@@ -1,8 +1,7 @@
-/* aprsrelay v1.0 by  james@ustc.edu.cn 2015.12.19
+/* aprstcp v1.0 by  james@ustc.edu.cn 2015.12.19
 
    replay 14580 tcp aprs packet to "china.aprs2.net"
-   copy all packets to udp host in file "/usr/src/arpsudp/udpdest" 
-   log all packets to "/var/log/aprs/tcp_*"
+   send all packets to udp host in file "/usr/src/arps/udpdest" 
 
 */
 
@@ -20,7 +19,6 @@
 #include <linux/if_packet.h>
 #include "sock.h"
 #include <ctype.h>
-
 
 #define MAXLEN 16384
 
@@ -195,8 +193,8 @@ void Process(int c_fd)
 
 void usage()
 {
-	printf("\naprsrelay v1.0 - aprs relay by james@ustc.edu.cn\n");
-	printf("\naprsrelay x.x.x.x 14580 china.aprs2.net 14580\n\n");
+	printf("\naprstcp v1.0 - aprs relay by james@ustc.edu.cn\n");
+	printf("\naprstcp x.x.x.x 14580 china.aprs2.net 14580\n\n");
 	exit(0);
 }
 

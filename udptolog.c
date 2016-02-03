@@ -15,12 +15,6 @@
 #include <ctype.h>
 
 
-// enable debuging
-//#define DEBUG 1
-
-// Logging aprs message to /var/log/aprs 
-#define LOG 1
-
 #define MAXLEN 16384
 
 #define PORT 14582
@@ -73,6 +67,10 @@ int main(void)
 
 	while(1) {
 		char buf[MAXLEN];
+        	FILE *fp;
+        	time_t timep;
+        	struct tm *p;
+        	static char fname[200];
 		int len;
 		len = recvfrom(s, buf, MAXLEN, 0, (struct sockaddr * )&si_other, (socklen_t *)&slen);
 		if (len<10 ) continue;
@@ -88,27 +86,19 @@ int main(void)
 			}
 		}
 
-        	FILE *fp;
-        	time_t timep;
-        	struct tm *p;
-        	static char fname[200];
-		int l=len;
-		if(buf[l-1]=='\n') {
-			buf[l-1]=0; l--; 
-		}
-		if(buf[l-1]=='\r') {
-			buf[l-1]=0; l--; 
-		}
+		if(buf[len-1]=='\n') 
+			len--; 
+		if(buf[len-1]=='\r') 
+			len--; 
+		buf[len]=0; 
         	time(&timep);
         	p = localtime(&timep); 
         	snprintf(fname,200,"/var/log/aprs/%d%02d%02d",(1900+p->tm_year),(1+p->tm_mon), p->tm_mday);
         	fp = fopen(fname,"a+");
 		if(fp) {
-        	//	fprintf (fp,"%d%02d%02d.%02d%02d%02d %s:%d %s\n",
         		fprintf (fp,"%d%02d%02d.%02d%02d%02d %s\n",
                 	(1900+p->tm_year),(1+p->tm_mon), p->tm_mday,
                 	p->tm_hour, p->tm_min, p->tm_sec, 
-		//	inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port), 
 			buf);
 			fclose(fp);
 		}

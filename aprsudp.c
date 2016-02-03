@@ -14,12 +14,7 @@
 #include <signal.h>
 #include <ctype.h>
 
-
-// enable debuging
 //#define DEBUG 1
-
-// Logging aprs message to /var/log/aprs 
-#define LOG 1
 
 #define MAXLEN 16384
 #define PORT 14580
