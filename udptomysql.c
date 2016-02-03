@@ -100,6 +100,7 @@ void ToMysql(char *buf, int len)
 		end = my_stpcpy(end,"','");
 		end += mysql_real_escape_string(mysql,end,bufcopy,len);
 		end = my_stpcpy(end,"')");
+		*end=0;
 		fprintf(stderr,"%s\n",sqlbuf);
 		if (mysql_real_query(mysql,sqlbuf,(unsigned int) (end - sqlbuf))) {
    			fprintf(stderr, "Failed to insert row, Error: %s\n",
@@ -114,6 +115,7 @@ unknow_msg:
 	end = my_stpcpy(end,"','");
 	end += mysql_real_escape_string(mysql,end,bufcopy,len);
 	end = my_stpcpy(end,"')");
+	*end=0;
 
 	fprintf(stderr,"%s\n",sqlbuf);
 	if (mysql_real_query(mysql,sqlbuf,(unsigned int) (end - sqlbuf))) {
@@ -124,7 +126,7 @@ unknow_msg:
 void Process(int u_fd) 
 {	
 	char buff[MAXLEN];
-	int m,n;
+	int n;
 
 	while (1) {
 		n = recv (u_fd, buff, MAXLEN,0);
