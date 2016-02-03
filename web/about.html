@@ -1,0 +1,64 @@
+程序源码请见 <a href=https://github.com/bg6cq/aprs target=_blank>https://github.com/bg6cq/aprs</a> 有问题请联系james@ustc.edu.cn<p>
+<img src=aprs_6cq.png>
+<br>
+
+程序请放在 /usr/src/aprs 下<p>
+
+<h3>1. aprsudp</h3>
+<pre>
+功能：
+从 14580 UDP端口接收数据
+使用UDP转发给127.0.0.1 14581端口
+使用UDP转发给/usr/src/aprs/udpdest服务器(/usr/src/aprs/udpdest 可以有多行，每行是一个IP:port形式)
+</pre>
+
+<h3>2. aprstcp</h3>
+<pre>
+功能：
+从 14580 tcp端口接收数据
+使用TCP转发给china.aprs2.net
+使用UDP转发给/usr/src/aprs/udpdest服务器(/usr/src/aprs/udpdest 可以有多行，每行是一个IP:port形式)
+</pre>
+
+<h3>3. udptoaprs</h3>
+<pre>
+命令行： udptoaprs 呼号
+参数含义：呼号，用来连接china.aprs2.net服务器
+ 
+功能：
+从 127.0.0.1 14581 UDP端口接收数据
+使用TCP转发给china.aprs2.net
+</pre>
+ 
+<h3>4. udptolog</h3>
+<pre>
+功能：
+从 127.0.0.1 14582 UDP端口接收数据
+在 /var/log/aprs目录下记录收到的APRS数据包
+</pre>
+
+<h3>5. udptomysql</h3>
+<pre>
+功能：
+从 127.0.0.1 14583 UDP端口接收数据
+在mysql数据库中记录收到的APRS数据包
+
+数据库名字是 aprs 
+
+表结构：
+
+CREATE TABLE `aprspacket` (
+  `tm` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `call` varchar(16) NOT NULL,
+  `datatype` char(1) NOT NULL,
+  `lat` char(8) NOT NULL,
+  `lon` char(9) NOT NULL,
+  `table` char(1) NOT NULL,
+  `symbol` char(1) NOT NULL,
+  `msg` varchar(200) NOT NULL,
+  `raw` varchar(250) NOT NULL,
+  KEY `tm` (`tm`),
+  KEY `tm_call` (`tm`,`call`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+</pre>
