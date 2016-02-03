@@ -92,9 +92,9 @@ void ToMysql(char *buf, int len)
 		end = my_stpcpy(end,"','");
 		end = my_stpcpy(end,lon);
 		end = my_stpcpy(end,"','");
-		*end = table; end++;
+		end += mysql_real_escape_string(mysql,end,&table,1);
 		end = my_stpcpy(end,"','");
-		*end = symbol; end++;
+		end += mysql_real_escape_string(mysql,end,&symbol,1);
 		end = my_stpcpy(end,"','");
 		end += mysql_real_escape_string(mysql,end,msg,strlen(msg));
 		end = my_stpcpy(end,"','");
