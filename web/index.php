@@ -54,7 +54,7 @@ if ($cmd=="new") {
         	echo "</td><td>";
         	echo "<a href=index.php?call=$r[1]>$r[1]</a>";
         	echo "</td><td>";
-        	echo $r[2];
+		echo iconv("utf-8","gb2312",$r[2]);  //raw
         	echo "</td><td>";
 		echo "<a href=\"http://aprs.fi/#!mt=roadmap&z=11&call=a%2F".$r[1]."&timerange=43200&tail=43200\" target=_blank>aprs.fi</a>";
         	echo "</td></tr>\n";
@@ -72,7 +72,7 @@ if ($cmd=="new") {
         	echo "</td><td>";
         	echo "<a href=index.php?call=$r[1]>$r[1]</a>";
         	echo "</td><td>";
-        	echo $r[2];
+		echo iconv("utf-8","gb2312",$r[2]);  //raw
         	echo "</td><td>";
 		echo "<a href=\"http://aprs.fi/#!mt=roadmap&z=11&call=a%2F".$r[1]."&timerange=43200&tail=43200\" target=_blank>aprs.fi</a>";
         	echo "</td></tr>\n";
@@ -129,9 +129,9 @@ if ($cmd=="call") {
 		echo $r[5];  //table 
 		echo $r[4];  //lon
 		echo $r[6];  //symbol
-		echo $r[7];  //msg
+		echo iconv("utf-8","gb2312",$r[7]);  //msg
         	echo "</td><td>";
-		echo $r[8];  //msg
+		echo iconv("utf-8","gb2312",$r[8]);  //raw
         	echo "</td></tr>\n";
 	}
 	echo "</table>";
