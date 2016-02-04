@@ -1,4 +1,4 @@
-&title=24%e5%b0%8f%e6%97%b6%e6%95%b0%e6%8d%ae%e5%8c%85%e7%bb%9f%e8%ae%a1%0a,{font-size: 20px; color: #000000}&
+&title=30%e5%a4%a9%e5%91%bc%e5%8f%b7%e7%bb%9f%e8%ae%a1%0a,{font-size: 20px; color: #000000}&
 &x_axis_steps=1&
 &y_ticks=5,10,5&
 &line_dot=3,#9999CC,pkts,12,4&
@@ -17,22 +17,22 @@
 date_default_timezone_set("Asia/Shanghai");
 include "../db.php";
 
-$d=date("Y-m-d",strtotime("-24hours"));
+$d=date("Y-m-d",strtotime("-30days"));
 
 $v1="";
 $x="";
 $y_max=0;
 
 
-for ($i=-24;$i<1;$i++) {
-	$dstr=$i."hours";
-	$d=date("H",strtotime($dstr));
+for ($i=-30;$i<1;$i++) {
+	$dstr=$i."days";
+	$d=date("d",strtotime($dstr));
 	if($x=='') 
 		$x=$d;
 	else $x=$x.",".$d;
 
-	$d=date("Y-m-d H:",strtotime($dstr));
-	$q="select count(*) from aprspacket where tm>='".$d."00:00' and tm<='".$d.":59:59'";
+	$d=date("Y-m-d",strtotime($dstr));
+	$q="select count(distinct(`call`)) from aprspacket where tm>='".$d." 00:00:00' and tm<='".$d." 23:59:59'";
 	$result = $mysqli->query($q);
 	$r=$result->fetch_array();
 	if($v1=="")

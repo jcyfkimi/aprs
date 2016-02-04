@@ -125,22 +125,48 @@ if ($cmd=="stats") {
 
 <script type="text/javascript" src="stats/swfobject.js"></script>
 
+<table>
+<tr>
+<td>
 <div id="flashcontent1"></div>
 <script type="text/javascript">
 var so = new SWFObject("stats/open-flash-chart.swf", "chart", "700", "350", "9", "#FFFFFF");
-so.addVariable("data", "stats/one_day.php");
+so.addVariable("data", "stats/48_hour_pkt.php");
 so.addParam("allowScriptAccess", "sameDomain");
 so.write("flashcontent1");
 </script>
-<p>
+</td>
+<td>
 <div id="flashcontent2"></div>
 <script type="text/javascript">
 var so = new SWFObject("stats/open-flash-chart.swf", "chart", "700", "350", "9", "#FFFFFF");
-so.addVariable("data", "stats/30_day.php");
+so.addVariable("data", "stats/48_hour_call.php");
 so.addParam("allowScriptAccess", "sameDomain");
 so.write("flashcontent2");
 </script>
-
+</td>
+</tr>
+<tr>
+<td>
+<div id="flashcontent3"></div>
+<script type="text/javascript">
+var so = new SWFObject("stats/open-flash-chart.swf", "chart", "700", "350", "9", "#FFFFFF");
+so.addVariable("data", "stats/30_day_pkt.php");
+so.addParam("allowScriptAccess", "sameDomain");
+so.write("flashcontent3");
+</script>
+</td>
+<td>
+<div id="flashcontent4"></div>
+<script type="text/javascript">
+var so = new SWFObject("stats/open-flash-chart.swf", "chart", "700", "350", "9", "#FFFFFF");
+so.addVariable("data", "stats/30_day_call.php");
+so.addParam("allowScriptAccess", "sameDomain");
+so.write("flashcontent4");
+</script>
+</td>
+</tr>
+</table>
 <?php
 	exit(0);
 }
