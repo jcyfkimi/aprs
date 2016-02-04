@@ -4,7 +4,8 @@
 &line_dot=3,#9999CC,calls,12,4&
 &y_min=0&
 &bg_colour=#FFFFFF&
-&tool_tip=%E6%97%A5%E6%9C%9F%3A%23x_label%23%3Cbr%3E%E5%85%B1%E8%AE%A1%3A%23val%23%E6%AC%A1&
+&tool_tip=%e5%b0%8f%e6%97%b6%3a%23x_label%23%3cbr%3e%e5%85%b1%e8%ae%a1%3a%23val%23%e4%b8%aa%0a%0a%0a%0a
+&
 <?php
 // 
 // &y_max=170&

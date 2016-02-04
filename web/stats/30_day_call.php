@@ -1,10 +1,11 @@
 &title=30%e5%a4%a9%e5%91%bc%e5%8f%b7%e7%bb%9f%e8%ae%a1%0a,{font-size: 20px; color: #000000}&
 &x_axis_steps=1&
 &y_ticks=5,10,5&
-&line_dot=3,#9999CC,pkts,12,4&
+&line_dot=3,#9999CC,calls,12,4&
 &y_min=0&
 &bg_colour=#FFFFFF&
-&tool_tip=%E6%97%A5%E6%9C%9F%3A%23x_label%23%3Cbr%3E%E5%85%B1%E8%AE%A1%3A%23val%23%E6%AC%A1&
+&tool_tip=%e6%97%a5%e6%9c%9f%3a%23x_label%23%3cbr%3e%e5%85%b1%e8%ae%a1%3a%23val%23%e4%b8%aa%0a%0a%0a
+&
 <?php
 // 
 // &y_max=170&
