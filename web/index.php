@@ -60,6 +60,24 @@ if ($cmd=="new") {
         	echo "</td></tr>\n";
 	}
 	echo "</table>\n";
+
+
+	echo "<h3>最新收到的无法解析APRS数据包</h3>";
+	$q="select tm,`call`,raw from aprspacket where tm>=curdate() and lat='' order by tm desc limit 10";
+	$result = $mysqli->query($q);
+	echo "<table border=1 cellspacing=0><tr><th>时间</th><th>呼号</th><th>APRS Packet</th><th>地图</th></tr>\n";
+	while($r=$result->fetch_array()) {
+        	echo "<tr><td>";
+        	echo $r[0];
+        	echo "</td><td>";
+        	echo "<a href=index.php?call=$r[1]>$r[1]</a>";
+        	echo "</td><td>";
+        	echo $r[2];
+        	echo "</td><td>";
+		echo "<a href=\"http://aprs.fi/#!mt=roadmap&z=11&call=a%2F".$r[1]."&timerange=43200&tail=43200\" target=_blank>aprs.fi</a>";
+        	echo "</td></tr>\n";
+	}
+	echo "</table>\n";
 	exit(0);
 }
 

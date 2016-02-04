@@ -71,6 +71,13 @@ void ToMysql(char *buf, int len)
 	p++;
 	datatype = *p;
 	p++;
+
+	if( datatype == '@' ) {  // change datatype @ to !
+		datatype = '!'; 
+		if( strlen(p)<17 ) 
+			goto unknow_msg;
+		p+=7;
+	}
 	if( (datatype == '=') || (datatype=='!') ) {
 		if( strlen(p)<17 ) 
 			goto unknow_msg;
