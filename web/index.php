@@ -22,6 +22,10 @@ if (isset($_REQUEST["new"])) {
 	header("refresh: 3;");
 }
 
+function disp_map($call) {
+	echo "aprs.fi(<a href=\"http://aprs.fi/#!mt=roadmap&z=11&call=a%2F".$call."&timerange=43200&tail=43200\" target=_blank>google</a>, ";
+	echo "<a href=\"http://aprs.fi/#!mt=osm&z=11&call=a%2F".$call."&timerange=43200&tail=43200\" target=_blank>osm</a>) ";
+}
 ?>
 
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
@@ -56,7 +60,7 @@ if ($cmd=="new") {
         	echo "</td><td>";
 		echo iconv("utf-8","gb2312",$r[2]);  //raw
         	echo "</td><td>";
-		echo "<a href=\"http://aprs.fi/#!mt=roadmap&z=11&call=a%2F".$r[1]."&timerange=43200&tail=43200\" target=_blank>aprs.fi</a>";
+		disp_map($r[1]);
         	echo "</td></tr>\n";
 	}
 	echo "</table>\n";
@@ -74,7 +78,7 @@ if ($cmd=="new") {
         	echo "</td><td>";
 		echo iconv("utf-8","gb2312",$r[2]);  //raw
         	echo "</td><td>";
-		echo "<a href=\"http://aprs.fi/#!mt=roadmap&z=11&call=a%2F".$r[1]."&timerange=43200&tail=43200\" target=_blank>aprs.fi</a>";
+		disp_map($r[1]);
         	echo "</td></tr>\n";
 	}
 	echo "</table>\n";
@@ -95,7 +99,7 @@ if ($cmd=="today") {
         	echo "</td><td align=right>";
         	echo $r[1];
         	echo "</td><td>";
-		echo "<a href=\"http://aprs.fi/#!mt=roadmap&z=11&call=a%2F".$r[0]."&timerange=43200&tail=43200\" target=_blank>aprs.fi</a>";
+		disp_map($r[0]);
         	echo "</td></tr>\n";
 	}
 
