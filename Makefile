@@ -6,7 +6,7 @@ aprsudp: aprsudp.c
 udptoaprs: udptoaprs.c
 	gcc -o udptoaprs udptoaprs.c -Wall
 udptomysql: udptomysql.c
-	gcc -o udptomysql udptomysql.c -Wall -lmysqlclient -L/usr/lib64/mysql/
+	gcc -g -o udptomysql udptomysql.c -Wall -lmysqlclient -L/usr/lib64/mysql/
 
 clean:
 	rm -f aprsudp.o

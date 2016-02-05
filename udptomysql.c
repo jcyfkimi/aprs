@@ -51,6 +51,14 @@ char *my_stpcpy(char *dst, const char *src){
 	return q; 
 } 
 
+char decode_mic_lat(char c) {
+	if(c>='0' && c<='9') return c;
+	if(c>='A' && c<='J') return c-'A'+'0';
+	if(c>='K' && c<='L') return ' ';
+	if(c>='P' && c<='Y') return c-'P'+'0';
+	if(c=='Z') return ' ';
+	return ' ';
+}
 void ToMysql(char *buf, int len)
 {	char bufcopy[MAXLEN],sqlbuf[MAXLEN],*end;
 	if(len<=10) return;
@@ -60,20 +68,26 @@ void ToMysql(char *buf, int len)
 	buf[len]=0;
 	strcpy(bufcopy,buf);
 
-	char *call="", datatype=0, *lat="", *lon="", table=0, symbol=0, *msg="", *p,*s;
+	char *call="", *path="", datatype=0, *lat="", *lon="", table=0, symbol=0, *msg="", *p,*s;
 	call = buf;
 	p=strchr(buf,'>');
 	if(p==NULL) return;
 	*p=0;
 	s=p+1;
+	path=s;
         p = strchr(s,':');
 	if(p==NULL) return;
 	p++;
 	datatype = *p;
 	p++;
 
-	if( datatype == '@' ) {  // change datatype @ to !
+	if( datatype == '/' ) {  // change datatype / to !
 		datatype = '!'; 
+		if( strlen(p)<17 ) 
+			goto unknow_msg;
+		p+=7;
+	} else if( datatype == '@' ) {  // change datatype @ to =
+		datatype = '='; 
 		if( strlen(p)<17 ) 
 			goto unknow_msg;
 		p+=7;
@@ -116,6 +130,81 @@ void ToMysql(char *buf, int len)
 		return;
 	}
 
+	if( (datatype == '`') ) {    // Mic-E
+		if( strlen(p)<8 ) 
+			goto unknow_msg;
+		if( strlen(path)<6 )
+			goto unknow_msg;
+		char lat[9];
+		lat[0]=decode_mic_lat(*(path));
+		lat[1]=decode_mic_lat(*(path+1));
+		lat[2]=decode_mic_lat(*(path+2));
+		lat[3]=decode_mic_lat(*(path+3));
+		lat[4]='.';
+		lat[5]=decode_mic_lat(*(path+4));
+		lat[6]=decode_mic_lat(*(path+5));
+		char c;
+		c = *(path+3);
+		if ( c>='0' && c<='9' ) lat[7]='S';
+		else lat[7]='N';
+		lat[8]=0;
+
+		int d;
+		d = *p - 28;
+		if (*(path+4)>='P' ) d+=100;
+		if( d>=180 && d<=189)
+			d-=80;
+		else if( d>=190 && d<=199)
+			d-=190;
+		int m;
+		m = *(p+1) - 28;
+		if(m>=60) m-=60;
+	
+		int hm;
+		hm = *(p+2) - 28;
+		
+		char lon[10];
+		lon[0] = (d/100) + '0';	
+		lon[1] =  (d%100)/10 + '0';
+		lon[2] =  (d%10) + '0';
+		lon[3] = m/10 + '0';
+		lon[4] = m%10 + '0';
+		lon[5]='.';
+		lon[6]=hm/10 + '0';
+		lon[7]=hm%10 + '0';
+		if(*(path+5)>='P') lon[8]='W';	
+		else lon[8]='E';
+		lon[9]=0;
+
+		table=*(p+7);
+		symbol = *(p+6);
+		p+=8;
+		msg=p;
+		end = my_stpcpy(sqlbuf,"INSERT INTO aprspacket (tm,`call`,datatype,lat,lon,`table`,symbol,msg,raw) VALUES(now(),'");
+		end += mysql_real_escape_string(mysql,end,call,strlen(call));
+		end = my_stpcpy(end,"','");
+		end += mysql_real_escape_string(mysql,end,&datatype,1);
+		end = my_stpcpy(end,"','");
+		end = my_stpcpy(end,lat);
+		end = my_stpcpy(end,"','");
+		end = my_stpcpy(end,lon);
+		end = my_stpcpy(end,"','");
+		end += mysql_real_escape_string(mysql,end,&table,1);
+		end = my_stpcpy(end,"','");
+		end += mysql_real_escape_string(mysql,end,&symbol,1);
+		end = my_stpcpy(end,"','");
+		end += mysql_real_escape_string(mysql,end,msg,strlen(msg));
+		end = my_stpcpy(end,"','");
+		end += mysql_real_escape_string(mysql,end,bufcopy,len);
+		end = my_stpcpy(end,"')");
+		*end=0;
+		fprintf(stderr,"%s\n",sqlbuf);
+		if (mysql_real_query(mysql,sqlbuf,(unsigned int) (end - sqlbuf))) {
+   			fprintf(stderr, "Failed to insert row, Error: %s\n",
+           		mysql_error(mysql));
+		} 
+		return;
+	}
 unknow_msg:	
 	end = my_stpcpy(sqlbuf,"INSERT INTO aprspacket (tm,`call`, raw) VALUES(now(),'");
 	end += mysql_real_escape_string(mysql,end,call,strlen(call));
