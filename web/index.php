@@ -243,7 +243,7 @@ if ($cmd=="map") {
 //		new BMap.Point(116.405, 39.920),
 //		new BMap.Point(116.423493, 39.907445)
 	
-	$q="select lat,lon from aprspacket where tm>curdate() and `call`=? order by tm";
+	$q="select lat,lon from aprspacket where tm>curdate() and `call`=? and lat<>'' and not lat like '0000.00%' order by tm";
 	$stmt=$mysqli->prepare($q);
         $stmt->bind_param("s",$call);
         $stmt->execute();
