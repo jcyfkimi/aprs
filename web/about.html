@@ -61,4 +61,15 @@ CREATE TABLE `aprspacket` (
   KEY `tm_call` (`tm`,`call`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
+CREATE TABLE `lastpacket` (
+  `call` varchar(16) NOT NULL,
+  `tm` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `datatype` char(1) NOT NULL,
+  `lat` char(8) NOT NULL,
+  `lon` char(9) NOT NULL,
+  `table` char(1) NOT NULL,
+  `symbol` char(1) NOT NULL,
+  `msg` varchar(200) NOT NULL,
+  PRIMARY KEY (`call`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 </pre>
