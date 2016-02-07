@@ -127,6 +127,29 @@ void ToMysql(char *buf, int len)
    			fprintf(stderr, "Failed to insert row, Error: %s\n",
            		mysql_error(mysql));
 		}
+		
+
+		end = my_stpcpy(sqlbuf,"REPLACE INTO lastpacket(tm,`call`,datatype,lat,lon,`table`,symbol,msg) VALUES(now(),'");
+		end += mysql_real_escape_string(mysql,end,call,strlen(call));
+		end = my_stpcpy(end,"','");
+		end += mysql_real_escape_string(mysql,end,&datatype,1);
+		end = my_stpcpy(end,"','");
+		end = my_stpcpy(end,lat);
+		end = my_stpcpy(end,"','");
+		end = my_stpcpy(end,lon);
+		end = my_stpcpy(end,"','");
+		end += mysql_real_escape_string(mysql,end,&table,1);
+		end = my_stpcpy(end,"','");
+		end += mysql_real_escape_string(mysql,end,&symbol,1);
+		end = my_stpcpy(end,"','");
+		end += mysql_real_escape_string(mysql,end,msg,strlen(msg));
+		end = my_stpcpy(end,"')");
+		*end=0;
+		fprintf(stderr,"%s\n",sqlbuf);
+		if (mysql_real_query(mysql,sqlbuf,(unsigned int) (end - sqlbuf))) {
+   			fprintf(stderr, "Failed to insert row, Error: %s\n",
+           		mysql_error(mysql));
+		}
 		return;
 	}
 
@@ -203,6 +226,27 @@ void ToMysql(char *buf, int len)
    			fprintf(stderr, "Failed to insert row, Error: %s\n",
            		mysql_error(mysql));
 		} 
+		end = my_stpcpy(sqlbuf,"REPLACE INTO lastpacket(tm,`call`,datatype,lat,lon,`table`,symbol,msg) VALUES(now(),'");
+		end += mysql_real_escape_string(mysql,end,call,strlen(call));
+		end = my_stpcpy(end,"','");
+		end += mysql_real_escape_string(mysql,end,&datatype,1);
+		end = my_stpcpy(end,"','");
+		end = my_stpcpy(end,lat);
+		end = my_stpcpy(end,"','");
+		end = my_stpcpy(end,lon);
+		end = my_stpcpy(end,"','");
+		end += mysql_real_escape_string(mysql,end,&table,1);
+		end = my_stpcpy(end,"','");
+		end += mysql_real_escape_string(mysql,end,&symbol,1);
+		end = my_stpcpy(end,"','");
+		end += mysql_real_escape_string(mysql,end,msg,strlen(msg));
+		end = my_stpcpy(end,"')");
+		*end=0;
+		fprintf(stderr,"%s\n",sqlbuf);
+		if (mysql_real_query(mysql,sqlbuf,(unsigned int) (end - sqlbuf))) {
+   			fprintf(stderr, "Failed to insert row, Error: %s\n",
+           		mysql_error(mysql));
+		}
 		return;
 	}
 unknow_msg:	
