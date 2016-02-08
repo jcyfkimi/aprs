@@ -160,9 +160,11 @@ function disp_map($call) {
 }
 
 function top_menu() {
-	global $mysqli;
-
-	echo "<a href=".$_SERVER["PHP_SELF"]."?new target=_blank>最新数据包</a> <a href=".$_SERVER["PHP_SELF"]."?today target=_blank>今天数据包</a> <a href=".$_SERVER["PHP_SELF"]."?stats target=_blank>数据包统计</a> ";
+	global $mysqli, $cmd;
+	$blank="";
+	if($cmd=="map") $blank = " target=_blank";
+	echo "<a href=".$_SERVER["PHP_SELF"]."?new".$blank.">最新数据包</a> <a href=".$_SERVER["PHP_SELF"]."?today".$blank.
+	">今天数据包</a> <a href=".$_SERVER["PHP_SELF"]."?stats".$blank.">数据包统计</a> ";
 	echo "<a href=".$_SERVER["PHP_SELF"]."?map target=_blank>数据包实况</a> <div id=calls>";
 	$q="select count(distinct(`call`)) from aprspacket where tm>=curdate()";
 	$result = $mysqli->query($q);
@@ -474,16 +476,16 @@ function setstation(lon, lat, label,tm, iconurl, msg)
 			markers[i].setZIndex(this.maxZindex++);
     			markers[i].setAnimation(BMAP_ANIMATION_BOUNCE);
 			if(call==labels[i])  {  // 正在跟踪
-				setTimeout(function(){ markers[i].setAnimation(null); }, 1000);
+				setTimeout(function(){ markers[i].setAnimation(null); }, 500);
 			} else 
-			setTimeout(function(){ markers[i].setAnimation(null); }, 2000);
+			setTimeout(function(){ markers[i].setAnimation(null); }, 500);
 			return;
 		}
 	}
 	var marker = addstation(lon, lat, label, tm, iconurl, msg);
 	marker.setZIndex(this.maxZindex++);
     	marker.setAnimation(BMAP_ANIMATION_BOUNCE);
-	setTimeout(function(){ marker.setAnimation(null); }, 2000);
+	setTimeout(function(){ marker.setAnimation(null); }, 500);
 }
 
 // 百度地图API功能
