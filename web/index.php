@@ -10,15 +10,10 @@ if (isset($_REQUEST["tm"])) {
 	else $jiupian=1;
 }else if (isset($_REQUEST["new"])) {
 	$cmd="new";
-	header("refresh: 3;");
+	header("refresh: 5;");
 } else if (isset($_REQUEST["today"])) {
 	$cmd="today";
 	header("refresh: 60;");
-} else if (isset($_REQUEST["allmap"])) {
-	$cmd="allmap";
-	if (isset($_REQUEST["nojiupian"]))
-		$jiupian=0;
-	else $jiupian=1;
 } else if (isset($_REQUEST["map"])) {
 	$cmd="map";
 	$call=$_REQUEST["call"];
@@ -35,37 +30,76 @@ if (isset($_REQUEST["tm"])) {
 } else if (isset($_REQUEST["about"])) {
 	$cmd="about";
 } else {
-	$cmd="new";
-	header("refresh: 3;");
+	$cmd="map";
+	if (isset($_REQUEST["nojiupian"]))
+		$jiupian=0;
+	else $jiupian=1;
+}
+
+if(@$jiupian) {
+	require "wgtochina_lb.php";
+	$mp=new Converter();
 }
 
 if ($cmd=="tm") {
-	$q="select lat,lon,`call`,unix_timestamp(tm) from lastpacket where tm>=FROM_UNIXTIME(?) and lat<>'' and not lat like '0000.00%'";
+	$q="select lat,lon,`call`,unix_timestamp(tm),concat(`table`,symbol) from lastpacket where tm>=FROM_UNIXTIME(?) and lat<>'' and not lat like '0000.00%'";
 	$stmt=$mysqli->prepare($q);
         $stmt->bind_param("i",$tm);
         $stmt->execute();
-	$meta = $stmt->result_metadata();
+       	$stmt->bind_result($glat, $glon,$dcall,$dtm,$dts);
 
-	$i=0;
-	while ($field = $meta->fetch_field()) {
-        	$params[] = &$r[$i];
-        	$i++;
-	}
-
-	call_user_func_array(array($stmt, 'bind_result'), $params);
-	if($jiupian) {
-		require "wgtochina_lb.php";
-		$mp=new Converter();
-	}
 	while($stmt->fetch()) {
-		$lat = substr($r[0],0,2) + substr($r[0],2,5)/60;
-		$lon = substr($r[1],0,3) + substr($r[1],3,5)/60;
+                $lat = substr($glat,0,2) + substr($glat,2,5)/60;
+                $lon = substr($glon,0,3) + substr($glon,3,5)/60;
 		if($jiupian) {
 			$p=$mp->getBDEncryPoint($lon,$lat);
 			$lon = $p->getX();
 			$lat = $p->getY();
-		} 
-		echo "setstation(".$lon.",".$lat.",\"".$r[2]."\",".$r[3].",\"\");\n";
+		}
+		$icon = "img/".bin2hex($dts).".png";
+		echo "setstation(".$lon.",".$lat.",\"".$dcall."\",".$dtm.",\"".$icon."\");\n";
+	}
+	$stmt->close();
+
+	$q="select count(distinct(`call`)) from aprspacket where tm>=curdate()";
+	$result = $mysqli->query($q);
+	$r=$result->fetch_array();
+	echo "document.getElementById(\"calls\").innerHTML = ".$r[0].";\n";
+	$q="select count(*) from aprspacket where tm>=curdate()";
+	$result = $mysqli->query($q);
+	$r=$result->fetch_array();
+	echo "document.getElementById(\"pkts\").innerHTML = ".$r[0].";\n";
+
+
+	if (!isset($_REQUEST["call"])) 
+		exit(0);
+	$call=$_REQUEST["call"];
+	if($call=="") exit(0);
+	$pathlen = $_REQUEST["pathlen"];
+	if($pathlen=="") $pathlen=0;
+	$q="select lat,lon from aprspacket where tm>curdate() and `call`=? and lat<>'' and not lat like '0000.00%' order by tm limit 50000 offset ?";
+        $stmt=$mysqli->prepare($q);
+        $stmt->bind_param("si",$call,$pathlen);
+        $stmt->execute();
+        $stmt->bind_result($glat, $glon);
+
+	$pathmore=0;
+	echo "if(movepath.lenght>0) map.removeOverlay(polyline);\n";
+        while($stmt->fetch()) {
+                $lat = substr($glat,0,2) + substr($glat,2,5)/60;
+                $lon = substr($glon,0,3) + substr($glon,3,5)/60;
+                if($jiupian) {
+                        $p=$mp->getBDEncryPoint($lon,$lat);
+                        $lon = $p->getX();
+                        $lat = $p->getY();
+                }
+		$pathmore=1;
+                echo "addpathpoint(".$lon.",".$lat.");\n";
+        }	
+	if($pathmore==1) {
+		echo "map.panTo(new BMap.Point(".$lon.",".$lat."));\n";
+		echo "polyline = new BMap.Polyline(movepath,{strokeColor:\"blue\", strokeWeight:2, strokeOpacity:0.5});\n";
+		echo "map.addOverlay(polyline);\n";
 	}
 	exit(0);
 }
@@ -75,28 +109,41 @@ function disp_map($call) {
 	echo "<a href=\"".$_SERVER["PHP_SELF"]."?map&call=".$call."\" target=_blank>baidu</a> ";
 }
 
-if ( ($cmd!="map") && ($cmd!="allmap")) {
+function top_menu() {
+	global $mysqli;
+
+	echo "<a href=".$_SERVER["PHP_SELF"]."?new target=_blank>最新数据包</a> <a href=".$_SERVER["PHP_SELF"]."?today target=_blank>今天数据包</a> <a href=".$_SERVER["PHP_SELF"]."?stats target=_blank>数据包统计</a> ";
+	echo "<a href=".$_SERVER["PHP_SELF"]."?map target=_blank>数据包实况</a> <div id=calls>";
+	$q="select count(distinct(`call`)) from aprspacket where tm>=curdate()";
+	$result = $mysqli->query($q);
+	$r=$result->fetch_array();
+	echo $r[0]."</div> 呼号发送了 <div id=pkts>";
+	$q="select count(*) from aprspacket where tm>=curdate()";
+	$result = $mysqli->query($q);
+	$r=$result->fetch_array();
+	echo $r[0]."</div> 数据包 ";
+
+	echo " <a href=".$_SERVER["PHP_SELF"]."?about target=_blank>关于本站</a> <div id=msg></div><p>";
+}
+
+if ( ($cmd!="map") ) {
 ?>
 
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
-	<title>APRS relay</title>
+	<title>APRS relay server</title>
 </head>
+<style type="text/css">
+<!--
+div{ display:inline} 
+-->
+</style>
 
 <body bgcolor=#dddddd>
 
 <?php
-echo "<a href=".$_SERVER["PHP_SELF"].">最新数据包</a> <a href=".$_SERVER["PHP_SELF"]."?today>今天数据包</a> <a href=".$_SERVER["PHP_SELF"]."?stats>数据包统计</a> ";
-echo "<a href=".$_SERVER["PHP_SELF"]."?allmap target=_blank>全国地图</a> ";
-$q="select count(distinct(`call`)) from aprspacket where tm>=curdate()";
-$result = $mysqli->query($q);
-$r=$result->fetch_array();
-echo $r[0]." 呼号发送了 ";
-$q="select count(*) from aprspacket where tm>=curdate()";
-$result = $mysqli->query($q);
-$r=$result->fetch_array();
-echo $r[0]." 数据包 ";
 
-echo " <a href=".$_SERVER["PHP_SELF"]."?about>关于本站</a><p>";
+top_menu();
+
 }
 if ($cmd=="new") {
 	echo "<h3>最新收到的APRS数据包</h3>";
@@ -141,7 +188,7 @@ if ($cmd=="today") {
 	if(isset($_REQUEST["c"]))
 		$q = "select `call`, count(*) c from aprspacket where tm>curdate() group by `call` order by c desc";
 	else
-		$q = "select `call`, count(*) from aprspacket where tm>curdate() group by `call`";
+		$q = "select `call`, count(*) from aprspacket where tm>curdate() group by substr(`call`,3)";
 	$result = $mysqli->query($q);
 	echo "<table border=1 cellspacing=0><tr><th><a href=".$_SERVER["PHP_SELF"]."?today>呼号</a></th><th><a href=".$_SERVER["PHP_SELF"]."?today&c>数量</a></th><th>地图</th></tr>\n";
 	while($r=$result->fetch_array()) {
@@ -245,7 +292,7 @@ so.write("flashcontent4");
 	exit(0);
 }
 
-if ($cmd=="map") {
+if ($cmd=="map") {  
 ?>
 <!DOCTYPE html>
 <html>
@@ -254,100 +301,18 @@ if ($cmd=="map") {
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 	<style type="text/css">
 		body, html{width: 100%;height: 100%;margin:0;font-family:"微软雅黑";}
+		#top {height:25px; width: 100%;}
 		#allmap {height:100%; width: 100%;}
 		#control{width:100%;}
+		#calls { display:inline} 
+		#pkts { display:inline} 
+		#msg { display:inline} 
 	</style>
+	<title>APRS数据包实况</title>
 	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=7RuEGPr12yqyg11XVR9Uz7NI"></script>
 </head>
 <body>
-	<div id="allmap"></div>
-</body>
-</html>
-<script type="text/javascript">
-function addstation(lon, lat, label, icon)
-{
-        var icon = new BMap.Icon(icon, new BMap.Size(24, 24), {  anchor: new BMap.Size(12, 24)});
-        var marker = new BMap.Marker(new BMap.Point(lon,lat), {  icon: icon  });
-        marker.setLabel(new BMap.Label(label, {offset: new BMap.Size(20,-10)}));
-        map.addOverlay(marker);
-        return marker;
-}
-	// 百度地图API功能
-	var map = new BMap.Map("allmap");
-	map.enableScrollWheelZoom();
-
-	var top_left_control = new BMap.ScaleControl({anchor: BMAP_ANCHOR_TOP_LEFT});// 左上角，添加比例尺
-	var top_left_navigation = new BMap.NavigationControl();  //左上角，添加默认缩放平移控件
-	var top_right_navigation = new BMap.NavigationControl({anchor: BMAP_ANCHOR_TOP_RIGHT, type: BMAP_NAVIGATION_CONTROL_SMALL}); //右上角，仅包含平移和缩放按钮
-	/*缩放控件type有四种类型:
-	BMAP_NAVIGATION_CONTROL_SMALL：仅包含平移和缩放按钮；BMAP_NAVIGATION_CONTROL_PAN:仅包含平移按钮；BMAP_NAVIGATION_CONTROL_ZOOM：仅包含缩放按钮*/
-	
-	//添加控件和比例尺
-	map.addControl(top_left_control);        
-	map.addControl(top_left_navigation);     
-	map.addControl(top_right_navigation);    
-
-	var polyline = new BMap.Polyline([
-<?php
-//		new BMap.Point(116.399, 39.910),
-//		new BMap.Point(116.405, 39.920),
-//		new BMap.Point(116.423493, 39.907445)
-	
-	$q="select lat,lon,`table`,symbol from aprspacket where tm>curdate() and `call`=? and lat<>'' and not lat like '0000.00%' order by tm";
-	$stmt=$mysqli->prepare($q);
-        $stmt->bind_param("s",$call);
-        $stmt->execute();
-	$meta = $stmt->result_metadata();
-
-	$i=0;
-	while ($field = $meta->fetch_field()) {
-        	$params[] = &$r[$i];
-        	$i++;
-	}
-
-	call_user_func_array(array($stmt, 'bind_result'), $params);
-	if($jiupian) {
-		require "wgtochina_lb.php";
-		$mp=new Converter();
-	}
-	while($stmt->fetch()) {
-		$lat = substr($r[0],0,2) + substr($r[0],2,5)/60;
-		$lon = substr($r[1],0,3) + substr($r[1],3,5)/60;
-		if($jiupian) {
-			$p=$mp->getBDEncryPoint($lon,$lat);
-			$lon = $p->getX();
-			$lat = $p->getY();
-		} 
-		echo "new BMap.Point(".$lon.",".$lat."),\n";
-	}
-?>
-	], {strokeColor:"blue", strokeWeight:2, strokeOpacity:0.5});   //创建折线
-	map.addOverlay(polyline);   //增加折线
-<?php
-	echo "map.centerAndZoom(new BMap.Point(".$lon.",".$lat."), 15);\n"; //james
-	$icon = "img/".bin2hex($r[2].$r[3]).".png";
-	echo "addstation(".$lon.",".$lat.",\"".$call."\",\"".$icon."\");\n";
-
-	echo "</script>";
-	exit(0);
-}
-
-
-if ($cmd=="allmap") {  
-?>
-<!DOCTYPE html>
-<html>
-<head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-	<style type="text/css">
-		body, html{width: 100%;height: 100%;margin:0;font-family:"微软雅黑";}
-		#allmap {height:100%; width: 100%;}
-		#control{width:100%;}
-	</style>
-	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=7RuEGPr12yqyg11XVR9Uz7NI"></script>
-</head>
-<body>
+	<div id="top"><?php top_menu();?></div>
 	<div id="allmap"></div>
 </body>
 </html>
@@ -356,8 +321,11 @@ if ($cmd=="allmap") {
 var markers = new Array();
 var labels = new Array();
 var lasttms = new Array();
+var iconurls = new Array();
 var totalmarkers=0;
 var lastupdatetm=0;
+var movepath = new Array();
+var call="";
 
 var xmlHttpRequest;     
 //XmlHttpRequest对象     
@@ -371,7 +339,7 @@ function createXmlHttpRequest(){
 
 function UpdateStation(){     
 //	alert(lastupdatetm);
-        var url = '<?php echo "http://".$_SERVER["HTTP_HOST"].$_SERVER["PHP_SELF"]."?tm=";?>'+lastupdatetm;  
+        var url = '<?php echo "http://".$_SERVER["HTTP_HOST"].$_SERVER["PHP_SELF"]."?tm=";?>'+lastupdatetm+"&call="+call+"&pathlen="+movepath.length;  
         //1.创建XMLHttpRequest组建     
         xmlHttpRequest = createXmlHttpRequest();     
              
@@ -387,38 +355,52 @@ function UpdateStation(){
     //回调函数     
 function UpdateStationDisplay(){     
         if(xmlHttpRequest.readyState == 4 && xmlHttpRequest.status == 200){  
-            var b = xmlHttpRequest.responseText;  
-//		alert(b);
+        	var b = xmlHttpRequest.responseText;  
 		eval(b);
-       	   setTimeout("UpdateStation();","5000");  
-            return b;  
+       	   	setTimeout("UpdateStation();","5000");  
+            	return b;  
         }     
-    }    
+}    
 
-function addstation(lon, lat, label, tm, icon)
+function addpathpoint(lon, lat){
+	var p = new BMap.Point(lon,lat);
+	movepath.push (p);
+	
+}
+
+
+/* function markerclick(m) {
+	alert(m);
+} 
+*/
+function addstation(lon, lat, label, tm, iconurl)
 {
-	var icon = new BMap.Icon(icon, new BMap.Size(24, 24), {  anchor: new BMap.Size(12, 24)});	
-	var marker = new BMap.Marker(new BMap.Point(lon,lat), {  icon: icon  });
+	var icon = new BMap.Icon(iconurl, new BMap.Size(24, 24), {anchor: new BMap.Size(12, 24)});	
+	var marker = new BMap.Marker(new BMap.Point(lon,lat), {icon: icon  });
 	marker.setLabel(new BMap.Label(label, {offset: new BMap.Size(20,-10)}));
+//	marker.addEventListener('click', markerclick); 
 	map.addOverlay(marker);
 	markers[totalmarkers]= marker;
 	labels[totalmarkers] = label;
 	lasttms[totalmarkers] = tm;
+	iconurls[totalmarkers]=iconurl;
 	if(tm>lastupdatetm) lastupdatetm = tm;
 	totalmarkers=totalmarkers+1;
 	return marker;
-//	alert(totalmarkers);
 }
 
-function setstation(lon, lat, label,tm, icon)
+function setstation(lon, lat, label,tm, iconurl)
 {	for (var i=0; i< totalmarkers; i++) {
 		if(labels[i]==label) {
-//			alert(i);
-//			alert(label);
 			if(tm<=lasttms[i]) return;
 			markers[i].setPosition( new BMap.Point(lon, lat) );
 			lasttms[i] = tm;
 			if(tm>lastupdatetm) lastupdatetm = tm;
+			if(iconurls[i]!=iconurl) {
+				var nicon = new BMap.Icon(iconurl, new BMap.Size(24, 24), {  anchor: new BMap.Size(12, 24)});	
+				markers[i].setIcon(nicon);
+				iconurls[i]=iconurl;
+			}
 			markers[i].setZIndex(this.maxZindex++);
     			markers[i].setAnimation(BMAP_ANIMATION_BOUNCE);
 			setTimeout(function(){
@@ -427,63 +409,41 @@ function setstation(lon, lat, label,tm, icon)
 			return;
 		}
 	}
-	var marker = addstation(lon, lat, label, tm, icon);
+	var marker = addstation(lon, lat, label, tm, iconurl);
 	marker.setZIndex(this.maxZindex++);
     	marker.setAnimation(BMAP_ANIMATION_BOUNCE);
 	setTimeout(function(){
     			marker.setAnimation(null);
 	}, 5000);
 }
-	// 百度地图API功能
-	var map = new BMap.Map("allmap");
-	map.enableScrollWheelZoom();
 
-	var top_left_control = new BMap.ScaleControl({anchor: BMAP_ANCHOR_TOP_LEFT});// 左上角，添加比例尺
-	var top_left_navigation = new BMap.NavigationControl();  //左上角，添加默认缩放平移控件
-	var top_right_navigation = new BMap.NavigationControl({anchor: BMAP_ANCHOR_TOP_RIGHT, type: BMAP_NAVIGATION_CONTROL_SMALL}); //右上角，仅包含平移和缩放按钮
-	/*缩放控件type有四种类型:
-	BMAP_NAVIGATION_CONTROL_SMALL：仅包含平移和缩放按钮；BMAP_NAVIGATION_CONTROL_PAN:仅包含平移按钮；BMAP_NAVIGATION_CONTROL_ZOOM：仅包含缩放按钮*/
+// 百度地图API功能
+var map = new BMap.Map("allmap");
+map.enableScrollWheelZoom();
+
+var top_left_control = new BMap.ScaleControl({anchor: BMAP_ANCHOR_TOP_LEFT});// 左上角，添加比例尺
+var top_left_navigation = new BMap.NavigationControl();  //左上角，添加默认缩放平移控件
+var top_right_navigation = new BMap.NavigationControl({anchor: BMAP_ANCHOR_TOP_RIGHT, type: BMAP_NAVIGATION_CONTROL_SMALL}); //右上角，仅包含平移和缩放按钮
+/*缩放控件type有四种类型:
+BMAP_NAVIGATION_CONTROL_SMALL：仅包含平移和缩放按钮；BMAP_NAVIGATION_CONTROL_PAN:仅包含平移按钮；BMAP_NAVIGATION_CONTROL_ZOOM：仅包含缩放按钮*/
 	
-	//添加控件和比例尺
-	map.addControl(top_left_control);        
-	map.addControl(top_left_navigation);     
-	map.addControl(top_right_navigation);    
+//添加控件和比例尺
+map.addControl(top_left_control);        
+map.addControl(top_left_navigation);     
+map.addControl(top_right_navigation);    
 
 <?php
-	
-	$q="select lat,lon,`call`,unix_timestamp(tm),`table`,symbol from lastpacket where tm>curdate() and lat<>'' and not lat like '0000.00%'";
-	$stmt=$mysqli->prepare($q);
-        $stmt->execute();
-	$meta = $stmt->result_metadata();
-
-	$i=0;
-	while ($field = $meta->fetch_field()) {
-        	$params[] = &$r[$i];
-        	$i++;
-	}
-
-	call_user_func_array(array($stmt, 'bind_result'), $params);
-	if($jiupian) {
-		require "wgtochina_lb.php";
-		$mp=new Converter();
-	}
-	while($stmt->fetch()) {
-		$lat = substr($r[0],0,2) + substr($r[0],2,5)/60;
-		$lon = substr($r[1],0,3) + substr($r[1],3,5)/60;
-		if($jiupian) {
-			$p=$mp->getBDEncryPoint($lon,$lat);
-			$lon = $p->getX();
-			$lat = $p->getY();
-		} 
-		$icon = "img/".bin2hex($r[4].$r[5]).".png";
-		echo "addstation(".$lon.",".$lat.",\"".$r[2]."\",".$r[3].",\"".$icon."\");\n";
-	}
 	echo "map.centerAndZoom(new BMap.Point(108.940178,34.5), 6);\n";
+        $call=@$_REQUEST["call"];
+        if($call!="")  {
+		echo "call=\"$call\";";
+		echo "document.getElementById(\"msg\").innerHTML = \"正在跟踪".$call."\";\n";
+        	echo "map.setZoom(15);\n";
+	}
 ?>
-     createXmlHttpRequest();  
-     setTimeout("UpdateStation();","5000");  
+createXmlHttpRequest();  
+setTimeout("UpdateStation();","1000");  
 </script>
-
 <?php
 	exit(0);
 }
