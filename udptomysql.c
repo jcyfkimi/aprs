@@ -59,6 +59,22 @@ char decode_mic_lat(char c) {
 	if(c=='Z') return ' ';
 	return ' ';
 }
+
+int checkcall(char*call) {
+	char *p;
+	if(strlen(call)<5) return 0;
+	p=call;
+	if(*p!='B') return 0;
+	if(!isdigit(*(p+2))) return 0;
+	while(*p) {
+		if( isupper(*p) ||
+		    isdigit(*p) ||
+		    (*p=='-') 
+		) p++;
+		else return 0;
+	}
+	return 1;
+}
 void ToMysql(char *buf, int len)
 {	char bufcopy[MAXLEN],sqlbuf[MAXLEN],*end;
 	if(len<=10) return;
@@ -73,6 +89,12 @@ void ToMysql(char *buf, int len)
 	p=strchr(buf,'>');
 	if(p==NULL) return;
 	*p=0;
+	if(checkcall(call)==0) {
+#ifdef DEBUG
+		fprintf(stderr,"skipp call: %s\n",call);
+#endif	
+		return;
+	}
 	s=p+1;
 	path=s;
         p = strchr(s,':');
