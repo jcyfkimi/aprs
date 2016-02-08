@@ -221,10 +221,10 @@ void ToMysql(char *buf, int len)
 		else lon[8]='E';
 		lon[9]=0;
 
+		msg=p;
 		table=*(p+7);
 		symbol = *(p+6);
 		p+=8;
-		msg=p;
 		end = my_stpcpy(sqlbuf,"INSERT INTO aprspacket (tm,`call`,datatype,lat,lon,`table`,symbol,msg,raw) VALUES(now(),'");
 		end += mysql_real_escape_string(mysql,end,call,strlen(call));
 		end = my_stpcpy(end,"','");
