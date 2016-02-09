@@ -66,20 +66,8 @@ void Process(int u_fd, int r_fd)
 	}
 }
 
-int passcode(char *call)
-{       int i=0;
-        unsigned int hash = 0x73e2;
-        while(call[i]) {
-                call[i]=toupper(call[i]);
-                call[i+1]=toupper(call[i+1]);
-                hash ^= call[i]<< 8;
-                hash ^= call[i+1];
-                if( call[i+1] == 0 ) break;
-                i+=2;
-        }
-        hash = hash & 0x7fff;
-	return hash;
-}
+
+#include "passcode.c"
 
 int main(int argc, char *argv[])
 {
@@ -112,7 +100,7 @@ int main(int argc, char *argv[])
 	u_fd = Udp_server("127.0.0.1","14581",(socklen_t *)&llen);
 
 	r_fd = Tcp_connect("china.aprs2.net","14580");
-	snprintf(buf,MAXLEN,"user %s pass %d vers aprsrelay 13 filter r/31.83/117.29/1\r\n",
+	snprintf(buf,MAXLEN,"user %s pass %d vers aprsrelay 1.0 filter r/31.83/117.29/1\r\n",
 		argv[1], passcode(argv[1]));
 	Write(r_fd, buf, strlen(buf));
 #ifdef DEBUG
