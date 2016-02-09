@@ -43,7 +43,7 @@ if(@$jiupian) {
 
 function urlmessage($call,$icon, $dtmstr, $msg, $ddt) {
 	$m = "<font face=微软雅黑 size=2><img src=".$icon."> ".$call." <a href=".$_SERVER["PHP_SELF"]."?call=".$call." target=_blank>数据包</a> <a id=\\\"m\\\" href=\\\"#\\\" onclick=\\\"javascript:monitor_station('".$call."');return false;\\\">";
-	$m = $m."切换跟踪台站</a> <hr color=green>".$dtmstr."<br>";
+	$m = $m."切换跟踪</a> <hr color=green>".$dtmstr."<br>";
 	if( (strlen($msg)>=16) &&
 		(substr($msg,3,1)=='/') &&
 		(substr($msg,7,3)=='/A=') )      // 178/061/A=000033
@@ -80,8 +80,7 @@ function urlmessage($call,$icon, $dtmstr, $msg, $ddt) {
 			$msg = substr($msg,5);
 		}
 		$m = $m."<b>".$speed." km/h ".$dir."° 海拔".$alt."m</b><br>";
-	}  else 
-	if (  (strlen($msg)>=32) &&
+	}  else if (  (strlen($msg)>=32) &&
 		(substr($msg,3,1)=='/') &&
 		(substr($msg,7,1)=='g') &&
 		(substr($msg,11,1)=='t') &&
@@ -121,6 +120,7 @@ function urlmessage($call,$icon, $dtmstr, $msg, $ddt) {
 	$m = $m."</font><font color=green face=微软雅黑 size=2>".htmlspecialchars($msg)."</font>";
 	return $m;	
 }
+
 if ($cmd=="tm") {
 	$q="delete from lastpacket where tm<=curdate()";
 	$mysqli->query($q);
@@ -197,18 +197,18 @@ function top_menu() {
 	global $mysqli, $cmd;
 	$blank="";
 	if($cmd=="map") $blank = " target=_blank";
-	echo "<a href=".$_SERVER["PHP_SELF"]."?new".$blank.">最新数据包</a> <a href=".$_SERVER["PHP_SELF"]."?today".$blank.
-	">今天数据包</a> <a href=".$_SERVER["PHP_SELF"]."?stats".$blank.">数据包统计</a> ";
-	echo "<a href=".$_SERVER["PHP_SELF"]."?map target=_blank>数据包实况</a> <div id=calls>";
+	echo "<a href=".$_SERVER["PHP_SELF"]."?new".$blank.">最新</a> <a href=".$_SERVER["PHP_SELF"]."?today".$blank.
+	">今天</a> <a href=".$_SERVER["PHP_SELF"]."?stats".$blank.">统计</a> ";
+	echo "<a href=".$_SERVER["PHP_SELF"]."?map target=_blank>地图</a> <div id=calls>";
 	$q="select count(distinct(`call`)) from aprspacket where tm>=curdate()";
 	$result = $mysqli->query($q);
 	$r=$result->fetch_array();
-	echo $r[0]."</div> 呼号发送了 <div id=pkts>";
+	echo $r[0]."</div>呼号/<div id=pkts>";
 	$q="select count(*) from aprspacket where tm>=curdate()";
 	$result = $mysqli->query($q);
 	$r=$result->fetch_array();
-	echo $r[0]."</div> 数据包 ";
-	echo " <a href=".$_SERVER["PHP_SELF"]."?about target=_blank>关于本站</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<div id=msg></div> <div id=pathlen></div><p>";
+	echo $r[0]."</div>数据包 ";
+	echo " <a href=".$_SERVER["PHP_SELF"]."?about target=_blank>关于</a>&nbsp;&nbsp;<div id=msg></div> <div id=pathlen></div><p>";
 }
 
 if ($cmd=="map") {  
@@ -262,7 +262,7 @@ function monitor_station(mycall) {
 		return;
 	}
 	call=mycall;
-	document.getElementById("msg").innerHTML = "正在跟踪"+call;
+	document.getElementById("msg").innerHTML = "跟踪"+call;
        	map.setZoom(15);
 }
 
@@ -322,6 +322,7 @@ function createXmlHttpRequest(){
         }else if(window.XMLHttpRequest){ //非IE浏览器     
             return new XMLHttpRequest();     
         }     
+        return new XMLHttpRequest();     
 }     
 
 function UpdateStation(){     
