@@ -147,7 +147,7 @@ if ($cmd=="tm") {
         }	
 	if($pathmore==1) {
 		echo "map.panTo(new BMap.Point(".$lon.",".$lat."));\n";
-		echo "polyline = new BMap.Polyline(movepath,{strokeColor:\"blue\", strokeWeight:2, strokeOpacity:0.5});\n";
+		echo "polyline = new BMap.Polyline(movepath,{strokeColor:\"blue\", strokeWeight:3, strokeOpacity:0.5});\n";
 		echo "map.addOverlay(polyline);\n";
 	}
 	exit(0);

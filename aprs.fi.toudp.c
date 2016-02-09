@@ -147,4 +147,5 @@ int main(int argc, char *argv[])
 		Process(call);
 	}
 #endif
+	return(0);
 }
