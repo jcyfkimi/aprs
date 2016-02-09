@@ -41,33 +41,67 @@ if(@$jiupian) {
 	$mp=new Converter();
 }
 
-function urlmessage($call,$icon, $dtmstr, $msg) {
-	$m = "<img src=".$icon."> ".$call." <a href=".$_SERVER["PHP_SELF"]."?call=".$call." target=_blank>数据包</a> <a id=\\\"m\\\" href=\\\"#\\\" onclick=\\\"javascript:monitor_station('".$call."');return false;\\\">跟踪台站</a> <hr color=green>".$dtmstr."<br>";
+function urlmessage($call,$icon, $dtmstr, $msg, $ddt) {
+	$m = "<font face=微软雅黑 size=2><img src=".$icon."> ".$call." <a href=".$_SERVER["PHP_SELF"]."?call=".$call." target=_blank>数据包</a> <a id=\\\"m\\\" href=\\\"#\\\" onclick=\\\"javascript:monitor_station('".$call."');return false;\\\">跟踪台站</a> <hr color=green>".$dtmstr."<br>";
 	if( (strlen($msg)>=16) &&
 		(substr($msg,3,1)=='/') &&
 		(substr($msg,7,3)=='/A=') )      // 178/061/A=000033
 	{
 		$dir=substr($msg,0,3);
-		$speed=substr($msg,4,3)*1.609;
-		$alt=substr($msg,10,6)*0.3048;
+		$speed=number_format(substr($msg,4,3)*1.609,1);
+		$alt=number_format(substr($msg,10,6)*0.3048,1);
 		$m = $m."<b>".$speed." km/h ".$dir."° 海拔".$alt."m</b><br>";
 		$msg = substr($msg,16);
 	} else if( (strlen($msg)>=9) &&
 		(substr($msg,0,3)=='/A=') )      // /A=000033
 	{
-		$alt=substr($msg,3,6)*0.3048;
+		$alt=number_format(substr($msg,3,6)*0.3048,1);
 		$m = $m."<b> 海拔".$alt."m</b><br>";
 		$msg = substr($msg,9);
-	} else if( (strlen($msg)>=7) &&
-		(substr($msg,0,1)=='`') &&
-		(substr($msg,4,1)=='}') )    // `"4/}_"
+	} else if( ($ddt=='`')  &&
+		 (strlen($msg)>=9) )   // `  0+jlT)v/]"4(}=
 	{
-		$alt = (ord( substr($msg,1,1)) -33)*91*91+
-			(ord( substr($msg,2,1)) -33)*91 +
-			(ord( substr($msg,3,1)) -33) -10000;
-		$m = $m."<b> 海拔".$alt."m</b><br>";
-		$msg = substr($msg,6);
-	} else if( (strlen($msg)>=7) &&
+		$speed = (ord(substr($msg,3,1))-28)*10;
+		$t=ord(substr($msg,4,1))-28;
+		$speed = $speed + $t/10;
+		if($speed>=800) $speed-=800;
+		$speed = number_format($speed*1.852,1);
+		$dir = ($t%10)*100 + ord(substr($msg,5,1))-28;
+		if($dir>=400) $dir -= 400;
+		$msg = substr($msg,8);
+		$alt=0;
+		
+		if( (substr($msg,0,1)==']') && (strlen($msg)>=5) ) {
+			$alt = (ord( substr($msg,1,1)) -33)*91*91+
+				(ord( substr($msg,2,1)) -33)*91 +
+				(ord( substr($msg,3,1)) -33) -10000;
+			$alt = number_format($alt,1);
+			$msg = substr($msg,5);
+		}
+		$m = $m."<b>".$speed." km/h ".$dir."° 海拔".$alt."m</b><br>";
+	}  else 
+	if (  (strlen($msg)>=32) &&
+		(substr($msg,3,1)=='/') &&
+		(substr($msg,7,1)=='g') &&
+		(substr($msg,11,1)=='t') &&
+		(substr($msg,15,1)=='r') )  // 090/001g003t064r000p000h24b10212 or 000/000g000t064r000P000p000h39b10165
+	{
+		$c = substr($msg,0,3)*1; //wind dir
+		$s = number_format(substr($msg,4,3)*0.447,1); //wind speed
+		$g = number_format(substr($msg,8,3)*0.447,1); //5min wind speed
+		$t = number_format((substr($msg,12,3)-32)/1.8,1); //temp
+		$r = number_format(substr($msg,16,3)*25.4/100,1); //rainfall in mm 1 hour
+		$msg = strstr($msg,"p");
+		$p = number_format(substr($msg,1,3)*25.4/100,1); //rainfall in mm 24 hour
+		$msg = strstr($msg,"h");
+		$h = substr($msg,1,2);	//hum
+		$b = substr($msg,4,5)/10; //press
+		$msg = substr($msg,9);
+		$m = $m."<b>温度".$t."°C 湿度".$h."% 气压".$b."mpar<br>";
+		$m = $m."风".$c."°".$s."m/s(大风".$g."m/s)<br>";
+	 	$m = $m."雨".$r."mm/1h ".$p."mm/24h<b><br>";
+	}
+	if( (strlen($msg)>=7) &&
                 (substr($msg,0,3)=='PHG') )  // PHG
         {
 		$pwr = ord(substr($msg,3,1))-ord('0');
@@ -83,18 +117,17 @@ function urlmessage($call,$icon, $dtmstr, $msg) {
 	$msg=iconv("utf-8","gb2312",$msg); 
 	$msg=rtrim($msg);
 		
-	$m = $m.htmlspecialchars($msg);
-	//$m = $m."<br><font color=green>".urlencode($msg)."</font>";
+	$m = $m."</font><font color=green face=微软雅黑 size=2>".htmlspecialchars($msg)."</font>";
 	return $m;	
 }
 if ($cmd=="tm") {
-	$q=" from lastpacket where tm<=curdate()";
+	$q="delete from lastpacket where tm<=curdate()";
 	$mysqli->query($q);
-	$q="select lat,lon,`call`,unix_timestamp(tm),tm,concat(`table`,symbol),msg from lastpacket where tm>=FROM_UNIXTIME(?) and lat<>'' and not lat like '0000.00%'";
+	$q="select lat,lon,`call`,unix_timestamp(tm),tm,concat(`table`,symbol),msg,datatype from lastpacket where tm>=FROM_UNIXTIME(?) and lat<>'' and not lat like '0000.00%'";
 	$stmt=$mysqli->prepare($q);
         $stmt->bind_param("i",$tm);
         $stmt->execute();
-       	$stmt->bind_result($glat,$glon,$dcall,$dtm,$dtmstr,$dts,$dmsg);
+       	$stmt->bind_result($glat,$glon,$dcall,$dtm,$dtmstr,$dts,$dmsg,$ddt);
 
 	while($stmt->fetch()) {
                 $lat = substr($glat,0,2) + substr($glat,2,5)/60;
@@ -105,7 +138,7 @@ if ($cmd=="tm") {
 			$lat = $p->getY();
 		}
 		$icon = "img/".bin2hex($dts).".png";
-		$dmsg = urlmessage($dcall, $icon, $dtmstr, $dmsg);
+		$dmsg = urlmessage($dcall, $icon, $dtmstr, $dmsg,$ddt);
 		echo "setstation(".$lon.",".$lat.",\"".$dcall."\",".$dtm.",\"".$icon."\",\n\"".$dmsg."\");\n";
 	}
 	$stmt->close();
