@@ -48,14 +48,14 @@ function urlmessage($call,$icon, $dtmstr, $msg) {
 		(substr($msg,7,3)=='/A=') )      // 178/061/A=000033
 	{
 		$dir=substr($msg,0,3);
-		$speed=substr($msg,4,3)*.16;
-		$alt=substr($msg,10,6)*0.3;
+		$speed=substr($msg,4,3)*1.609;
+		$alt=substr($msg,10,6)*0.3048;
 		$m = $m."<b>".$speed." km/h ".$dir."¡ã º£°Î".$alt."m</b><br>";
 		$msg = substr($msg,16);
 	} else if( (strlen($msg)>=9) &&
 		(substr($msg,0,3)=='/A=') )      // /A=000033
 	{
-		$alt=substr($msg,3,6)*0.3;
+		$alt=substr($msg,3,6)*0.3048;
 		$m = $m."<b> º£°Î".$alt."m</b><br>";
 		$msg = substr($msg,9);
 	} else if( (strlen($msg)>=7) &&
