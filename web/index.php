@@ -467,21 +467,26 @@ if ($cmd=="new") {
 if ($cmd=="today") {
 	echo "<h3>今天收到的APRS数据包</h3>";
 	if(isset($_REQUEST["c"]))
-		$q = "select `call`, count(*) c from aprspacket where tm>curdate() group by `call` order by c desc";
+		$q = "select `call`, count(*) c, count(distinct(concat(lon,lat))) from aprspacket where tm>curdate() group by `call` order by c desc";
+	else if(isset($_REQUEST["d"]))
+		$q = "select `call`, count(*), count(distinct(concat(lon,lat))) c from aprspacket where tm>curdate() group by `call` order by c desc";
 	else
-		$q = "select `call`, count(*) from aprspacket where tm>curdate() group by substr(`call`,3)";
+		$q = "select `call`, count(*), count(distinct(concat(lon,lat))) from aprspacket where tm>curdate() group by substr(`call`,3)";
 	$result = $mysqli->query($q);
-	echo "<table border=1 cellspacing=0><tr><th><a href=".$_SERVER["PHP_SELF"]."?today>呼号</a></th><th><a href=".$_SERVER["PHP_SELF"]."?today&c>数量</a></th><th>地图</th></tr>\n";
+	echo "<table border=1 cellspacing=0><tr><th><a href=".$_SERVER["PHP_SELF"]."?today>呼号</a></th>";
+	echo "<th><a href=".$_SERVER["PHP_SELF"]."?today&c>数据包数量</a></th>";
+	echo "<th><a href=".$_SERVER["PHP_SELF"]."?today&d>位置点数量</a></th><th>地图</th></tr>\n";
 	while($r=$result->fetch_array()) {
         	echo "<tr><td>";
         	echo "<a href=".$_SERVER["PHP_SELF"]."?call=$r[0]>$r[0]</a>";
         	echo "</td><td align=right>";
         	echo $r[1];
+        	echo "</td><td align=right>";
+        	echo $r[2];
         	echo "</td><td>";
 		disp_map($r[0]);
         	echo "</td></tr>\n";
 	}
-
 	echo "</table>";
 	exit(0);
 }
