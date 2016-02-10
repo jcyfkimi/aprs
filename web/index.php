@@ -174,7 +174,7 @@ if ($cmd=="tm") {
 	$stmt->close();
 	$endtm = microtime(true); $spantm = $endtm-$starttm; $startm=$endtm; echo "//".$spantm."\n";
 
-	$q="select count(distinct(`call`)) from aprspacket where tm>=curdate()";
+	$q="select count(*) from lastpacket where tm>=curdate()";
 	$result = $mysqli->query($q);
 	$r=$result->fetch_array();
 	echo "updatecalls(".$r[0].");\n";
