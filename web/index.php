@@ -178,7 +178,7 @@ if ($cmd=="tm") {
 	$result = $mysqli->query($q);
 	$r=$result->fetch_array();
 	echo "updatecalls(".$r[0].");\n";
-	$q="select count(*) from aprspacket where tm>=curdate()";
+	$q="select packets from packetstats where day=curdate()";
 	$result = $mysqli->query($q);
 	$r=$result->fetch_array();
 	echo "updatepkts(".$r[0].");\n";

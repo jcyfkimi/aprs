@@ -172,6 +172,11 @@ void ToMysql(char *buf, int len)
    			fprintf(stderr, "Failed to insert row, Error: %s\n",
            		mysql_error(mysql));
 		}
+		end = my_stpcpy(sqlbuf,"INSERT INTO packetstats VALUES(curdate(),1) ON DUPLICATE KEY UPDATE packets=packets+1");
+		if (mysql_real_query(mysql,sqlbuf,(unsigned int) (end - sqlbuf))) {
+   			fprintf(stderr, "Failed to insert row, Error: %s\n",
+           		mysql_error(mysql));
+		}
 		return;
 	}
 
@@ -269,6 +274,11 @@ void ToMysql(char *buf, int len)
    			fprintf(stderr, "Failed to insert row, Error: %s\n",
            		mysql_error(mysql));
 		}
+		end = my_stpcpy(sqlbuf,"INSERT INTO packetstats VALUES(curdate(),1) ON DUPLICATE KEY UPDATE packets=packets+1");
+		if (mysql_real_query(mysql,sqlbuf,(unsigned int) (end - sqlbuf))) {
+   			fprintf(stderr, "Failed to insert row, Error: %s\n",
+           		mysql_error(mysql));
+		}
 		return;
 	}
 unknow_msg:	
@@ -283,6 +293,11 @@ unknow_msg:
 	if (mysql_real_query(mysql,sqlbuf,(unsigned int) (end - sqlbuf))) {
    		fprintf(stderr, "Failed to insert row, Error: %s\n",
            	mysql_error(mysql));
+	}
+	end = my_stpcpy(sqlbuf,"INSERT INTO packetstats VALUES(curdate(),1) ON DUPLICATE KEY UPDATE packets=packets+1");
+	if (mysql_real_query(mysql,sqlbuf,(unsigned int) (end - sqlbuf))) {
+   		fprintf(stderr, "Failed to insert row, Error: %s\n",
+       		mysql_error(mysql));
 	}
 }
 void Process(int u_fd) 
