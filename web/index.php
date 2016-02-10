@@ -72,12 +72,14 @@ function urlmessage($call,$icon, $dtmstr, $msg, $ddt) {
 		$msg = substr($msg,8);
 		$alt=0;
 		
-		if( (substr($msg,0,1)==']') && (strlen($msg)>=5) ) {
-			$alt = (ord( substr($msg,1,1)) -33)*91*91+
-				(ord( substr($msg,2,1)) -33)*91 +
-				(ord( substr($msg,3,1)) -33) -10000;
+		if((substr($msg,0,1)==']') || (substr($msg,0,1)=='`') )
+			$msg=substr($msg,1);
+		if( (strlen($msg)>=4) && (substr($msg,3,1)=='}') ) {
+			$alt = (ord( substr($msg,0,1)) -33)*91*91+
+				(ord( substr($msg,1,1)) -33)*91 +
+				(ord( substr($msg,2,1)) -33) -10000;
 			$alt = number_format($alt,1);
-			$msg = substr($msg,5);
+			$msg = substr($msg,4);
 		}
 		$m = $m."<b>".$speed." km/h ".$dir."¡ã º£°Î".$alt."m</b><br>";
 	}  else if (  (strlen($msg)>=32) &&
