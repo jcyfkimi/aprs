@@ -162,11 +162,11 @@ if ($cmd=="tm") {
 			$p=$mp->getBDEncryPoint($lon,$lat);
 			$lon = $p->getX();
 			$lat = $p->getY();
-			if ( $lon < $lon1) continue;
-			if ( $lon > $lon2) continue;
-			if ( $lat < $lat1) continue;
-			if ( $lat > $lat2) continue;
 		}
+		if ( $lon < $lon1) continue;
+		if ( $lon > $lon2) continue;
+		if ( $lat < $lat1) continue;
+		if ( $lat > $lat2) continue;
 		$icon = "img/".bin2hex($dts).".png";
 		$dmsg = urlmessage($dcall, $icon, $dtmstr, $dmsg,$ddt);
 		echo "setstation(".$lon.",".$lat.",\"".$dcall."\",".$dtm.",\"".$icon."\",\n\"".$dmsg."\");\n";
