@@ -180,11 +180,12 @@ if ($cmd=="tm") {
                 echo "addpathpoint(".$lon.",".$lat.");\n";
         }	
 	if($pathmore==1) {
-		echo "if(movepath.length>0) map.removeOverlay(polyline);\n";
+//		echo "if(movepath.length>0) map.removeOverlay(polyline);\n";
+//		echo "polyline = new BMap.Polyline(movepath,{strokeColor:\"blue\", strokeWeight:3, strokeOpacity:0.5});\n";
+//		echo "map.addOverlay(polyline);\n";
+		echo "polyline.setPath(movepath);\n";
 		echo "updatepathlen();\n";
 		echo "map.panTo(new BMap.Point(".$lon.",".$lat."));\n";
-		echo "polyline = new BMap.Polyline(movepath,{strokeColor:\"blue\", strokeWeight:3, strokeOpacity:0.5});\n";
-		echo "map.addOverlay(polyline);\n";
 	}
 	exit(0);
 }
@@ -201,7 +202,7 @@ function top_menu() {
 	if($cmd=="map") $blank = " target=_blank";
 	echo "<a href=".$_SERVER["PHP_SELF"]."?new".$blank.">最新</a> <a href=".$_SERVER["PHP_SELF"]."?today".$blank.
 	">今天</a> <a href=".$_SERVER["PHP_SELF"]."?stats".$blank.">统计</a> ";
-	echo "<a href=".$_SERVER["PHP_SELF"]."?map target=_blank>地图</a> <div id=calls></div>/<div id=pkts></div> ";
+	echo "<a href=".$_SERVER["PHP_SELF"]."?map target=_blank>地图</a> <div id=calls></div><div id=pkts></div> ";
 	echo " <a href=".$_SERVER["PHP_SELF"]."?about target=_blank>关于</a>&nbsp;&nbsp;<div id=msg></div><div id=pathlen></div><p>";
 }
 
@@ -264,11 +265,10 @@ function updatecalls(calls) {
 
 function updatepkts(pkts) {
 	if(ismobile)
-		document.getElementById("pkts").innerHTML = pkts+"P";
+		document.getElementById("pkts").innerHTML = "/"+pkts+"P";
 	else
-		document.getElementById("pkts").innerHTML = pkts+"数据包";
+		document.getElementById("pkts").innerHTML = "/"+pkts+"数据包";
 }
-
 
 function monitor_station(mycall) {
 	if(movepath.length>0) {
@@ -292,12 +292,19 @@ function monitor_station(mycall) {
 function addpathpoint(lon, lat){
 	var p = new BMap.Point(lon,lat);
 	movepath.push (p);
+	if(movepath.length==1) {
+		polyline = new BMap.Polyline(movepath,{strokeColor:"blue", strokeWeight:3, strokeOpacity:0.5});
+		map.addOverlay(polyline);
+	}
 }
 
 function setstation(lon, lat, label,tm, iconurl, msg)
 {	for (var i=0; i< totalmarkers; i++) {
 		if(labels[i]==label) {
-			if(tm<=lasttms[i]) return;
+			//if(tm<=lasttms[i]) return;
+			if(tm<lasttms[i]) return;
+			if(tm==lasttms[i]) tm++;  // 如果同一个站点同样的时间戳第二次出现，说明至少过去了2秒，
+						// 可以将最后时间戳+1, 这样一来，同一个站点的信息最多重复一次
 			markers[i].setPosition( new BMap.Point(lon, lat) );
 			infowindows[i].setContent(msg);
 			lasttms[i] = tm;
