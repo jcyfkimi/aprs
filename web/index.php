@@ -130,6 +130,20 @@ function urlmessage($call,$icon, $dtmstr, $msg, $ddt) {
 	return $m;	
 }
 
+function strtolat($glat) {
+	$lat = 0;
+	$lat = substr($glat,0,2) + substr($glat,2,5)/60;
+	if(substr($glat,7,1)=='S')
+		$lat = -$lat;
+	return $lat;
+}
+function strtolon($glon) {
+	$lon = 0;
+	$lon = substr($glon,0,3) + substr($glon,3,5)/60;
+	if(substr($glon,8,1)=='W')
+		$lon = -$lon;
+	return $lon;
+}
 if ($cmd=="tm") {
 	$starttm = microtime(true);
 	$q="delete from lastpacket where tm<=curdate()";
@@ -163,8 +177,8 @@ if ($cmd=="tm") {
        	$stmt->bind_result($glat,$glon,$dcall,$dtm,$dtmstr,$dts,$dmsg,$ddt);
 
 	while($stmt->fetch()) {
-                $lat = substr($glat,0,2) + substr($glat,2,5)/60;
-                $lon = substr($glon,0,3) + substr($glon,3,5)/60;
+                $lat = strtolat($glat);
+                $lon = strtolon($glon);
 		if($jiupian) {
 			$p=$mp->getBDEncryPoint($lon,$lat);
 			$lon = $p->getX();
@@ -205,8 +219,8 @@ if ($cmd=="tm") {
 
 	$pathmore=0;
         while($stmt->fetch()) {
-                $lat = substr($glat,0,2) + substr($glat,2,5)/60;
-                $lon = substr($glon,0,3) + substr($glon,3,5)/60;
+                $lat = strtolat($glat);
+                $lon = strtolon($glon);
                 if($jiupian) {
                         $p=$mp->getBDEncryPoint($lon,$lat);
                         $lon = $p->getX();
@@ -536,8 +550,8 @@ Content-Type:application/gpx+xml
         $stmt->bind_result($dtm, $glat, $glon, $msg, $ddt);
 //<trkpt lat="46.57608333" lon="8.89241667"><ele>2376</ele><time>2007-10-14T10:09:57Z</time></trkpt>
         while($stmt->fetch()) {
-                $lat = substr($glat,0,2) + substr($glat,2,5)/60;
-                $lon = substr($glon,0,3) + substr($glon,3,5)/60;
+                $lat = strtolat($glat);
+                $lon = strtolon($glon);
 		$wpt = gpx_wpt($dtm, $msg,$ddt);
 		echo "<trkpt lat=\"".$lat."\" lon=\"".$lon."\">".$wpt."</trkpt>\n";
         }	
