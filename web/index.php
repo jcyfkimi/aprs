@@ -380,7 +380,9 @@ function setstation(lon, lat, label, tm, iconurl, msg)
 	}
 	var icon = new BMap.Icon(iconurl, new BMap.Size(24, 24), {anchor: new BMap.Size(12, 12)});	
 	var marker = new BMap.Marker(new BMap.Point(lon,lat), {icon: icon});
-	marker.setLabel(new BMap.Label(label, {offset: new BMap.Size(20,-10)}));
+	var lb = new BMap.Label(label, {offset: new BMap.Size(20,-10)});
+	lb.setStyle({border:0, background: "#eeeeee"});
+	marker.setLabel(lb);
 	var infowindow = new BMap.InfoWindow(msg, {width:300});
 	(function(){
         	marker.addEventListener('click', function(){
