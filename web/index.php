@@ -464,6 +464,55 @@ UpdateStation();
 	exit(0);
 }
 
+function gpx_wpt($tm, $msg, $ddt) {
+	$alt = 0;
+	if( (strlen($msg)>=7) &&
+		(substr($msg,3,1)=='/'))  // 178/061/A=000033
+	{
+		$dir=substr($msg,0,3);
+		$speed=number_format(substr($msg,4,3)*1.852,1);
+		$m = $m."<b>".$speed." km/h ".$dir."бу";
+		$msg = substr($msg,7);
+		if( substr($msg,0,3)=='/A=') {      // 178/061/A=000033
+			$alt=number_format(substr($msg,10,6)*0.3048,1);
+		} 
+		$m="<ele>$alt</ele><time>$tm</time><magvar>$dir</magvar><desc>$speed km/h</desc>";
+		return $m;
+	} else if( (strlen($msg)>=9) &&
+		(substr($msg,0,3)=='/A=') )      // /A=000033
+	{
+		$alt=number_format(substr($msg,3,6)*0.3048,1);
+		$m="<ele>$alt</ele><time>$tm</time>";
+		return $m;
+	} else if( ($ddt=='`')  &&
+		 (strlen($msg)>=9) )   // `  0+jlT)v/]"4(}=
+	{
+		$speed = (ord(substr($msg,3,1))-28)*10;
+		$t=ord(substr($msg,4,1))-28;
+		$speed = $speed + $t/10;
+		if($speed>=800) $speed-=800;
+		$speed = number_format($speed*1.852,1);
+		$dir = ($t%10)*100 + ord(substr($msg,5,1))-28;
+		if($dir>=400) $dir -= 400;
+		$msg = substr($msg,8);
+		$alt=0;
+		
+		if((substr($msg,0,1)==']') || (substr($msg,0,1)=='`') )
+			$msg=substr($msg,1);
+		if( (strlen($msg)>=4) && (substr($msg,3,1)=='}') ) {
+			$alt = (ord( substr($msg,0,1)) -33)*91*91+
+				(ord( substr($msg,1,1)) -33)*91 +
+				(ord( substr($msg,2,1)) -33) -10000;
+			$alt = number_format($alt,1);
+			$msg = substr($msg,4);
+		}
+		$m="<ele>$alt</ele><time>$tm</time><magvar>$dir</magvar><desc>$speed km/h</desc>";
+		return $m;
+	}
+	$m="<time>$tm</time>";
+	return $m;
+}
+
 if($cmd=="gpx") {
 	if($call=="") exit(0); 
 	
@@ -475,21 +524,22 @@ Content-Type:application/gpx+xml
 */
 	date_default_timezone_set("Asia/Shanghai");
 	header("Content-Type:application/gpx+xml");
-	header("Content-Disposition:attachment; filename=\"".$call.date("Y-m-d")."Track.gpx\"");
+	header("Content-Disposition:attachment; filename=\"".$call."-".date("Y-m-d")."Track.gpx\"");
 	echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 	echo "<gpx version=\"1.0\">\n";
 	echo "<name>APRS GPX</name>\n";
 	echo "<trk><name>".$call." ".date("Y-m-d")." Track</name><number>1</number><trkseg>\n";
-	$q="select date_format(CONVERT_TZ(tm,@@session.time_zone, '+00:00'),\"%Y-%m-%dT%H:%i:%sZ\"),lat,lon from aprspacket where tm>curdate() and `call`=? and lat<>'' and not lat like '0000.00%' order by tm";
+	$q="select date_format(CONVERT_TZ(tm,@@session.time_zone, '+00:00'),\"%Y-%m-%dT%H:%i:%sZ\"),lat,lon,msg,datatype from aprspacket where tm>curdate() and `call`=? and lat<>'' and not lat like '0000.00%' order by tm";
         $stmt=$mysqli->prepare($q);
         $stmt->bind_param("s",$call);
         $stmt->execute();
-        $stmt->bind_result($dtm, $glat, $glon);
+        $stmt->bind_result($dtm, $glat, $glon, $msg, $ddt);
 //<trkpt lat="46.57608333" lon="8.89241667"><ele>2376</ele><time>2007-10-14T10:09:57Z</time></trkpt>
         while($stmt->fetch()) {
                 $lat = substr($glat,0,2) + substr($glat,2,5)/60;
                 $lon = substr($glon,0,3) + substr($glon,3,5)/60;
-		echo "<trkpt lat=\"".$lat."\" lon=\"".$lon."\"><ele>0</ele><time>".$dtm."</time></trkpt>\n";
+		$wpt = gpx_wpt($dtm, $msg,$ddt);
+		echo "<trkpt lat=\"".$lat."\" lon=\"".$lon."\">".$wpt."</trkpt>\n";
         }	
 	echo "</trkseg></trk>\n";
 	echo "</gpx>\n";
