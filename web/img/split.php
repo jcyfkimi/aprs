@@ -1,6 +1,11 @@
 <?php
 
 
+if (isset($_SERVER['REMOTE_ADDR']))  {
+	echo "not for web\n";
+	exit(0);
+}
+
 function process($fn, $p) {
 	echo $fn; echo $p; echo "\n";
 	$imgs = imagecreatefrompng($fn);
