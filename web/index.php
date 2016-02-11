@@ -27,6 +27,9 @@ if (isset($_REQUEST["tm"])) {
 } else if (isset($_REQUEST["stats"])) {
 	$cmd="stats";
 	header("refresh: 60;");
+} else if (isset($_REQUEST["gpx"])) {
+	$cmd="gpx";
+	$call=$_REQUEST["gpx"];
 } else if (isset($_REQUEST["about"])) {
 	$cmd="about";
 } else {
@@ -43,7 +46,8 @@ if(@$jiupian) {
 
 function urlmessage($call,$icon, $dtmstr, $msg, $ddt) {
 	$m = "<font face=微软雅黑 size=2><img src=".$icon."> ".$call." <a href=".$_SERVER["PHP_SELF"]."?call=".$call." target=_blank>数据包</a> <a id=\\\"m\\\" href=\\\"#\\\" onclick=\\\"javascript:monitor_station('".$call."');return false;\\\">";
-	$m = $m."切换跟踪</a> <hr color=green>".$dtmstr."<br>";
+	$m = $m."切换跟踪</a> ";
+	$m = $m."<a href=".$_SERVER["PHP_SELF"]."?gpx=".$call." target=_blank>下载轨迹</a> <hr color=green>".$dtmstr."<br>";
 	if( (strlen($msg)>=16) &&
 		(substr($msg,3,1)=='/') &&
 		(substr($msg,7,3)=='/A=') )      // 178/061/A=000033
@@ -456,6 +460,39 @@ UpdateStation();
 <?php
 	exit(0);
 }
+
+if($cmd=="gpx") {
+	if($call=="") exit(0); 
+	
+/*Content-Disposition:attachment; filename="2110153.gpx"
+Content-Language:en-US
+Content-Length:7890
+Content-Transfer-Encoding:binary
+Content-Type:application/gpx+xml
+*/
+	date_default_timezone_set("Asia/Shanghai");
+	header("Content-Type:application/gpx+xml");
+	header("Content-Disposition:attachment; filename=\"".$call.date("Y-m-d")."Track.gpx\"");
+	echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+	echo "<gpx version=\"1.0\">\n";
+	echo "<name>APRS GPX</name>\n";
+	echo "<trk><name>".$call." ".date("Y-m-d")." Track</name><number>1</number><trkseg>\n";
+	$q="select date_format(CONVERT_TZ(tm,@@session.time_zone, '+00:00'),\"%Y-%m-%dT%H:%i:%sZ\"),lat,lon from aprspacket where tm>curdate() and `call`=? and lat<>'' and not lat like '0000.00%' order by tm";
+        $stmt=$mysqli->prepare($q);
+        $stmt->bind_param("s",$call);
+        $stmt->execute();
+        $stmt->bind_result($dtm, $glat, $glon);
+//<trkpt lat="46.57608333" lon="8.89241667"><ele>2376</ele><time>2007-10-14T10:09:57Z</time></trkpt>
+        while($stmt->fetch()) {
+                $lat = substr($glat,0,2) + substr($glat,2,5)/60;
+                $lon = substr($glon,0,3) + substr($glon,3,5)/60;
+		echo "<trkpt lat=\"".$lat."\" lon=\"".$lon."\"><ele>0</ele><time>".$dtm."</time></trkpt>\n";
+        }	
+	echo "</trkseg></trk>\n";
+	echo "</gpx>\n";
+	exit(0);
+}
+
 ?>
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
 	<title>APRS relay server</title>
@@ -520,7 +557,7 @@ if ($cmd=="today") {
 	$result = $mysqli->query($q);
 	echo "<table border=1 cellspacing=0><tr><th><a href=".$_SERVER["PHP_SELF"]."?today>呼号</a></th>";
 	echo "<th><a href=".$_SERVER["PHP_SELF"]."?today&c>数据包数量</a></th>";
-	echo "<th><a href=".$_SERVER["PHP_SELF"]."?today&d>位置点数量</a></th><th>地图</th></tr>\n";
+	echo "<th><a href=".$_SERVER["PHP_SELF"]."?today&d>位置点数量</a></th><th>下载轨迹</th><th>地图</th></tr>\n";
 	while($r=$result->fetch_array()) {
         	echo "<tr><td>";
         	echo "<a href=".$_SERVER["PHP_SELF"]."?call=$r[0]>$r[0]</a>";
@@ -528,6 +565,8 @@ if ($cmd=="today") {
         	echo $r[1];
         	echo "</td><td align=right>";
         	echo $r[2];
+        	echo "</td><td>";
+        	echo "<a href=".$_SERVER["PHP_SELF"]."?gpx=$r[0]>下载轨迹</a>";
         	echo "</td><td>";
 		disp_map($r[0]);
         	echo "</td></tr>\n";
@@ -538,6 +577,7 @@ if ($cmd=="today") {
 
 if ($cmd=="call") {
 	echo "今天收到的 $call APRS数据包 ";
+       	echo "<a href=".$_SERVER["PHP_SELF"]."?gpx=$call>下载轨迹</a> ";
 	disp_map($call);
 	echo "<p>";
 	$q="select tm,`call`,datatype,lat,lon,`table`,symbol,msg,raw from aprspacket where tm>curdate() and `call`=? order by tm desc";
@@ -622,6 +662,7 @@ so.write("flashcontent4");
 <?php
 	exit(0);
 }
+
 
 if ($cmd=="about") {
 include "about.html";
