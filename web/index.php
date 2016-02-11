@@ -56,7 +56,7 @@ function urlmessage($call,$icon, $dtmstr, $msg, $ddt) {
 		$m = $m."<b>".$speed." km/h ".$dir."¡ã";
 		$msg = substr($msg,7);
 		if( substr($msg,0,3)=='/A=') {      // 178/061/A=000033
-			$alt=number_format(substr($msg,10,6)*0.3048,1);
+			$alt=number_format(substr($msg,3,6)*0.3048,1);
 			$m=$m." º£°Î".$alt."m</b><br>";
 			$msg = substr($msg,9);
 		}
@@ -474,7 +474,7 @@ function gpx_wpt($tm, $msg, $ddt) {
 		$m = $m."<b>".$speed." km/h ".$dir."¡ã";
 		$msg = substr($msg,7);
 		if( substr($msg,0,3)=='/A=') {      // 178/061/A=000033
-			$alt=number_format(substr($msg,10,6)*0.3048,1);
+			$alt=number_format(substr($msg,3,6)*0.3048,1);
 		} 
 		$m="<ele>$alt</ele><time>$tm</time><magvar>$dir</magvar><desc>$speed km/h</desc>";
 		return $m;
