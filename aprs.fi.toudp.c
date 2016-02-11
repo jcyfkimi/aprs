@@ -22,7 +22,7 @@
 
 #define MAXLEN 16384
 
- #define DEBUG 1
+// #define DEBUG 1
 
 #define PORT 14580
 
@@ -138,14 +138,19 @@ int main(int argc, char *argv[])
 
 #ifndef DEBUG
 	daemon_init("aprsrelay",LOG_DAEMON);
+	while(1) {
+                int pid;
+                pid=fork();
+                if(pid==0) // i am child, will do the job
+                        break;
+                else if(pid==-1) // error
+                        exit(0);
+                else
+                        wait(NULL); // i am parent, wait for child
+                sleep(2);  // if child exit, wait 2 second, and rerun
+        }
 #endif
 
-#ifdef DEBUG
 	Process(call);
-#else
-	if( Fork()==0 ) {
-		Process(call);
-	}
-#endif
 	return(0);
 }
