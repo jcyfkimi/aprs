@@ -60,7 +60,8 @@ CREATE TABLE `aprspacket` (
   `msg` varchar(200) NOT NULL,
   `raw` varchar(250) NOT NULL,
   KEY `tm` (`tm`),
-  KEY `tm_call` (`tm`,`call`)
+  KEY `tm_call` (`tm`,`call`),
+  KEY `call_tm` (`call`,`tm`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 CREATE TABLE `lastpacket` (
@@ -73,5 +74,11 @@ CREATE TABLE `lastpacket` (
   `symbol` char(1) NOT NULL,
   `msg` varchar(200) NOT NULL,
   PRIMARY KEY (`call`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+CREATE TABLE `packetstats` (
+  `day` date NOT NULL DEFAULT '0000-00-00',
+  `packets` int(10) DEFAULT NULL,
+  PRIMARY KEY (`day`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 </pre>
