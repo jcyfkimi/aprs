@@ -12,6 +12,7 @@ function process($c) {
 	}
 }
 
-process("R");
+process("E");
+process("2");
 
 ?>
