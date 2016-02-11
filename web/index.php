@@ -48,15 +48,18 @@ function urlmessage($call,$icon, $dtmstr, $msg, $ddt) {
 	$m = "<font face=Î¢ÈíÑÅºÚ size=2><img src=".$icon."> ".$call." <a href=".$_SERVER["PHP_SELF"]."?call=".$call." target=_blank>Êý¾Ý°ü</a> <a id=\\\"m\\\" href=\\\"#\\\" onclick=\\\"javascript:monitor_station('".$call."');return false;\\\">";
 	$m = $m."ÇÐ»»¸ú×Ù</a> ";
 	$m = $m."<a href=".$_SERVER["PHP_SELF"]."?gpx=".$call." target=_blank>ÏÂÔØ¹ì¼£</a> <hr color=green>".$dtmstr."<br>";
-	if( (strlen($msg)>=16) &&
-		(substr($msg,3,1)=='/') &&
-		(substr($msg,7,3)=='/A=') )      // 178/061/A=000033
+	if( (strlen($msg)>=7) &&
+		(substr($msg,3,1)=='/'))  // 178/061/A=000033
 	{
 		$dir=substr($msg,0,3);
 		$speed=number_format(substr($msg,4,3)*1.852,1);
-		$alt=number_format(substr($msg,10,6)*0.3048,1);
-		$m = $m."<b>".$speed." km/h ".$dir."¡ã º£°Î".$alt."m</b><br>";
-		$msg = substr($msg,16);
+		$m = $m."<b>".$speed." km/h ".$dir."¡ã";
+		$msg = substr($msg,7);
+		if( substr($msg,0,3)=='/A=') {      // 178/061/A=000033
+			$alt=number_format(substr($msg,10,6)*0.3048,1);
+			$m=$m." º£°Î".$alt."m</b><br>";
+			$msg = substr($msg,9);
+		}
 	} else if( (strlen($msg)>=9) &&
 		(substr($msg,0,3)=='/A=') )      // /A=000033
 	{
