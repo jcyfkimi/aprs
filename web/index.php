@@ -127,7 +127,7 @@ function urlmessage($call,$icon, $dtmstr, $msg, $ddt) {
 	$msg=iconv("utf-8","gb2312",$msg); 
 	$msg=rtrim($msg);
 		
-	$m = $m."</font><font color=green face=Î¢ÈíÑÅºÚ size=2>".htmlspecialchars($msg)."</font>";
+	$m = $m."</font><font color=green face=Î¢ÈíÑÅºÚ size=2>".addcslashes(htmlspecialchars($msg),"\\\r\n'\"")."</font>";
 	return $m;	
 }
 
@@ -483,6 +483,7 @@ UpdateStation();
 
 function gpx_wpt($tm, $msg, $ddt) {
 	$alt = 0;
+	$m = "";
 	if( (strlen($msg)>=7) &&
 		(substr($msg,3,1)=='/'))  // 178/061/A=000033
 	{
