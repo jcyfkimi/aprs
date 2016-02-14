@@ -109,7 +109,7 @@ void Process(char *call)
 				exit(0);
 			}
 			if(buffer[0]=='#') continue;
-
+			buffer[n]=0;
 			char *p,*s;
 			p=buffer;
 			while (1) {
