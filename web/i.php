@@ -449,7 +449,8 @@ function setstation(lon, lat, label, tm, iconurl, msg)
 					// 可以将最后时间戳+1, 这样一来，同一个站点的信息最多重复一次
 		else {
     			markers[i].setAnimation(BMAP_ANIMATION_BOUNCE);
-			setTimeout(function(){markers[i].setAnimation(null);}, 500);
+			m = markers[i];
+			setTimeout(function(){m.setAnimation(null);}, 500);
 		}
 		lasttms[i] = tm;
 		if(tm>lastupdatetm) lastupdatetm = tm;
