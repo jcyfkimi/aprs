@@ -321,7 +321,7 @@ var debug=true;
 
 function updateinview() {
 	if(!ismobile)
-		document.getElementById("inview").innerHTML = "(视线内"+totalmarkers+")";
+		document.getElementById("inview").innerHTML = "(显示"+totalmarkers+")";
 }
 
 function updatepathlen() {
@@ -394,6 +394,11 @@ function delstation(i) {
         lasttms[i]=lasttms[totalmarkers-1];
         iconurls[i]=iconurls[totalmarkers-1];
         infowindows[i]=infowindows[totalmarkers-1];
+	markers.splice(totalmarkers-1,1);
+	labels.splice(totalmarkers-1,1);
+	lasttms.splice(totalmarkers-1,1);
+	iconurls.splice(totalmarkers-1,1);
+	infowindows.splice(totalmarkers-1,1);
 	totalmarkers--;
 	updateinview();
 }
@@ -404,16 +409,14 @@ function map_resize() {
 	lat1=b.getSouthWest().lat;
 	lon2=b.getNorthEast().lng;
 	lat2=b.getNorthEast().lat;
-	console.log("resize: "+ lon1+"/"+lat1+","+lon2+"/"+lat2);
 	i=0;
 	while(i<totalmarkers) {
 		if(call==labels[i]) {
-			console.log("monitor call:"+labels[i]+",no del");
+			i++;
+			continue;
 		}
 		p = markers[i].getPosition();
 		if( (p.lng<lon1) || (p.lat<lat1) || (p.lng>lon2) || (p.lat>lat2)) {
-			console.log("i="+i+" call:"+labels[i]);
-			console.log("call:"+labels[i]+", need del");
 			delstation(i);
 			continue;
 		}
