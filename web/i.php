@@ -409,7 +409,6 @@ function delstation(i) {
 	infowindows.splice(totalmarkers-1,1);
 	totalmarkers--;
 	updateinview();
-	UpdateStation();  
 }
 
 function map_resize() {
@@ -431,6 +430,7 @@ function map_resize() {
 		}
 		i++;
 	}
+	UpdateStation();  
 }
 
 function setstation(lon, lat, label, tm, iconurl, msg)
