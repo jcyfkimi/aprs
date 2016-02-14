@@ -75,6 +75,33 @@ int checkcall(char*call) {
 	}
 	return 1;
 }
+
+int checklat(char *s) {
+	if(!isdigit(*s)) return 0;
+	if(!isdigit(*(s+1)) && (*(s+1)!=' ') ) return 0;
+	if(!isdigit(*(s+2)) && (*(s+1)!=' ') ) return 0;
+	if(!isdigit(*(s+3)) && (*(s+1)!=' ') ) return 0;
+	if(*(s+4)!='.') return 0;
+	if(!isdigit(*(s+5)) && (*(s+1)!=' ') ) return 0;
+	if(!isdigit(*(s+6)) && (*(s+1)!=' ') ) return 0;
+	if(*(s+7)=='N') return 1;
+	if(*(s+7)=='S') return 1;
+	return 0;
+}
+
+int checklon(char *s) {
+	if(!isdigit(*s)) return 0;
+	if(!isdigit(*(s+1)) && (*(s+1)!=' ') ) return 0;
+	if(!isdigit(*(s+2)) && (*(s+1)!=' ') ) return 0;
+	if(!isdigit(*(s+3)) && (*(s+1)!=' ') ) return 0;
+	if(!isdigit(*(s+4)) && (*(s+1)!=' ') ) return 0;
+	if(*(s+5)!='.') return 0;
+	if(!isdigit(*(s+6)) && (*(s+1)!=' ') ) return 0;
+	if(!isdigit(*(s+7)) && (*(s+1)!=' ') ) return 0;
+	if(*(s+8)=='E') return 1;
+	if(*(s+8)=='W') return 1;
+	return 0;
+}
 void ToMysql(char *buf, int len)
 {	char bufcopy[MAXLEN],sqlbuf[MAXLEN],*end;
 	if(len<=10) return;
@@ -118,10 +145,12 @@ void ToMysql(char *buf, int len)
 		if( strlen(p)<17 ) 
 			goto unknow_msg;
 		lat = p;
+		if(checklat(lat)==0) lat="";
 		table=*(p+8);
 		*(p+8)=0;
 		p+=9;
 		lon= p;
+		if(checklon(lon)==0) lon="";
 		symbol = *(p+9);
 		*(p+9)=0;
 		p+=10;
