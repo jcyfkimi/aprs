@@ -450,7 +450,7 @@ function setstation(lon, lat, label, tm, iconurl, msg)
 		else {
     			markers[i].setAnimation(BMAP_ANIMATION_BOUNCE);
 			m = markers[i];
-			setTimeout(function(){m.setAnimation(null);}, 500);
+			setTimeout((function(m){m.setAnimation(null);})(m), 500);
 		}
 		lasttms[i] = tm;
 		if(tm>lastupdatetm) lastupdatetm = tm;
@@ -478,7 +478,7 @@ function setstation(lon, lat, label, tm, iconurl, msg)
 	totalmarkers=totalmarkers+1;
 	marker.setZIndex(this.maxZindex++);
     	marker.setAnimation(BMAP_ANIMATION_BOUNCE);
-	setTimeout(function(){ marker.setAnimation(null);}, 500);
+	setTimeout((function(m){m.setAnimation(null);})(marker), 500);
 	updateinview();
 }
 
