@@ -86,8 +86,18 @@ void Process(char *call)
 {	
 	char buffer[MAXLEN];
 	int n;
-
+	int optval;
+   	socklen_t optlen = sizeof(optval);
 	r_fd= Tcp_connect("china.aprs2.net","14580");
+	optval = 1;
+	Setsockopt(r_fd, SOL_SOCKET, SO_KEEPALIVE, &optval, optlen);
+	optval = 3;
+	Setsockopt(r_fd, SOL_TCP, TCP_KEEPCNT, &optval, optlen);
+	optval = 2;
+	Setsockopt(r_fd, SOL_TCP, TCP_KEEPIDLE, &optval, optlen);
+	optval = 2;
+	Setsockopt(r_fd, SOL_TCP, TCP_KEEPINTVL, &optval, optlen);
+
 	snprintf(buffer,MAXLEN,"user %s pass %d vers fwd 1.5 filter p/B\r\n",call,passcode(call));
 	Write(r_fd, buffer, strlen(buffer));
 
