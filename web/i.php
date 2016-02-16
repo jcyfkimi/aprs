@@ -520,6 +520,14 @@ function UpdateStationDisplay(){
         }     
 }    
 
+function centertocurrent(){
+	var geolocation = new BMap.Geolocation();
+	geolocation.getCurrentPosition(function(r){
+		if(this.getStatus() == BMAP_STATUS_SUCCESS){
+			map.centerAndZoom(r.point,12);
+	}},{enableHighAccuracy: false});
+}
+
 // 百度地图API功能
 var map = new BMap.Map("allmap");
 map.enableScrollWheelZoom();
@@ -548,14 +556,9 @@ map.addEventListener('resize', map_resize);
         $call=@$_REQUEST["call"];
         if($call!="")  {
 		echo "monitor_station(\"$call\");\n";
-	}
+	} else 
+		echo "centertocurrent();\n";
 ?>
-
-var geolocation = new BMap.Geolocation();
-geolocation.getCurrentPosition(function(r){
-	if(this.getStatus() == BMAP_STATUS_SUCCESS){
-		map.centerAndZoom(r.point,12);
-	}},{enableHighAccuracy: false});
 
 createXmlHttpRequest();  
 UpdateStation();  
