@@ -254,6 +254,7 @@ if ($cmd=="tm") {
 function disp_map($call) {
 	echo "<a href=\"http://aprs.fi/#!mt=roadmap&z=11&call=a%2F".$call."&timerange=43200&tail=43200\" target=_blank>aprs.fi</a> ";
 	echo "<a href=\"http://aprs.hamclub.net/mtracker/map/aprs/".$call."\" target=_blank>hamclub</a> ";
+	echo "<a href=\"http://aprs.hellocq.net/\" target=_blank>hellocq</a> ";
 	echo "<a href=\"".$_SERVER["PHP_SELF"]."?map&call=".$call."\" target=_blank>baidu</a> ";
 }
 

@@ -184,7 +184,9 @@ void Process(int c_fd)
 			while (1) {
 				if((p-buffer) >= n) break;
 				s=strchr(p,'\n');
-				if(s==NULL) break;
+				if(s==NULL)  
+					s=strchr(p,'\r');
+				if(s==NULL)  continue;
 				relayaprs(p,s-p+1);
 				p = s+1;
 			}
