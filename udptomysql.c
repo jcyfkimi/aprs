@@ -79,11 +79,11 @@ int checkcall(char*call) {
 int checklat(char *s) {
 	if(!isdigit(*s)) return 0;
 	if(!isdigit(*(s+1)) && (*(s+1)!=' ') ) return 0;
-	if(!isdigit(*(s+2)) && (*(s+1)!=' ') ) return 0;
-	if(!isdigit(*(s+3)) && (*(s+1)!=' ') ) return 0;
+	if(!isdigit(*(s+2)) && (*(s+2)!=' ') ) return 0;
+	if(!isdigit(*(s+3)) && (*(s+3)!=' ') ) return 0;
 	if(*(s+4)!='.') return 0;
-	if(!isdigit(*(s+5)) && (*(s+1)!=' ') ) return 0;
-	if(!isdigit(*(s+6)) && (*(s+1)!=' ') ) return 0;
+	if(!isdigit(*(s+5)) && (*(s+5)!=' ') ) return 0;
+	if(!isdigit(*(s+6)) && (*(s+6)!=' ') ) return 0;
 	if(*(s+7)=='N') return 1;
 	if(*(s+7)=='S') return 1;
 	return 0;
@@ -92,12 +92,12 @@ int checklat(char *s) {
 int checklon(char *s) {
 	if(!isdigit(*s)) return 0;
 	if(!isdigit(*(s+1)) && (*(s+1)!=' ') ) return 0;
-	if(!isdigit(*(s+2)) && (*(s+1)!=' ') ) return 0;
-	if(!isdigit(*(s+3)) && (*(s+1)!=' ') ) return 0;
-	if(!isdigit(*(s+4)) && (*(s+1)!=' ') ) return 0;
+	if(!isdigit(*(s+2)) && (*(s+2)!=' ') ) return 0;
+	if(!isdigit(*(s+3)) && (*(s+3)!=' ') ) return 0;
+	if(!isdigit(*(s+4)) && (*(s+4)!=' ') ) return 0;
 	if(*(s+5)!='.') return 0;
-	if(!isdigit(*(s+6)) && (*(s+1)!=' ') ) return 0;
-	if(!isdigit(*(s+7)) && (*(s+1)!=' ') ) return 0;
+	if(!isdigit(*(s+6)) && (*(s+6)!=' ') ) return 0;
+	if(!isdigit(*(s+7)) && (*(s+7)!=' ') ) return 0;
 	if(*(s+8)=='E') return 1;
 	if(*(s+8)=='W') return 1;
 	return 0;
