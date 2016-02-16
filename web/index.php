@@ -684,7 +684,7 @@ if ($cmd=="new") {
 	}
 	echo "</table>\n";
 
-	echo "<h3>最新收到的无法解析APRS数据包</h3>";
+	echo "<h3>最新收到的无法解析经纬度的APRS数据包</h3>";
 	$q="select tm,`call`,raw from aprspacket where tm>=curdate() and lat='' order by tm desc limit 10";
 	$result = $mysqli->query($q);
 	echo "<table border=1 cellspacing=0><tr><th>时间</th><th>呼号</th><th>APRS Packet</th><th>地图</th></tr>\n";
