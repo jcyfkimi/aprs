@@ -176,12 +176,13 @@ void Process(int c_fd)
 				PrintStats();
 				exit(0);		
 			}
+			buffer[n]=0;
 			Write(r_fd, buffer, n);  
 			fwd+=n;
 			char *p,*s;
 			p=buffer;
 			while (1) {
-				if((p-buffer) == n) break;
+				if((p-buffer) >= n) break;
 				s=strchr(p,'\n');
 				if(s==NULL) break;
 				relayaprs(p,s-p+1);
