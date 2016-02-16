@@ -355,6 +355,10 @@ function updatepkts(pkts) {
 
 function autocenter_click(obj){
 	autocenter = obj.checked;
+	if(autocenter && movepath.length>0)  {
+		map.panTo(movepath[movepath.length-1]);
+       		map.setZoom(15);
+	}
 }
 
 function monitor_station(mycall) {
