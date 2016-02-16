@@ -304,12 +304,11 @@ if ($cmd=="map") {
 </body>
 </html>
 <script type="text/javascript">
-var markers = new Array();
-var labels = new Array();
-var lasttms = new Array();
-var iconurls = new Array();
-var infowindows = new Array();
 var totalmarkers=0;
+var markers = {};
+var lasttms = {};
+var iconurls = {};
+var infowindows = {};
 var lastupdatetm=0;
 var movepath = new Array();
 var polyline;
@@ -399,18 +398,12 @@ function addpathpoint(lon, lat){
 	}
 }
 
-function delstation(i) {
-	map.removeOverlay(markers[i]);
-	markers[i]=markers[totalmarkers-1];
-        labels[i]=labels[totalmarkers-1];
-        lasttms[i]=lasttms[totalmarkers-1];
-        iconurls[i]=iconurls[totalmarkers-1];
-        infowindows[i]=infowindows[totalmarkers-1];
-	markers.splice(totalmarkers-1,1);
-	labels.splice(totalmarkers-1,1);
-	lasttms.splice(totalmarkers-1,1);
-	iconurls.splice(totalmarkers-1,1);
-	infowindows.splice(totalmarkers-1,1);
+function delstation(label) {
+	map.removeOverlay(markers[label]);
+	delete markers[label];
+        delete lasttms[label];
+        delete iconurls[label];
+        delete infowindows[label];
 	totalmarkers--;
 	updateinview();
 }
@@ -421,43 +414,35 @@ function map_resize() {
 	lat1=b.getSouthWest().lat;
 	lon2=b.getNorthEast().lng;
 	lat2=b.getNorthEast().lat;
-	i=0;
-	while(i<totalmarkers) {
-		if(call==labels[i]) {
-			i++;
+	for(var label in markers) {
+		if(call==label) 
 			continue;
-		}
-		p = markers[i].getPosition();
-		if( (p.lng<lon1) || (p.lat<lat1) || (p.lng>lon2) || (p.lat>lat2)) {
-			delstation(i);
-			continue;
-		}
-		i++;
+		p = markers[label].getPosition();
+		if( (p.lng<lon1) || (p.lat<lat1) || (p.lng>lon2) || (p.lat>lat2))
+			delstation(label);
 	}
 	UpdateStation();  
 }
 
 function setstation(lon, lat, label, tm, iconurl, msg)
 {	
-	var i=labels.indexOf(label);   // 很旧的浏览器可能不支持, 如IE6/7/8
-	if(i>-1) {
-		if(tm<lasttms[i]) return;
-		markers[i].setPosition( new BMap.Point(lon, lat) );
-		infowindows[i].setContent(msg);
-		if(iconurls[i]!=iconurl) {
+	if(markers.hasOwnProperty(label)) { 
+		if(tm<lasttms[label]) return;
+		markers[label].setPosition( new BMap.Point(lon, lat) );
+		infowindows[label].setContent(msg);
+		if(iconurls[label]!=iconurl) {
 			var nicon = new BMap.Icon(iconurl, new BMap.Size(24, 24), {anchor: new BMap.Size(12, 12)});
-			markers[i].setIcon(nicon);
-			iconurls[i]=iconurl;
+			markers[label].setIcon(nicon);
+			iconurls[label]=iconurl;
 		}
-		markers[i].setZIndex(this.maxZindex++);
-		if(tm==lasttms[i]) tm++;  // 如果同一个站点同样的时间戳第二次出现，说明至少过去了2秒，
+		if(tm==lasttms[label]) tm++;  // 如果同一个站点同样的时间戳第二次出现，说明至少过去了2秒，
 					// 可以将最后时间戳+1, 这样一来，同一个站点的信息最多重复一次
 		else {
-    			markers[i].setAnimation(BMAP_ANIMATION_BOUNCE);
-			m = markers[i];
+    			markers[label].setAnimation(BMAP_ANIMATION_BOUNCE);
+			m = markers[label];
 			setTimeout((function(m){m.setAnimation(null);})(m), 500);
 		}
-		lasttms[i] = tm;
+		lasttms[label] = tm;
 		if(tm>lastupdatetm) lastupdatetm = tm;
 		updateinview();
 		return;
@@ -474,16 +459,14 @@ function setstation(lon, lat, label, tm, iconurl, msg)
         	});
 	})();
 	map.addOverlay(marker);
-	markers[totalmarkers]= marker;
-	labels[totalmarkers] = label;
-	lasttms[totalmarkers] = tm;
-	iconurls[totalmarkers]=iconurl;
-	infowindows[totalmarkers]=infowindow;
+	markers[label]= marker;
+	lasttms[label] = tm;
+	iconurls[label]=iconurl;
+	infowindows[label]=infowindow;
 	if(tm>lastupdatetm) lastupdatetm = tm;
-	totalmarkers=totalmarkers+1;
-	marker.setZIndex(this.maxZindex++);
     	marker.setAnimation(BMAP_ANIMATION_BOUNCE);
 	setTimeout((function(m){m.setAnimation(null);})(marker), 500);
+	totalmarkers++;
 	updateinview();
 }
 
@@ -537,15 +520,27 @@ function UpdateStationDisplay(){
         }     
 }    
 
+function centertocurrent(){
+	var geolocation = new BMap.Geolocation();
+	geolocation.getCurrentPosition(function(r){
+		if(this.getStatus() == BMAP_STATUS_SUCCESS){
+			map.centerAndZoom(r.point,12);
+	}},{enableHighAccuracy: false});
+}
+
 // 百度地图API功能
 var map = new BMap.Map("allmap");
 map.enableScrollWheelZoom();
 
 var top_left_control = new BMap.ScaleControl({anchor: BMAP_ANCHOR_TOP_LEFT});// 左上角，添加比例尺
 var top_left_navigation = new BMap.NavigationControl();  //左上角，添加默认缩放平移控件
-var top_right_navigation = new BMap.NavigationControl({anchor: BMAP_ANCHOR_TOP_RIGHT, type: BMAP_NAVIGATION_CONTROL_SMALL}); //右上角，仅包含平移和缩放按钮
+var top_right_navigation = new BMap.NavigationControl({anchor: BMAP_ANCHOR_TOP_RIGHT, type: BMAP_NAVIGATION_CONTROL_SMALL}); 
+//右上角，仅包含平移和缩放按钮
 /*缩放控件type有四种类型:
-BMAP_NAVIGATION_CONTROL_SMALL：仅包含平移和缩放按钮；BMAP_NAVIGATION_CONTROL_PAN:仅包含平移按钮；BMAP_NAVIGATION_CONTROL_ZOOM：仅包含缩放按钮*/
+BMAP_NAVIGATION_CONTROL_SMALL：仅包含平移和缩放按钮；
+BMAP_NAVIGATION_CONTROL_PAN:仅包含平移按钮；
+BMAP_NAVIGATION_CONTROL_ZOOM：仅包含缩放按钮
+*/
 	
 //添加控件和比例尺
 map.addControl(top_left_control);        
@@ -561,8 +556,10 @@ map.addEventListener('resize', map_resize);
         $call=@$_REQUEST["call"];
         if($call!="")  {
 		echo "monitor_station(\"$call\");\n";
-	}
+	} else 
+		echo "centertocurrent();\n";
 ?>
+
 createXmlHttpRequest();  
 UpdateStation();  
 </script>
