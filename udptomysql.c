@@ -218,7 +218,7 @@ void ToMysql(char *buf, int len)
 		return;
 	}
 
-	if( (datatype == '`') ) {    // Mic-E
+	if( (datatype == '`') || (datatype=='\'')) {    // Mic-E
 		if( strlen(p)<8 ) 
 			goto unknow_msg;
 		if( strlen(path)<6 )
