@@ -84,42 +84,31 @@ void relayaprs(char *buf, int len)
 
 void Process(char *call) 
 {	
-	fd_set rset;
-	struct timeval tv;
 	char buffer[MAXLEN];
-	int m,n;
-
+	int n;
+	int optval;
+   	socklen_t optlen = sizeof(optval);
 	r_fd= Tcp_connect("china.aprs2.net","14580");
+	optval = 1;
+	Setsockopt(r_fd, SOL_SOCKET, SO_KEEPALIVE, &optval, optlen);
+	optval = 3;
+	Setsockopt(r_fd, SOL_TCP, TCP_KEEPCNT, &optval, optlen);
+	optval = 2;
+	Setsockopt(r_fd, SOL_TCP, TCP_KEEPIDLE, &optval, optlen);
+	optval = 2;
+	Setsockopt(r_fd, SOL_TCP, TCP_KEEPINTVL, &optval, optlen);
+
 	snprintf(buffer,MAXLEN,"user %s pass %d vers fwd 1.5 filter p/B\r\n",call,passcode(call));
 	Write(r_fd, buffer, strlen(buffer));
+
 	while (1) {
-		FD_ZERO(&rset);
-		FD_SET(r_fd, &rset);
-		tv.tv_sec = 300;
-		tv.tv_usec = 0;
-
-		m = Select (r_fd + 1, &rset, NULL, NULL, &tv);
-
-		if (m == 0) 
-			continue;
-		
-		if (FD_ISSET(r_fd, &rset)) {
-			n = recv (r_fd, buffer, MAXLEN,0);
-			if(n<=0)   {
-				exit(0);
-			}
-			if(buffer[0]=='#') continue;
-			buffer[n]=0;
-			char *p,*s;
-			p=buffer;
-			while (1) {
-				if((p-buffer) == n) break;
-				s=strchr(p,'\n');
-				if(s==NULL) break;
-				relayaprs(p,s-p+1);
-				p = s+1;
-			}
+		n = Readline(r_fd, buffer, MAXLEN);
+		if(n<=0)   {
+			exit(0);
 		}
+		if(buffer[0]=='#') continue;
+		buffer[n]=0;
+		relayaprs(buffer,n);
 	}
 }
 

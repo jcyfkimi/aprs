@@ -126,7 +126,16 @@ void ToMysql(char *buf, int len)
 	path=s;
         p = strchr(s,':');
 	if(p==NULL) return;
-	p++;
+	p++; 
+	{	// fix PHG04600!2343.06NR12034.80E#NextVOD + TNC-22M Rx-only iGate144.640Mhz,
+		// change to !2343.06NR12034.80E# PHG04600 NextVOD + TNC-22M Rx-only iGate144.640Mhz,
+		char tmp[8];
+		if((strlen(p)>=27) && (memcmp(p,"PHG",3)==0))  {
+			memcpy(tmp,p,8);
+			memcpy(p,p+8,19);
+			memcpy(p+19,tmp,8);
+		}
+	}
 	datatype = *p;
 	p++;
 
