@@ -422,7 +422,7 @@ function map_resize() {
 		if( (p.lng<lon1) || (p.lat<lat1) || (p.lng>lon2) || (p.lat>lat2))
 			delstation(label);
 	}
-	UpdateStation();  
+	//UpdateStation();  
 }
 
 function setstation(lon, lat, label, tm, iconurl, msg)
