@@ -242,6 +242,8 @@ class Converter {
         $x1_x2;
         $y1_y2;
         $point = new Point();
+        $point->setX( $wg_lng );
+        $point->setY( $wg_lat );
         if ( $wg_heit > 5000 ) {
             return $point;
         }
