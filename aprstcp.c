@@ -116,7 +116,6 @@ void Process(int c_fd)
 {	
 	fd_set rset;
 	struct timeval tv;
-	char buffer[MAXLEN];
 	int m,n;
 	int max_fd;
 	struct sockaddr_in6 sa;
@@ -154,6 +153,7 @@ void Process(int c_fd)
 			continue;
 		
 		if (FD_ISSET(r_fd, &rset)) {
+			char buffer[MAXLEN];
 			n = recv (r_fd, buffer, MAXLEN,0);
 			if(n<=0)   {
 				PrintStats();
@@ -171,25 +171,32 @@ void Process(int c_fd)
 			rfwd+=n;
 		}	
 		if (FD_ISSET(c_fd, &rset)) {
-			n = recv (c_fd, buffer, MAXLEN,0);
+			static char buffer[MAXLEN];
+			static int lastread =0;
+			n = recv (c_fd, buffer+lastread, MAXLEN-lastread-1,0);
 			if(n<=0)   {
 				PrintStats();
 				exit(0);		
 			}
-			buffer[n]=0;
-			Write(r_fd, buffer, n);  
+			buffer[lastread+n]=0;
+			Write(r_fd, buffer+lastread, n);  
 			fwd+=n;
 			char *p,*s;
+			n=lastread+n;
 			p=buffer;
 			while (1) {
 				if((p-buffer) >= n) break;
 				s=strchr(p,'\n');
 				if(s==NULL)  
 					s=strchr(p,'\r');
-				if(s==NULL)  continue;
+				if(s==NULL)  break;
 				relayaprs(p,s-p+1);
 				p = s+1;
 			}
+			if((p-buffer)<n) {
+				lastread=n-(p-buffer);
+				memcpy(buffer,p,lastread);
+			}else lastread=0;
 		}
 	}
 }
