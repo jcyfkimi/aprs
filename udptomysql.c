@@ -13,7 +13,7 @@
 #include <ctype.h>
 #include "sock.h"
 
-#define DEBUG 1
+// #define DEBUG 1
 
 #define MAXLEN 16384
 
@@ -182,7 +182,9 @@ void ToMysql(char *buf, int len)
 		end += mysql_real_escape_string(mysql,end,bufcopy,len);
 		end = my_stpcpy(end,"')");
 		*end=0;
+#ifdef DEBUG
 		fprintf(stderr,"%s\n",sqlbuf);
+#endif
 		if (mysql_real_query(mysql,sqlbuf,(unsigned int) (end - sqlbuf))) {
    			fprintf(stderr, "Failed to insert row, Error: %s\n",
            		mysql_error(mysql));
@@ -205,7 +207,9 @@ void ToMysql(char *buf, int len)
 		end += mysql_real_escape_string(mysql,end,msg,strlen(msg));
 		end = my_stpcpy(end,"')");
 		*end=0;
+#ifdef DEBUG
 		fprintf(stderr,"%s\n",sqlbuf);
+#endif
 		if (mysql_real_query(mysql,sqlbuf,(unsigned int) (end - sqlbuf))) {
    			fprintf(stderr, "Failed to insert row, Error: %s\n",
            		mysql_error(mysql));
@@ -286,7 +290,9 @@ void ToMysql(char *buf, int len)
 		end += mysql_real_escape_string(mysql,end,bufcopy,len);
 		end = my_stpcpy(end,"')");
 		*end=0;
+#ifdef DEBUG
 		fprintf(stderr,"%s\n",sqlbuf);
+#endif
 		if (mysql_real_query(mysql,sqlbuf,(unsigned int) (end - sqlbuf))) {
    			fprintf(stderr, "Failed to insert row, Error: %s\n",
            		mysql_error(mysql));
@@ -307,7 +313,9 @@ void ToMysql(char *buf, int len)
 		end += mysql_real_escape_string(mysql,end,msg,strlen(msg));
 		end = my_stpcpy(end,"')");
 		*end=0;
+#ifdef DEBUG
 		fprintf(stderr,"%s\n",sqlbuf);
+#endif
 		if (mysql_real_query(mysql,sqlbuf,(unsigned int) (end - sqlbuf))) {
    			fprintf(stderr, "Failed to insert row, Error: %s\n",
            		mysql_error(mysql));
@@ -327,7 +335,9 @@ unknow_msg:
 	end = my_stpcpy(end,"')");
 	*end=0;
 
+#ifdef DEBUG
 	fprintf(stderr,"%s\n",sqlbuf);
+#endif
 	if (mysql_real_query(mysql,sqlbuf,(unsigned int) (end - sqlbuf))) {
    		fprintf(stderr, "Failed to insert row, Error: %s\n",
            	mysql_error(mysql));
@@ -362,7 +372,6 @@ int main(int argc, char *argv[])
 {
 	int u_fd;
 	int llen;
-	char buf[MAXLEN];
 
 	signal(SIGCHLD,SIG_IGN);
 
