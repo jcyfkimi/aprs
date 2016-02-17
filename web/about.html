@@ -44,7 +44,19 @@
 功能：
 从 127.0.0.1 14583 UDP端口接收数据
 在mysql数据库中记录收到的APRS数据包
+</pre>
 
+<h3>6. aprs.fi.toudp</h3>
+<pre>
+命令行： aprs.fi.toudp 呼号
+参数含义：呼号，用来连接china.aprs2.net服务器
+功能：
+登录china.aprs2.net服务器，获取呼号前缀为B和VR2的信息
+使用UDP转发给/usr/src/aprs/aprs.fi.udpdest服务器(/usr/src/aprs/aprs.fi.udpdest 可以有多行，每行是一个IP:port形式)
+</pre>
+
+<h3>数据库信息</h3>
+<pre>
 数据库名字是 aprs 
 
 表结构：
