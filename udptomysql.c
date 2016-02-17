@@ -64,7 +64,7 @@ int checkcall(char*call) {
 	char *p;
 	if(strlen(call)<5) return 0;
 	p=call;
-	if(*p!='B') return 0;
+	if( (*p!='B') && (memcmp(p,"VR2",3)!=0))  return 0;
 	if(!isdigit(*(p+2))) return 0;
 	while(*p) {
 		if( isupper(*p) ||
