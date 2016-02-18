@@ -2,9 +2,9 @@
 
 include "db.php";
 
-$jiupian = 0; 	// 0 ²»´¦Àí
-		// 1 ´æ´¢µÄÊÇµØÇò×ø±ê£¬×ª»»³ÉbaiduÏÔÊ¾, Ä¬ÈÏÇé¿ö
-		// 2 ´æ´¢µÄÊÇ»ğĞÇ×ø±ê£¬×ª»»³ÉbaiduÏÔÊ¾
+$jiupian = 0; 	// 0 ä¸å¤„ç†
+		// 1 å­˜å‚¨çš„æ˜¯åœ°çƒåæ ‡ï¼Œè½¬æ¢æˆbaiduæ˜¾ç¤º, é»˜è®¤æƒ…å†µ
+		// 2 å­˜å‚¨çš„æ˜¯ç«æ˜Ÿåæ ‡ï¼Œè½¬æ¢æˆbaiduæ˜¾ç¤º
 
 if (isset($_REQUEST["tm"])) {
 	$cmd="tm";
@@ -49,9 +49,9 @@ if($jiupian>0) {
 }
 
 function urlmessage($call,$icon, $dtmstr, $msg, $ddt) {
-	$m = "<font face=Î¢ÈíÑÅºÚ size=2><img src=".$icon."> ".$call." <a href=".$_SERVER["PHP_SELF"]."?call=".$call." target=_blank>Êı¾İ°ü</a> <a id=\\\"m\\\" href=\\\"#\\\" onclick=\\\"javascript:monitor_station('".$call."');return false;\\\">";
-	$m = $m."ÇĞ»»¸ú×Ù</a> ";
-	$m = $m."<a href=".$_SERVER["PHP_SELF"]."?gpx=".$call." target=_blank>ÏÂÔØ¹ì¼£</a> <hr color=green>".$dtmstr."<br>";
+	$m = "<font face=å¾®è½¯é›…é»‘ size=2><img src=".$icon."> ".$call." <a href=".$_SERVER["PHP_SELF"]."?call=".$call." target=_blank>æ•°æ®åŒ…</a> <a id=\\\"m\\\" href=\\\"#\\\" onclick=\\\"javascript:monitor_station('".$call."');return false;\\\">";
+	$m = $m."åˆ‡æ¢è·Ÿè¸ª</a> ";
+	$m = $m."<a href=".$_SERVER["PHP_SELF"]."?gpx=".$call." target=_blank>ä¸‹è½½è½¨è¿¹</a> <hr color=green>".$dtmstr."<br>";
 	if (  (strlen($msg)>=32) &&
 		(substr($msg,3,1)=='/') &&
 		(substr($msg,7,1)=='g') &&
@@ -69,27 +69,27 @@ function urlmessage($call,$icon, $dtmstr, $msg, $ddt) {
 		$h = substr($msg,1,2);	//hum
 		$b = substr($msg,4,5)/10; //press
 		$msg = substr($msg,9);
-		$m = $m."<b>ÎÂ¶È".$t."¡ãC Êª¶È".$h."% ÆøÑ¹".$b."mpar<br>";
-		$m = $m."·ç".$c."¡ã".$s."m/s(´ó·ç".$g."m/s)<br>";
-	 	$m = $m."Óê".$r."mm/1h ".$p."mm/24h<b><br>";
+		$m = $m."<b>æ¸©åº¦".$t."Â°C æ¹¿åº¦".$h."% æ°”å‹".$b."mpar<br>";
+		$m = $m."é£".$c."Â°".$s."m/s(å¤§é£".$g."m/s)<br>";
+	 	$m = $m."é›¨".$r."mm/1h ".$p."mm/24h<b><br>";
 	}
 	if( (strlen($msg)>=7) &&
 		(substr($msg,3,1)=='/'))  // 178/061/A=000033
 	{
 		$dir=substr($msg,0,3);
 		$speed=number_format(substr($msg,4,3)*1.852,1);
-		$m = $m."<b>".$speed." km/h ".$dir."¡ã";
+		$m = $m."<b>".$speed." km/h ".$dir."Â°";
 		$msg = substr($msg,7);
 		if( substr($msg,0,3)=='/A=') {      // 178/061/A=000033
 			$alt=number_format(substr($msg,3,6)*0.3048,1);
-			$m=$m." º£°Î".$alt."m</b><br>";
+			$m=$m." æµ·æ‹”".$alt."m</b><br>";
 			$msg = substr($msg,9);
 		}
 	} else if( (strlen($msg)>=9) &&
 		(substr($msg,0,3)=='/A=') )      // /A=000033
 	{
 		$alt=number_format(substr($msg,3,6)*0.3048,1);
-		$m = $m."<b> º£°Î".$alt."m</b><br>";
+		$m = $m."<b> æµ·æ‹”".$alt."m</b><br>";
 		$msg = substr($msg,9);
 	} else if( ($ddt=='`')  &&
 		 (strlen($msg)>=9) )   // `  0+jlT)v/]"4(}=
@@ -113,7 +113,7 @@ function urlmessage($call,$icon, $dtmstr, $msg, $ddt) {
 			$alt = number_format($alt,1);
 			$msg = substr($msg,4);
 		}
-		$m = $m."<b>".$speed." km/h ".$dir."¡ã º£°Î".$alt."m</b><br>";
+		$m = $m."<b>".$speed." km/h ".$dir."Â° æµ·æ‹”".$alt."m</b><br>";
 	}  
 	if( (strlen($msg)>=7) &&
                 (substr($msg,0,3)=='PHG') )  // PHG
@@ -124,14 +124,13 @@ function urlmessage($call,$icon, $dtmstr, $msg, $ddt) {
 		$h = pow(2,$h)*10*0.3048;
 		$h = round($h);
 		$g = substr($msg,5,1);
-                $m = $m."<b>¹¦ÂÊ".$pwr."Íß ÌìÏß¸ß¶È".$h."m ÔöÒæ".$g."dB</b><br>";
+                $m = $m."<b>åŠŸç‡".$pwr."ç“¦ å¤©çº¿é«˜åº¦".$h."m å¢ç›Š".$g."dB</b><br>";
                 $msg = substr($msg,7);
 	}
 		
-	$msg=iconv("utf-8","gb2312",$msg); 
 	$msg=rtrim($msg);
 		
-	$m = $m."</font><font color=green face=Î¢ÈíÑÅºÚ size=2>".addcslashes(htmlspecialchars($msg),"\\\r\n'\"")."</font>";
+	$m = $m."</font><font color=green face=å¾®è½¯é›…é»‘ size=2>".addcslashes(htmlspecialchars($msg),"\\\r\n'\"")."</font>";
 	return $m;	
 }
 
@@ -262,10 +261,10 @@ function top_menu() {
 	global $mysqli, $cmd;
 	$blank="";
 	if($cmd=="map") $blank = " target=_blank";
-	echo "<a href=".$_SERVER["PHP_SELF"]."?new".$blank.">×îĞÂ</a> <a href=".$_SERVER["PHP_SELF"]."?today".$blank.
-	">½ñÌì</a> <a href=".$_SERVER["PHP_SELF"]."?stats".$blank.">Í³¼Æ</a> ";
-	echo "<a href=".$_SERVER["PHP_SELF"]."?map target=_blank>µØÍ¼</a> <div id=calls></div><div id=inview></div><div id=pkts></div> ";
-	echo "<a href=".$_SERVER["PHP_SELF"]."?about target=_blank>¹ØÓÚ</a><div id=msg></div><div id=pathlen></div><div id=autocenter></div><p>";
+	echo "<a href=".$_SERVER["PHP_SELF"]."?new".$blank.">æœ€æ–°</a> <a href=".$_SERVER["PHP_SELF"]."?today".$blank.
+	">ä»Šå¤©</a> <a href=".$_SERVER["PHP_SELF"]."?stats".$blank.">ç»Ÿè®¡</a> ";
+	echo "<a href=".$_SERVER["PHP_SELF"]."?map target=_blank>åœ°å›¾</a> <div id=calls></div><div id=inview></div><div id=pkts></div> ";
+	echo "<a href=".$_SERVER["PHP_SELF"]."?about target=_blank>å…³äº</a><div id=msg></div><div id=pathlen></div><div id=autocenter></div><p>";
 }
 
 if ($cmd=="map") {  
@@ -276,7 +275,7 @@ if ($cmd=="map") {
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 	<style type="text/css">
-		body, html{width: 100%;height: 100%;margin:0;font-family:"Î¢ÈíÑÅºÚ";}
+		body, html{width: 100%;height: 100%;margin:0;font-family:"å¾®è½¯é›…é»‘";}
 		#full {height:100%; width: 100%;}
 		#top {height:25px; width: 100%;}
 		#allmap {height:100%; width: 100%;}
@@ -288,17 +287,17 @@ if ($cmd=="map") {
 		#pathlen { display:inline; color:green} 
 		#autocenter { display:inline;} 
 	</style>
-	<title>APRSµØÍ¼</title>
+	<title>APRSåœ°å›¾</title>
 	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=7RuEGPr12yqyg11XVR9Uz7NI"></script>
 </head>
 <body>
 <div id="full">
 	<div id="top"><?php
 	$blank = " target=_blank";
-	echo "<a href=".$_SERVER["PHP_SELF"]."?new".$blank.">×îĞÂ</a> <a href=".$_SERVER["PHP_SELF"]."?today".$blank.
-	">½ñÌì</a>";
+	echo "<a href=".$_SERVER["PHP_SELF"]."?new".$blank.">æœ€æ–°</a> <a href=".$_SERVER["PHP_SELF"]."?today".$blank.
+	">ä»Šå¤©</a>";
 	echo" <div id=calls></div><div id=inview></div><div id=pkts></div> ";
-	echo "<a href=".$_SERVER["PHP_SELF"]."?about target=_blank>¹ØÓÚ</a><div id=msg></div><div id=pathlen></div><div id=autocenter></div></div>";
+	echo "<a href=".$_SERVER["PHP_SELF"]."?about target=_blank>å…³äº</a><div id=msg></div><div id=pathlen></div><div id=autocenter></div></div>";
 ?>
 	<div id="allmap"></div>
 </div>
@@ -329,28 +328,28 @@ function updateinview() {
 	if(ismobile)
 		document.getElementById("inview").innerHTML = "("+totalmarkers+")";
 	else
-		document.getElementById("inview").innerHTML = "(ÏÔÊ¾"+totalmarkers+")";
+		document.getElementById("inview").innerHTML = "(æ˜¾ç¤º"+totalmarkers+")";
 }
 
 function updatepathlen() {
 	if(ismobile)
 		document.getElementById("pathlen").innerHTML = "/"+movepath.length;
 	else
-		document.getElementById("pathlen").innerHTML = "º½µã"+movepath.length;
+		document.getElementById("pathlen").innerHTML = "èˆªç‚¹"+movepath.length;
 }
 
 function updatecalls(calls) {
 	if(ismobile)
 		document.getElementById("calls").innerHTML = calls+"C";
 	else
-		document.getElementById("calls").innerHTML = calls+"ºôºÅ";
+		document.getElementById("calls").innerHTML = calls+"å‘¼å·";
 }
 
 function updatepkts(pkts) {
 	if(ismobile)
 		document.getElementById("pkts").innerHTML = "/"+pkts+"P";
 	else
-		document.getElementById("pkts").innerHTML = "/"+pkts+"Êı¾İ°ü ";
+		document.getElementById("pkts").innerHTML = "/"+pkts+"æ•°æ®åŒ… ";
 }
 
 function autocenter_click(obj){
@@ -377,15 +376,15 @@ function monitor_station(mycall) {
 	if(ismobile) {
 		document.getElementById("msg").innerHTML = call;
 		if(autocenter)
-		document.getElementById("autocenter").innerHTML = "<input type=checkbox checked id=autocenter onclick=\"autocenter_click(this);\">º½µã¾ÓÖĞ</input>";
+		document.getElementById("autocenter").innerHTML = "<input type=checkbox checked id=autocenter onclick=\"autocenter_click(this);\">èˆªç‚¹å±…ä¸­</input>";
 		else
-		document.getElementById("autocenter").innerHTML = "<input type=checkbox id=autocenter onclick=\"autocenter_click(this);\">º½µã¾ÓÖĞ</input>";
+		document.getElementById("autocenter").innerHTML = "<input type=checkbox id=autocenter onclick=\"autocenter_click(this);\">èˆªç‚¹å±…ä¸­</input>";
 	} else {
-		document.getElementById("msg").innerHTML = " ¸ú×Ù"+call;
+		document.getElementById("msg").innerHTML = " è·Ÿè¸ª"+call;
 		if(autocenter)
-		document.getElementById("autocenter").innerHTML = "<input type=checkbox checked id=autocenter onclick=\"autocenter_click(this);\">º½µã¾ÓÖĞ</input>";
+		document.getElementById("autocenter").innerHTML = "<input type=checkbox checked id=autocenter onclick=\"autocenter_click(this);\">èˆªç‚¹å±…ä¸­</input>";
 		else
-		document.getElementById("autocenter").innerHTML = "<input type=checkbox id=autocenter onclick=\"autocenter_click(this);\">º½µã¾ÓÖĞ</input>";
+		document.getElementById("autocenter").innerHTML = "<input type=checkbox id=autocenter onclick=\"autocenter_click(this);\">èˆªç‚¹å±…ä¸­</input>";
 	}
        	map.setZoom(15);
 }
@@ -422,7 +421,6 @@ function map_resize() {
 		if( (p.lng<lon1) || (p.lat<lat1) || (p.lng>lon2) || (p.lat>lat2))
 			delstation(label);
 	}
-	UpdateStation();  
 }
 
 function setstation(lon, lat, label, tm, iconurl, msg)
@@ -436,8 +434,8 @@ function setstation(lon, lat, label, tm, iconurl, msg)
 			markers[label].setIcon(nicon);
 			iconurls[label]=iconurl;
 		}
-		if(tm==lasttms[label]) tm++;  // Èç¹ûÍ¬Ò»¸öÕ¾µãÍ¬ÑùµÄÊ±¼ä´ÁµÚ¶ş´Î³öÏÖ£¬ËµÃ÷ÖÁÉÙ¹ıÈ¥ÁË2Ãë£¬
-					// ¿ÉÒÔ½«×îºóÊ±¼ä´Á+1, ÕâÑùÒ»À´£¬Í¬Ò»¸öÕ¾µãµÄĞÅÏ¢×î¶àÖØ¸´Ò»´Î
+		if(tm==lasttms[label]) tm++;  // å¦‚æœåŒä¸€ä¸ªç«™ç‚¹åŒæ ·çš„æ—¶é—´æˆ³ç¬¬äºŒæ¬¡å‡ºç°ï¼Œè¯´æ˜è‡³å°‘è¿‡å»äº†2ç§’ï¼Œ
+					// å¯ä»¥å°†æœ€åæ—¶é—´æˆ³+1, è¿™æ ·ä¸€æ¥ï¼ŒåŒä¸€ä¸ªç«™ç‚¹çš„ä¿¡æ¯æœ€å¤šé‡å¤ä¸€æ¬¡
 		else {
     			markers[label].setAnimation(BMAP_ANIMATION_BOUNCE);
 			m = markers[label];
@@ -471,7 +469,7 @@ function setstation(lon, lat, label, tm, iconurl, msg)
 	updateinview();
 }
 
-var xmlHttpRequest;     //XmlHttpRequest¶ÔÏó     
+var xmlHttpRequest;     //XmlHttpRequestå¯¹è±¡     
 function createXmlHttpRequest(){     
 	var http_request = false;
 	if (window.XMLHttpRequest) { // Mozilla, Safari,...
@@ -500,17 +498,17 @@ function UpdateStation(){
 	var b = map.getBounds();
         var url = '<?php echo "http://".$_SERVER["HTTP_HOST"].$_SERVER["PHP_SELF"]."?tm=";?>'+lastupdatetm+"&call="+call+"&pathlen="+movepath.length+"&llon1="+llon1+"&llon2="+llon2+"&llat1="+llat1+"&llat2="+llat2+"&lon1="+b.getSouthWest().lng+"&lat1="+b.getSouthWest().lat+"&lon2="+b.getNorthEast().lng+"&lat2="+b.getNorthEast().lat;
 	if(jiupian!=1) url = url+"&jiupian="+jiupian;
-        //1.´´½¨XMLHttpRequest×é½¨     
+        //1.åˆ›å»ºXMLHttpRequestç»„å»º     
         xmlHttpRequest = createXmlHttpRequest();     
-        //2.ÉèÖÃ»Øµ÷º¯Êı     
+        //2.è®¾ç½®å›è°ƒå‡½æ•°     
         xmlHttpRequest.onreadystatechange = UpdateStationDisplay;
-        //3.³õÊ¼»¯XMLHttpRequest×é½¨     
+        //3.åˆå§‹åŒ–XMLHttpRequestç»„å»º     
         xmlHttpRequest.open("post",url,true);     
-        //4.·¢ËÍÇëÇó     
+        //4.å‘é€è¯·æ±‚     
         xmlHttpRequest.send(null);
 }
 
-//»Øµ÷º¯Êı     
+//å›è°ƒå‡½æ•°     
 function UpdateStationDisplay(){     
         if(xmlHttpRequest.readyState == 4){
 		if(xmlHttpRequest.status == 200){  
@@ -529,21 +527,21 @@ function centertocurrent(){
 	}},{enableHighAccuracy: false});
 }
 
-// °Ù¶ÈµØÍ¼API¹¦ÄÜ
+// ç™¾åº¦åœ°å›¾APIåŠŸèƒ½
 var map = new BMap.Map("allmap");
 map.enableScrollWheelZoom();
 
-var top_left_control = new BMap.ScaleControl({anchor: BMAP_ANCHOR_TOP_LEFT});// ×óÉÏ½Ç£¬Ìí¼Ó±ÈÀı³ß
-var top_left_navigation = new BMap.NavigationControl();  //×óÉÏ½Ç£¬Ìí¼ÓÄ¬ÈÏËõ·ÅÆ½ÒÆ¿Ø¼ş
+var top_left_control = new BMap.ScaleControl({anchor: BMAP_ANCHOR_TOP_LEFT});// å·¦ä¸Šè§’ï¼Œæ·»åŠ æ¯”ä¾‹å°º
+var top_left_navigation = new BMap.NavigationControl();  //å·¦ä¸Šè§’ï¼Œæ·»åŠ é»˜è®¤ç¼©æ”¾å¹³ç§»æ§ä»¶
 var top_right_navigation = new BMap.NavigationControl({anchor: BMAP_ANCHOR_TOP_RIGHT, type: BMAP_NAVIGATION_CONTROL_SMALL}); 
-//ÓÒÉÏ½Ç£¬½ö°üº¬Æ½ÒÆºÍËõ·Å°´Å¥
-/*Ëõ·Å¿Ø¼ştypeÓĞËÄÖÖÀàĞÍ:
-BMAP_NAVIGATION_CONTROL_SMALL£º½ö°üº¬Æ½ÒÆºÍËõ·Å°´Å¥£»
-BMAP_NAVIGATION_CONTROL_PAN:½ö°üº¬Æ½ÒÆ°´Å¥£»
-BMAP_NAVIGATION_CONTROL_ZOOM£º½ö°üº¬Ëõ·Å°´Å¥
+//å³ä¸Šè§’ï¼Œä»…åŒ…å«å¹³ç§»å’Œç¼©æ”¾æŒ‰é’®
+/*ç¼©æ”¾æ§ä»¶typeæœ‰å››ç§ç±»å‹:
+BMAP_NAVIGATION_CONTROL_SMALLï¼šä»…åŒ…å«å¹³ç§»å’Œç¼©æ”¾æŒ‰é’®ï¼›
+BMAP_NAVIGATION_CONTROL_PAN:ä»…åŒ…å«å¹³ç§»æŒ‰é’®ï¼›
+BMAP_NAVIGATION_CONTROL_ZOOMï¼šä»…åŒ…å«ç¼©æ”¾æŒ‰é’®
 */
 	
-//Ìí¼Ó¿Ø¼şºÍ±ÈÀı³ß
+//æ·»åŠ æ§ä»¶å’Œæ¯”ä¾‹å°º
 map.addControl(top_left_control);        
 map.addControl(top_left_navigation);     
 map.addControl(top_right_navigation);    
@@ -576,7 +574,7 @@ function gpx_wpt($tm, $msg, $ddt) {
 	{
 		$dir=substr($msg,0,3);
 		$speed=number_format(substr($msg,4,3)*1.852,1);
-		$m = $m."<b>".$speed." km/h ".$dir."¡ã";
+		$m = $m."<b>".$speed." km/h ".$dir."Â°";
 		$msg = substr($msg,7);
 		if( substr($msg,0,3)=='/A=') {      // 178/061/A=000033
 			$alt=number_format(substr($msg,3,6)*0.3048,1);
@@ -652,7 +650,7 @@ Content-Type:application/gpx+xml
 }
 
 ?>
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<title>APRS relay server</title>
 </head>
 <style type="text/css">
@@ -668,34 +666,34 @@ div{ display:inline}
 top_menu();
 
 if ($cmd=="new") {
-	echo "<h3>×îĞÂÊÕµ½µÄAPRSÊı¾İ°ü</h3>";
+	echo "<h3>æœ€æ–°æ”¶åˆ°çš„APRSæ•°æ®åŒ…</h3>";
 	$q="select tm,`call`,raw from aprspacket where tm>=curdate() order by tm desc limit 10";
 	$result = $mysqli->query($q);
-	echo "<table border=1 cellspacing=0><tr><th>Ê±¼ä</th><th>ºôºÅ</th><th>APRS Packet</th><th>µØÍ¼</th></tr>\n";
+	echo "<table border=1 cellspacing=0><tr><th>æ—¶é—´</th><th>å‘¼å·</th><th>APRS Packet</th><th>åœ°å›¾</th></tr>\n";
 	while($r=$result->fetch_array()) {
         	echo "<tr><td>";
         	echo $r[0];
         	echo "</td><td>";
         	echo "<a href=".$_SERVER["PHP_SELF"]."?call=$r[1]>$r[1]</a>";
         	echo "</td><td>";
-		echo iconv("utf-8","gb2312",$r[2]);  //raw
+		echo $r[2];  //raw
         	echo "</td><td>";
 		disp_map($r[1]);
         	echo "</td></tr>\n";
 	}
 	echo "</table>\n";
 
-	echo "<h3>×îĞÂÊÕµ½µÄÎŞ·¨½âÎö¾­Î³¶ÈµÄAPRSÊı¾İ°ü</h3>";
+	echo "<h3>æœ€æ–°æ”¶åˆ°çš„æ— æ³•è§£æç»çº¬åº¦çš„APRSæ•°æ®åŒ…</h3>";
 	$q="select tm,`call`,raw from aprspacket where tm>=curdate() and lat='' order by tm desc limit 10";
 	$result = $mysqli->query($q);
-	echo "<table border=1 cellspacing=0><tr><th>Ê±¼ä</th><th>ºôºÅ</th><th>APRS Packet</th><th>µØÍ¼</th></tr>\n";
+	echo "<table border=1 cellspacing=0><tr><th>æ—¶é—´</th><th>å‘¼å·</th><th>APRS Packet</th><th>åœ°å›¾</th></tr>\n";
 	while($r=$result->fetch_array()) {
         	echo "<tr><td>";
         	echo $r[0];
         	echo "</td><td>";
         	echo "<a href=".$_SERVER["PHP_SELF"]."?call=$r[1]>$r[1]</a>";
         	echo "</td><td>";
-		echo iconv("utf-8","gb2312",$r[2]);  //raw
+		echo $r[2];  //raw
         	echo "</td><td>";
 		disp_map($r[1]);
         	echo "</td></tr>\n";
@@ -705,7 +703,7 @@ if ($cmd=="new") {
 }
 
 if ($cmd=="today") {
-	echo "<h3>½ñÌìÊÕµ½µÄAPRSÊı¾İ°ü</h3>";
+	echo "<h3>ä»Šå¤©æ”¶åˆ°çš„APRSæ•°æ®åŒ…</h3>";
 	if(isset($_REQUEST["c"]))
 		$q = "select `call`, count(*) c, count(distinct(concat(lon,lat))) from aprspacket where tm>curdate() group by `call` order by c desc";
 	else if(isset($_REQUEST["d"]))
@@ -713,9 +711,9 @@ if ($cmd=="today") {
 	else
 		$q = "select `call`, count(*), count(distinct(concat(lon,lat))) from aprspacket where tm>curdate() group by substr(`call`,3)";
 	$result = $mysqli->query($q);
-	echo "<table border=1 cellspacing=0><tr><th><a href=".$_SERVER["PHP_SELF"]."?today>ºôºÅ</a></th>";
-	echo "<th><a href=".$_SERVER["PHP_SELF"]."?today&c>Êı¾İ°üÊıÁ¿</a></th>";
-	echo "<th><a href=".$_SERVER["PHP_SELF"]."?today&d>Î»ÖÃµãÊıÁ¿</a></th><th>ÏÂÔØ¹ì¼£</th><th>µØÍ¼</th></tr>\n";
+	echo "<table border=1 cellspacing=0><tr><th><a href=".$_SERVER["PHP_SELF"]."?today>å‘¼å·</a></th>";
+	echo "<th><a href=".$_SERVER["PHP_SELF"]."?today&c>æ•°æ®åŒ…æ•°é‡</a></th>";
+	echo "<th><a href=".$_SERVER["PHP_SELF"]."?today&d>ä½ç½®ç‚¹æ•°é‡</a></th><th>ä¸‹è½½è½¨è¿¹</th><th>åœ°å›¾</th></tr>\n";
 	while($r=$result->fetch_array()) {
         	echo "<tr><td>";
         	echo "<a href=".$_SERVER["PHP_SELF"]."?call=$r[0]>$r[0]</a>";
@@ -724,7 +722,7 @@ if ($cmd=="today") {
         	echo "</td><td align=right>";
         	echo $r[2];
         	echo "</td><td>";
-        	echo "<a href=".$_SERVER["PHP_SELF"]."?gpx=$r[0]>ÏÂÔØ¹ì¼£</a>";
+        	echo "<a href=".$_SERVER["PHP_SELF"]."?gpx=$r[0]>ä¸‹è½½è½¨è¿¹</a>";
         	echo "</td><td>";
 		disp_map($r[0]);
         	echo "</td></tr>\n";
@@ -734,8 +732,8 @@ if ($cmd=="today") {
 }
 
 if ($cmd=="call") {
-	echo "½ñÌìÊÕµ½µÄ $call APRSÊı¾İ°ü ";
-       	echo "<a href=".$_SERVER["PHP_SELF"]."?gpx=$call>ÏÂÔØ¹ì¼£</a> ";
+	echo "ä»Šå¤©æ”¶åˆ°çš„ $call APRSæ•°æ®åŒ… ";
+       	echo "<a href=".$_SERVER["PHP_SELF"]."?gpx=$call>ä¸‹è½½è½¨è¿¹</a> ";
 	disp_map($call);
 	echo "<p>";
 	$q="select tm,`call`,datatype,lat,lon,`table`,symbol,msg,raw from aprspacket where tm>curdate() and `call`=? order by tm desc";
@@ -751,7 +749,7 @@ if ($cmd=="call") {
 	}
 
 	call_user_func_array(array($stmt, 'bind_result'), $params);
-	echo "<table border=1 cellspacing=0><tr><th>Ê±¼ä</th><th>msg</th><th>raw packet</th></tr>\n";
+	echo "<table border=1 cellspacing=0><tr><th>æ—¶é—´</th><th>msg</th><th>raw packet</th></tr>\n";
 	while($stmt->fetch()) {
 		echo "<tr><td>";
 		echo $r[0];  //tm
@@ -761,9 +759,9 @@ if ($cmd=="call") {
 		echo $r[5];  //table 
 		echo $r[4];  //lon
 		echo $r[6];  //symbol
-		echo iconv("utf-8","gb2312",$r[7]);  //msg
+		echo $r[7];  //msg
         	echo "</td><td>";
-		echo iconv("utf-8","gb2312",$r[8]);  //raw
+		echo $r[8];  //raw
         	echo "</td></tr>\n";
 	}
 	echo "</table>";

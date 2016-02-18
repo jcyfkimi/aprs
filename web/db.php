@@ -7,10 +7,12 @@ $db_dbname = "aprs";
 
 
 $mysqli = new mysqli($db_host, $db_user, $db_passwd, $db_dbname);
-//ÃæÏò¶ÔÏóµÄ°ºÊÓÆÁ±ÎÁËÁ¬½Ó²úÉúµÄ´íÎó£¬ÐèÒªÍ¨¹ýº¯ÊýÀ´ÅÐ¶Ï
+//é¢å‘å¯¹è±¡çš„æ˜‚è§†å±è”½äº†è¿žæŽ¥äº§ç”Ÿçš„é”™è¯¯ï¼Œéœ€è¦é€šè¿‡å‡½æ•°æ¥åˆ¤æ–­
 if(mysqli_connect_error()){
 	echo mysqli_connect_error();
 }
+
+//$mysqli->query("SET NAMES utf8");
 
 session_start();
 
