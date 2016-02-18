@@ -398,7 +398,6 @@ int main(int argc, char *argv[])
 	u_fd = Udp_server("127.0.0.1","14583",(socklen_t *)&llen);
 
 #ifdef DEBUG
-	fprintf(stderr,"C: %s",buf);
 	fprintf(stderr,"u_fd=%d\n",u_fd);
 #endif
 	mysql=connectdb();	
