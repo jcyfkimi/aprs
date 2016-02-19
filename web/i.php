@@ -73,6 +73,25 @@ function urlmessage($call,$icon, $dtmstr, $msg, $ddt) {
 		$m = $m."风".$c."°".$s."m/s(大风".$g."m/s)<br>";
 	 	$m = $m."雨".$r."mm/1h ".$p."mm/24h<b><br>";
 	}
+	if (  (strlen($msg)>=27) &&
+		(substr($msg,3,1)=='/') &&
+		(substr($msg,7,1)=='g') &&
+		(substr($msg,11,1)=='t') &&
+		(substr($msg,15,1)=='P') )  // 090/000g002t046P099h51b10265V130OTW1
+	{
+		$c = substr($msg,0,3)*1; //wind dir
+		$s = number_format(substr($msg,4,3)*0.447,1); //wind speed
+		$g = number_format(substr($msg,8,3)*0.447,1); //5min wind speed
+		$t = number_format((substr($msg,12,3)-32)/1.8,1); //temp
+		$r = number_format(substr($msg,16,3)*25.4/100,1); //rainfall in mm 1 hour
+		$msg = strstr($msg,"h");
+		$h = substr($msg,1,2);	//hum
+		$b = substr($msg,4,5)/10; //press
+		$msg = substr($msg,9);
+		$m = $m."<b>温度".$t."°C 湿度".$h."% 气压".$b."mpar<br>";
+		$m = $m."风".$c."°".$s."m/s(大风".$g."m/s)<br>";
+	 	$m = $m."雨".$r."mm/自午夜起<b><br>";
+	}
 	if( (strlen($msg)>=7) &&
 		(substr($msg,3,1)=='/'))  // 178/061/A=000033
 	{
