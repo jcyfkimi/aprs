@@ -198,7 +198,8 @@ if ($cmd=="tm") {
 		echo "llat2=$lat2;\n";
 		echo "ldisp15min=$disp15min;\n";
 	}
-
+	if(($tm==0) && ($disp15min=="true")) 
+		$tm = time() - 15*60;
 	$q="select lat,lon,`call`,unix_timestamp(tm),tm,concat(`table`,symbol),msg,datatype from lastpacket where tm>=FROM_UNIXTIME(?) and lat<>'' and not lat like '0000.00%'";
 	$stmt=$mysqli->prepare($q);
         $stmt->bind_param("i",$tm);
