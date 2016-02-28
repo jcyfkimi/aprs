@@ -201,9 +201,16 @@ if ($cmd=="tm") {
 	}
 	if(($tm==0) && ($disp15min=="true")) 
 		$tm = time() - 15*60;
-	$q="select lat,lon,`call`,unix_timestamp(tm),tm,concat(`table`,symbol),msg,datatype from lastpacket where tm>=FROM_UNIXTIME(?) and lat<>'' and not lat like '0000.00%'";
-	$stmt=$mysqli->prepare($q);
-        $stmt->bind_param("i",$tm);
+	if (isset($_REQUEST["call"]))  {
+		$call=$_REQUEST["call"];
+		$q="select lat,lon,`call`,unix_timestamp(tm),tm,concat(`table`,symbol),msg,datatype from lastpacket where (`call`=? or tm>=FROM_UNIXTIME(?)) and lat<>'' and not lat like '0000.00%'";
+		$stmt=$mysqli->prepare($q);
+        	$stmt->bind_param("si",$call,$tm);
+	} else {
+		$q="select lat,lon,`call`,unix_timestamp(tm),tm,concat(`table`,symbol),msg,datatype from lastpacket where tm>=FROM_UNIXTIME(?) and lat<>'' and not lat like '0000.00%'";
+		$stmt=$mysqli->prepare($q);
+        	$stmt->bind_param("i",$tm);
+	}
         $stmt->execute();
        	$stmt->bind_result($glat,$glon,$dcall,$dtm,$dtmstr,$dts,$dmsg,$ddt);
 
