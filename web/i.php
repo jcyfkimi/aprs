@@ -44,6 +44,9 @@ if (isset($_REQUEST["tm"])) {
 } else if (isset($_REQUEST["gpx"])) {
 	$cmd="gpx";
 	$call=$_REQUEST["gpx"];
+} else if (isset($_REQUEST["kml"])) {
+	$cmd="kml";
+	$call=$_REQUEST["kml"];
 } else if (isset($_REQUEST["about"])) {
 	$cmd="about";
 } else if (isset($_REQUEST["setup"])) {
@@ -70,7 +73,9 @@ if($jiupian>0) {
 function urlmessage($call,$icon, $dtmstr, $msg, $ddt) {
 	$m = "<font face=微软雅黑 size=2><img src=".$icon."> ".$call." <a href=".$_SERVER["PHP_SELF"]."?call=".$call." target=_blank>数据包</a> <a id=\\\"m\\\" href=\\\"#\\\" onclick=\\\"javascript:monitor_station('".$call."');return false;\\\">";
 	$m = $m."切换跟踪</a> ";
-	$m = $m."<a href=".$_SERVER["PHP_SELF"]."?gpx=".$call." target=_blank>下载轨迹</a> <hr color=green>".$dtmstr."<br>";
+	$m =$m."轨迹";
+	$m = $m."<a href=".$_SERVER["PHP_SELF"]."?gpx=".$call." target=_blank>GPX</a> ";
+	$m = $m."<a href=".$_SERVER["PHP_SELF"]."?kml=".$call." target=_blank>KML</a> <hr color=green>".$dtmstr."<br>";
 	if (  (strlen($msg)>=32) &&
 		(substr($msg,3,1)=='/') &&
 		(substr($msg,7,1)=='g') &&
@@ -741,6 +746,126 @@ Content-Type:application/gpx+xml
 	exit(0);
 }
 
+function kml_wpt($tm, $msg, $ddt) {
+	$alt = 0;
+	$m = "";
+	if( (strlen($msg)>=7) &&
+		(substr($msg,3,1)=='/'))  // 178/061/A=000033
+	{
+		$dir=substr($msg,0,3);
+		$speed=number_format(substr($msg,4,3)*1.852,1);
+		$m = $m."<b>".$speed." km/h ".$dir."°";
+		$msg = substr($msg,7);
+		if( substr($msg,0,3)=='/A=') {      // 178/061/A=000033
+			$alt=number_format(substr($msg,3,6)*0.3048,1);
+		} 
+		$m="<ele>$alt</ele><time>$tm</time><magvar>$dir</magvar><desc>$speed km/h</desc>";
+		return $m;
+	} else if( (strlen($msg)>=9) &&
+		(substr($msg,0,3)=='/A=') )      // /A=000033
+	{
+		$alt=number_format(substr($msg,3,6)*0.3048,1);
+		$m="<ele>$alt</ele><time>$tm</time>";
+		return $m;
+	} else if( ($ddt=='`')  &&
+		 (strlen($msg)>=9) )   // `  0+jlT)v/]"4(}=
+	{
+		$speed = (ord(substr($msg,3,1))-28)*10;
+		$t=ord(substr($msg,4,1))-28;
+		$speed = $speed + $t/10;
+		if($speed>=800) $speed-=800;
+		$speed = number_format($speed*1.852,1);
+		$dir = ($t%10)*100 + ord(substr($msg,5,1))-28;
+		if($dir>=400) $dir -= 400;
+		$msg = substr($msg,8);
+		$alt=0;
+		
+		if((substr($msg,0,1)==']') || (substr($msg,0,1)=='`') )
+			$msg=substr($msg,1);
+		if( (strlen($msg)>=4) && (substr($msg,3,1)=='}') ) {
+			$alt = (ord( substr($msg,0,1)) -33)*91*91+
+				(ord( substr($msg,1,1)) -33)*91 +
+				(ord( substr($msg,2,1)) -33) -10000;
+			$alt = number_format($alt,1);
+			$msg = substr($msg,4);
+		}
+		$m="<ele>$alt</ele><time>$tm</time><magvar>$dir</magvar><desc>$speed km/h</desc>";
+		return $m;
+	}
+	$m="<time>$tm</time>";
+	return $m;
+}
+
+if($cmd=="kml") {
+	if($call=="") exit(0); 
+	
+	date_default_timezone_set("Asia/Shanghai");
+	header("Content-Type:application/gpx+xml");
+	header("Content-Disposition:attachment; filename=\"".$call."-".date("Y-m-d")."Track.kml\"");
+	echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+	echo "<kml xmlns=\"http://www.opengis.net/kml/2.2\" xmlns:gx=\"http://www.google.com/kml/ext/2.2\">\n";
+	echo "<Document>\n";
+	echo "<name>".$call." Track</name>\n";?>
+	<Style id="sn_ylw-pushpin">
+		<LabelStyle>
+			<color>ff1307ff</color>
+		</LabelStyle>
+		<LineStyle>
+			<color>ff00ffff</color>
+			<width>1.5</width>
+		</LineStyle>
+	</Style>
+	<Style id="sh_ylw-pushpin">
+		<IconStyle>
+			<scale>1.2</scale>
+		</IconStyle>
+		<LabelStyle>
+			<color>ff1307ff</color>
+		</LabelStyle>
+		<LineStyle>
+			<color>ff00ffff</color>
+			<width>1.5</width>
+		</LineStyle>
+	</Style>
+	<StyleMap id="msn_ylw-pushpin">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#sn_ylw-pushpin</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#sh_ylw-pushpin</styleUrl>
+		</Pair>
+	</StyleMap>
+<?php
+	echo "<Folder><name>".$call."-".date("Y-m-d")."</name>\n";
+	echo "<Placemark>\n";
+	echo "<styleUrl>#msn_ylw-pushpin</styleUrl>\n";
+	echo "<gx:Track id=\"1\">\n";
+	echo "<altitudeMode>absolute</altitudeMode>\n";
+	$q="select date_format(CONVERT_TZ(tm,@@session.time_zone, '+00:00'),\"%Y-%m-%dT%H:%i:%sZ\"),lat,lon,msg,datatype from aprspacket where tm>? and `call`=? and lat<>'' and not lat like '0000.00%' order by tm";
+        $stmt=$mysqli->prepare($q);
+        $stmt->bind_param("ss",$startdatestr,$call);
+        $stmt->execute();
+        $stmt->bind_result($dtm, $glat, $glon, $msg, $ddt);
+	$stmt->store_result();	
+        while($stmt->fetch()) {
+		echo "<when>".$dtm."</when>\n";
+	}
+	$stmt->data_seek(0);
+        while($stmt->fetch()) {
+                $lat = strtolat($glat);
+                $lon = strtolon($glon);
+//		$wpt = gpx_wpt($dtm, $msg,$ddt);
+		echo "<gx:coord>".$lon." ".$lat." 0</gx:coord>\n";
+        }	
+	echo "</gx:Track>\n";
+	echo "</Placemark>\n";
+	echo "</Folder>\n";
+	echo "</Document>\n";
+	echo "</kml>\n";
+	exit(0);
+}
 ?>
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<title>APRS relay server</title>
@@ -814,7 +939,9 @@ if ($cmd=="today") {
         	echo "</td><td align=right>";
         	echo $r[2];
         	echo "</td><td>";
-        	echo "<a href=".$_SERVER["PHP_SELF"]."?gpx=$r[0]>下载轨迹</a>";
+		echo "下载轨迹";
+        	echo "<a href=".$_SERVER["PHP_SELF"]."?gpx=$r[0]>GPX</a>";
+        	echo " <a href=".$_SERVER["PHP_SELF"]."?kml=$r[0]>KML</a>";
         	echo "</td><td>";
 		disp_map($r[0]);
         	echo "</td></tr>\n";
@@ -825,7 +952,9 @@ if ($cmd=="today") {
 
 if ($cmd=="call") {
 	echo "今天收到的 $call APRS数据包 ";
-       	echo "<a href=".$_SERVER["PHP_SELF"]."?gpx=$call>下载轨迹</a> ";
+	echo "下载轨迹";
+       	echo "<a href=".$_SERVER["PHP_SELF"]."?gpx=$call>GPX</a> ";
+       	echo "<a href=".$_SERVER["PHP_SELF"]."?kml=$call>KML</a> ";
 	disp_map($call);
 	echo "<p>";
 	$q="select tm,`call`,datatype,lat,lon,`table`,symbol,msg,raw from aprspacket where tm>curdate() and `call`=? order by tm desc";
