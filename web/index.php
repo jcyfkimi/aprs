@@ -2,6 +2,23 @@
 
 include "db.php";
 
+date_default_timezone_set( 'Asia/Shanghai');
+
+if (!isset($_SESSION["jiupian"]))
+	$_SESSION["jiupian"]=1;
+
+if (!isset($_SESSION["span"]))
+	$_SESSION["span"]=1;
+$span = $_SESSION["span"];
+if ( ($span<=0) || ($span >10) ) $span=1;
+$span--;
+$startdate=date_create();
+date_sub($startdate,date_interval_create_from_date_string("$span days"));
+$startdatestr=date_format($startdate,"Y-m-d 00:00:00");
+
+//echo $startdatestr;
+
+
 $jiupian = 0; 	// 0 不处理
 		// 1 存储的是地球坐标，转换成baidu显示, 默认情况
 		// 2 存储的是火星坐标，转换成baidu显示
@@ -29,6 +46,8 @@ if (isset($_REQUEST["tm"])) {
 	$call=$_REQUEST["gpx"];
 } else if (isset($_REQUEST["about"])) {
 	$cmd="about";
+} else if (isset($_REQUEST["setup"])) {
+	$cmd="setup";
 } else {
 	$cmd="map";
 }
@@ -39,8 +58,8 @@ if ( $cmd=="map") {
 
 if ( ($cmd=="map") || ($cmd=="tm")) {
 	$jiupian = 1;
-	if (isset($_REQUEST["jiupian"]))
-		$jiupian=$_REQUEST["jiupian"];
+	if (isset($_SESSION["jiupian"]))
+		$jiupian=$_SESSION["jiupian"];
 }
 
 if($jiupian>0) {
@@ -169,7 +188,8 @@ function strtolon($glon) {
 }
 if ($cmd=="tm") {
 	$starttm = microtime(true);
-	$q="delete from lastpacket where tm<=curdate()";
+//删除10天前的每个台站最后状态数据包
+	$q="delete from lastpacket where tm<=date_sub(now(),INTERVAL 10 day)";
 	$mysqli->query($q);
 	$endtm = microtime(true); $spantm = $endtm-$starttm; $startm=$endtm; echo "//".$spantm."\n";
 
@@ -185,10 +205,15 @@ if ($cmd=="tm") {
 	$disp15min=$_REQUEST["disp15min"];
 	$ldisp15min=$_REQUEST["ldisp15min"];
 
+	$span=$_SESSION["span"];
+	$lspan=$_REQUEST["lspan"];
+
 	if( ($llon1==$lon1) && ($llon2==$lon2) && ($llat1==$lat1) && ($llat2==$lat2)) 
 		$viewchanged=0;
 	else  $viewchanged=1;
 	if($disp15min!=$ldisp15min) 
+		$viewchanged=1;
+	if($span!=$lspan)
 		$viewchanged=1;
 	if($viewchanged) {
 		$tm=0;  // get all new lastpacket
@@ -198,18 +223,19 @@ if ($cmd=="tm") {
 		echo "llat2=$lat2;\n";
 		echo "ldisp15min=$disp15min;\n";
 		echo "disp15min_refresh = 0;\n";
+		echo "lspan=$span;\n";
 	}
 	if(($tm==0) && ($disp15min=="true")) 
 		$tm = time() - 15*60;
 	if (isset($_REQUEST["call"]))  {
 		$call=$_REQUEST["call"];
-		$q="select lat,lon,`call`,unix_timestamp(tm),tm,concat(`table`,symbol),msg,datatype from lastpacket where (`call`=? or tm>=FROM_UNIXTIME(?)) and lat<>'' and not lat like '0000.00%'";
+		$q="select lat,lon,`call`,unix_timestamp(tm),tm,concat(`table`,symbol),msg,datatype from lastpacket where (`call`=? or (tm>=FROM_UNIXTIME(?) and tm>=?) ) and lat<>'' and not lat like '0000.00%'";
 		$stmt=$mysqli->prepare($q);
-        	$stmt->bind_param("si",$call,$tm);
+        	$stmt->bind_param("sis",$call,$tm,$startdatestr);
 	} else {
-		$q="select lat,lon,`call`,unix_timestamp(tm),tm,concat(`table`,symbol),msg,datatype from lastpacket where tm>=FROM_UNIXTIME(?) and lat<>'' and not lat like '0000.00%'";
+		$q="select lat,lon,`call`,unix_timestamp(tm),tm,concat(`table`,symbol),msg,datatype from lastpacket where tm>=FROM_UNIXTIME(?) and tm>=? and lat<>'' and not lat like '0000.00%'";
 		$stmt=$mysqli->prepare($q);
-        	$stmt->bind_param("i",$tm);
+        	$stmt->bind_param("is",$tm,$startdatestr);
 	}
         $stmt->execute();
        	$stmt->bind_result($glat,$glon,$dcall,$dtm,$dtmstr,$dts,$dmsg,$ddt);
@@ -237,11 +263,11 @@ if ($cmd=="tm") {
 	$stmt->close();
 	$endtm = microtime(true); $spantm = $endtm-$starttm; $startm=$endtm; echo "//".$spantm."\n";
 
-	$q="select count(*) from lastpacket where tm>=curdate()";
+	$q="select count(*) from lastpacket where tm>=\"".$startdatestr."\"";
 	$result = $mysqli->query($q);
 	$r=$result->fetch_array();
 	echo "updatecalls(".$r[0].");\n";
-	$q="select packets from packetstats where day=curdate()";
+	$q="select sum(packets) from packetstats where day>=\"".$startdatestr."\"";
 	$result = $mysqli->query($q);
 	$r=$result->fetch_array();
 	echo "updatepkts(".$r[0].");\n";
@@ -253,11 +279,17 @@ if ($cmd=="tm") {
 		exit(0);
 	$call=$_REQUEST["call"];
 	if($call=="") exit(0);
-	$pathlen = @$_REQUEST["pathlen"];
-	if($pathlen=="") $pathlen=0;
-	$q="select lat,lon from aprspacket where tm>curdate() and `call`=? and lat<>'' and not lat like '0000.00%' order by tm limit 50000 offset ?";
+
+	if($span!=$lspan) { // 历史时间发生变化，删除所有路径, 重新更新
+		echo "	if(movepath.length>0) { map.removeOverlay(polyline); movepath.splice(0,movepath.length);} \n";
+		$pathlen = 0;
+	} else {
+		$pathlen = @$_REQUEST["pathlen"];
+		if($pathlen=="") $pathlen=0;
+	}
+	$q="select lat,lon from aprspacket where tm>? and `call`=? and lat<>'' and not lat like '0000.00%' order by tm limit 50000 offset ?";
         $stmt=$mysqli->prepare($q);
-        $stmt->bind_param("si",$call,$pathlen);
+        $stmt->bind_param("ssi",$startdatestr,$call,$pathlen);
         $stmt->execute();
         $stmt->bind_result($glat, $glon);
 
@@ -300,7 +332,8 @@ function top_menu() {
 	echo "<a href=".$_SERVER["PHP_SELF"]."?new".$blank.">最新</a> <a href=".$_SERVER["PHP_SELF"]."?today".$blank.
 	">今天</a> <a href=".$_SERVER["PHP_SELF"]."?stats".$blank.">统计</a> ";
 	echo "<a href=".$_SERVER["PHP_SELF"]."?map target=_blank>地图</a> <div id=calls></div><div id=inview></div><div id=pkts></div> ";
-	echo "<a href=".$_SERVER["PHP_SELF"]."?about target=_blank>关于</a><div id=msg></div><div id=pathlen></div><div id=autocenter></div><p>";
+	echo "<a href=".$_SERVER["PHP_SELF"]."?setup>设置</a> <div id=msg></div><div id=pathlen></div><div id=autocenter></div> ";
+	echo "<a href=".$_SERVER["PHP_SELF"]."?about>关于</a><p>";
 }
 
 if ($cmd=="map") {  
@@ -334,7 +367,7 @@ if ($cmd=="map") {
 	echo "<a href=".$_SERVER["PHP_SELF"]."?new".$blank.">最新</a> <a href=".$_SERVER["PHP_SELF"]."?today".$blank.
 	">今天</a>";
 	echo" <div id=calls></div><div id=inview></div><div id=pkts></div> ";
-	echo "<a href=".$_SERVER["PHP_SELF"]."?about target=_blank>关于</a><div id=msg></div><div id=pathlen></div><div id=autocenter></div><div id=disp15min></div></div>";
+	echo "<a href=".$_SERVER["PHP_SELF"]."?setup target=_blank>设置</a><div id=msg></div><div id=pathlen></div><div id=autocenter></div><div id=disp15min></div></div>";
 ?>
 	<div id="allmap"></div>
 </div>
@@ -361,6 +394,7 @@ var debug=true;
 var disp15min = true;
 var ldisp15min = true;
 var disp15min_refresh = 0;
+var lspan=1;
 
 (function(a,b){if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0,4)))ismobile=b})(navigator.userAgent||navigator.vendor||window.opera,1);
 
@@ -559,7 +593,8 @@ function createXmlHttpRequest(){
 function UpdateStation(){     
 //	alert(lastupdatetm);
 	var b = map.getBounds();
-        var url = '<?php echo "http://".$_SERVER["HTTP_HOST"].$_SERVER["PHP_SELF"]."?tm=";?>'+lastupdatetm+"&call="+call+"&pathlen="+movepath.length+"&llon1="+llon1+"&llon2="+llon2+"&llat1="+llat1+"&llat2="+llat2+"&lon1="+b.getSouthWest().lng+"&lat1="+b.getSouthWest().lat+"&lon2="+b.getNorthEast().lng+"&lat2="+b.getNorthEast().lat+"&disp15min="+disp15min+"&ldisp15min="+ldisp15min;
+        var url = window.location.protocol+"//"+window.location.host+":"+window.location.port+"/"+window.location.pathname+"?tm="+lastupdatetm+"&call="+call+"&pathlen="+movepath.length+"&llon1="+llon1+"&llon2="+llon2+"&llat1="+llat1+"&llat2="+llat2+"&lon1="+b.getSouthWest().lng+"&lat1="+b.getSouthWest().lat+"&lon2="+b.getNorthEast().lng+"&lat2="+b.getNorthEast().lat+"&disp15min="+disp15min+"&ldisp15min="+ldisp15min;
+	url = url+"&lspan="+lspan;
 	if(jiupian!=1) url = url+"&jiupian="+jiupian;
         //1.创建XMLHttpRequest组建     
         xmlHttpRequest = createXmlHttpRequest();     
@@ -689,9 +724,9 @@ Content-Type:application/gpx+xml
 	echo "<gpx version=\"1.0\">\n";
 	echo "<name>APRS GPX</name>\n";
 	echo "<trk><name>".$call." ".date("Y-m-d")." Track</name><number>1</number><trkseg>\n";
-	$q="select date_format(CONVERT_TZ(tm,@@session.time_zone, '+00:00'),\"%Y-%m-%dT%H:%i:%sZ\"),lat,lon,msg,datatype from aprspacket where tm>curdate() and `call`=? and lat<>'' and not lat like '0000.00%' order by tm";
+	$q="select date_format(CONVERT_TZ(tm,@@session.time_zone, '+00:00'),\"%Y-%m-%dT%H:%i:%sZ\"),lat,lon,msg,datatype from aprspacket where tm>? and `call`=? and lat<>'' and not lat like '0000.00%' order by tm";
         $stmt=$mysqli->prepare($q);
-        $stmt->bind_param("s",$call);
+        $stmt->bind_param("ss",$startdatestr,$call);
         $stmt->execute();
         $stmt->bind_result($dtm, $glat, $glon, $msg, $ddt);
 //<trkpt lat="46.57608333" lon="8.89241667"><ele>2376</ele><time>2007-10-14T10:09:57Z</time></trkpt>
@@ -877,7 +912,60 @@ so.write("flashcontent4");
 }
 
 
+if ($cmd=="setup") {
+	echo "<h3>轨迹历史时间</h3> ";
+	if ( isset($_REQUEST["span"]) && isset($_REQUEST["spanchange"])) {
+		$span = intval($_REQUEST["span"]);
+		if ( ($span<=0) || ($span >10) ) $span=1;
+		$_SESSION["span"] = $span;
+	}
+	$span = $_SESSION["span"];
+	echo "<form action=".$_SERVER["PHP_SELF"]." method=POST>";
+	echo "<input name=setup type=hidden>";
+	echo "<input name=spanchange type=hidden>";
+	echo "请选择轨迹历史:";
+	echo "<select name=span>";
+	for ( $i=1; $i<8; $i++) {
+		if ( $i==$span )
+			echo "<option value=\"$i\" selected=\"selected\">".$i."天</option>";
+		else
+			echo "<option value=\"$i\">".$i."天</option>";
+	}
+	echo "</select><br>";
+	echo "<input type=submit value=\"设置轨迹历史时间\">";
+	echo "<p>";
+	echo "注：选择2天，则显示从昨天00:00开始的台站数据和轨迹<p>";
+	echo "</form>";
+
+	echo "<h3>显示时纠偏处理</h3>";
+	if ( isset($_REQUEST["jiupian"]) && isset($_REQUEST["jiupianchange"])) {
+		$jiupian = intval($_REQUEST["jiupian"]);
+		if ( ($jiupian<0) || ($jiupian >2) ) $jiupian=1;
+		$_SESSION["jiupian"] = $jiupian;
+	}
+	$jiupian = $_SESSION["jiupian"];
+	echo "<form action=".$_SERVER["PHP_SELF"]." method=POST>";
+	echo "<input name=setup type=hidden>";
+	echo "<input name=jiupianchange type=hidden>";
+	echo "请选择显示纠偏处理方式:<br>";
+	echo "<select name=jiupian>";
+	echo "<option value=0";
+	if ($jiupian==0) echo " selected=\"selected\"";
+	echo ">不处理，直接显示</option>";
+	echo "<option value=1";
+	if ($jiupian==1) echo " selected=\"selected\"";
+	echo ">GPS坐标转换成百度坐标显示，默认方式</option>";
+	echo "<option value=2";
+	if ($jiupian==2) echo " selected=\"selected\"";
+	echo ">火星坐标转换成百度坐标显示</option>";
+	echo "</select>";
+	echo "<br><input type=submit value=\"设置显示纠偏方式\">";
+	echo "</form>";
+	echo "修改本项设置，需手动刷新地图才生效";
+	exit(0);
+}
 if ($cmd=="about") {
-include "about.html";
+	include "about.html";
+	exit(0);
 }
 ?>
