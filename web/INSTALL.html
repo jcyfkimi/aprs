@@ -15,7 +15,7 @@ SELINUX=disabled
 
 4. 安装需要的软件包
 运行:
-yum install httpd php php-mysql mysql-server git screen gcc mysql-devel telnet
+yum install httpd php php-mysql mysql-server git screen gcc mysql-devel telnet ntpdate
 
 （http://he.fi/aprsc/INSTALLING.html）
 curl -o /etc/yum.repos.d/aprsc.repo http://he.fi/aprsc/down/aprsc-centos.repo
@@ -104,6 +104,11 @@ vi /etc/rc.local
 /usr/src/aprs/udptomysql
 /usr/src/aprs/aprs.fi.toudp
 
+11. 设置服务器自动对时
+执行crontab -e
+0 * * * * /usr/sbin/ntpdate 202.38.64.7 >/dev/null 2>/dev/null
+
+12. 重启
 reboot 重启
 
 启动后 
