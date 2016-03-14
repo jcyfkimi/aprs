@@ -275,6 +275,7 @@ if ($cmd=="tm") {
 	$q="select sum(packets) from packetstats where day>=\"".$startdatestr."\"";
 	$result = $mysqli->query($q);
 	$r=$result->fetch_array();
+	$r[0]=intval($r[0]);
 	echo "updatepkts(".$r[0].");\n";
 	$endtm = microtime(true); $spantm = $endtm-$starttm; $startm=$endtm; echo "//".$spantm."\n";
 	
