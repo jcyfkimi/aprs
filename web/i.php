@@ -747,6 +747,39 @@ Content-Type:application/gpx+xml
 	exit(0);
 }
 
+function kml_alt($msg) {
+	$alt = 0;
+	$m = "";
+	if( (strlen($msg)>=7) &&
+		(substr($msg,3,1)=='/'))  // 178/061/A=000033
+	{
+		$msg = substr($msg,7);
+		if( substr($msg,0,3)=='/A=') {      // 178/061/A=000033
+			$alt=number_format(substr($msg,3,6)*0.3048,1);
+		} 
+		return $alt;
+	} else if( (strlen($msg)>=9) &&
+		(substr($msg,0,3)=='/A=') )      // /A=000033
+	{
+		$alt=number_format(substr($msg,3,6)*0.3048,1);
+		return $alt;
+	} else if( ($ddt=='`')  &&
+		 (strlen($msg)>=9) )   // `  0+jlT)v/]"4(}=
+	{
+		$msg = substr($msg,8);
+		if((substr($msg,0,1)==']') || (substr($msg,0,1)=='`') )
+			$msg=substr($msg,1);
+		if( (strlen($msg)>=4) && (substr($msg,3,1)=='}') ) {
+			$alt = (ord( substr($msg,0,1)) -33)*91*91+
+				(ord( substr($msg,1,1)) -33)*91 +
+				(ord( substr($msg,2,1)) -33) -10000;
+			$alt = number_format($alt,1);
+		}
+		return $alt;
+	}
+	return $alt;
+}
+
 function kml_wpt($tm, $msg, $ddt) {
 	$alt = 0;
 	$m = "";
@@ -858,7 +891,9 @@ if($cmd=="kml") {
                 $lat = strtolat($glat);
                 $lon = strtolon($glon);
 //		$wpt = gpx_wpt($dtm, $msg,$ddt);
-		echo "<gx:coord>".$lon." ".$lat." 0</gx:coord>\n";
+		echo "<gx:coord>".$lon." ".$lat." ";
+		echo kml_alt($msg);
+		echo "</gx:coord>\n";
         }	
 	echo "</gx:Track>\n";
 	echo "</Placemark>\n";
