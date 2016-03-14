@@ -22,7 +22,7 @@ curl -o /etc/yum.repos.d/aprsc.repo http://he.fi/aprsc/down/aprsc-centos.repo
 yum install aprsc
 
 5. 修改包过滤防火墙配置文件
-运行 vi /etc/sysconfig/iptables 修改以下内容
+运行 vi /etc/sysconfig/iptables 修改以下内容(注意下面22端口的是允许远程登录的IP，请根据自己情况修改)
 -A INPUT -m tcp -p tcp --dport 22 -j ACCEPT -s 202.38.64.0/24
 -A INPUT -m tcp -p tcp --dport 22 -j ACCEPT -s 211.86.158.0/24
 -A INPUT -m tcp -p tcp --dport 80 -j ACCEPT
