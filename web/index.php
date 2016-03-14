@@ -336,8 +336,8 @@ function top_menu() {
 	if($cmd=="map") $blank = " target=_blank";
 	echo "<a href=".$_SERVER["PHP_SELF"]."?new".$blank.">最新</a> <a href=".$_SERVER["PHP_SELF"]."?today".$blank.
 	">今天</a> <a href=".$_SERVER["PHP_SELF"]."?stats".$blank.">统计</a> ";
-	echo "<a href=".$_SERVER["PHP_SELF"]."?map target=_blank>地图</a> <div id=calls></div><div id=inview></div><div id=pkts></div> ";
-	echo "<a href=".$_SERVER["PHP_SELF"]."?setup>设置</a> <div id=msg></div><div id=pathlen></div><div id=autocenter></div> ";
+	echo "<a href=".$_SERVER["PHP_SELF"]."?map target=_blank>地图</a> ";
+	echo "<a href=".$_SERVER["PHP_SELF"]."?setup>设置</a> ";
 	echo "<a href=".$_SERVER["PHP_SELF"]."?about>关于</a><p>";
 }
 
@@ -370,9 +370,10 @@ if ($cmd=="map") {
 	<div id="top"><?php
 	$blank = " target=_blank";
 	echo "<a href=".$_SERVER["PHP_SELF"]."?new".$blank.">最新</a> <a href=".$_SERVER["PHP_SELF"]."?today".$blank.
-	">今天</a>";
+	">今天</a> ";
+	echo "<a href=".$_SERVER["PHP_SELF"]."?setup target=_blank>设置</a> ";
 	echo" <div id=calls></div><div id=inview></div><div id=pkts></div> ";
-	echo "<a href=".$_SERVER["PHP_SELF"]."?setup target=_blank>设置</a><div id=msg></div><div id=pathlen></div><div id=autocenter></div><div id=disp15min></div></div>";
+	echo "<div id=msg></div><div id=pathlen></div><div id=autocenter></div><div id=disp15min></div></div>";
 ?>
 	<div id="allmap"></div>
 </div>
