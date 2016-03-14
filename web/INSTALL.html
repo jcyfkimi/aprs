@@ -1,0 +1,120 @@
+安装记录:
+
+<pre>
+1. 下载CentOS-6.7-x86_64-netinstall.iso，默认安装，时区设置为Asia/Shanghai
+
+2. 禁止selinux
+运行vi /etc/sysconfig/selinux
+将 
+SELINUX=enforcing 
+修改为
+SELINUX=disabled
+
+3. 更新系统
+运行 yum update
+
+4. 安装需要的软件包
+运行:
+yum install httpd php php-mysql mysql-server git screen gcc mysql-devel telnet
+
+（http://he.fi/aprsc/INSTALLING.html）
+curl -o /etc/yum.repos.d/aprsc.repo http://he.fi/aprsc/down/aprsc-centos.repo
+yum install aprsc
+
+5. 修改包过滤防火墙配置文件
+运行 vi /etc/sysconfig/iptables 修改以下内容
+-A INPUT -m tcp -p tcp --dport 22 -j ACCEPT -s 202.38.64.0/24
+-A INPUT -m tcp -p tcp --dport 22 -j ACCEPT -s 211.86.158.0/24
+-A INPUT -m tcp -p tcp --dport 80 -j ACCEPT
+-A INPUT -m tcp -p tcp --dport 14501 -j ACCEPT
+-A INPUT -m tcp -p tcp --dport 14580 -j ACCEPT
+-A INPUT -m udp -p udp --dport 14580 -j ACCEPT
+
+6. 修改aprsc配置文件
+vi /etc/sysconfig/aprsc
+STARTAPRSC="yes"
+
+vi /opt/aprsc/etc/aprsc.conf
+需要时修改ServerID，管理员mail
+注释下面两行：
+Listen "UDP submit"
+MagicBadness   42.7
+
+7. 下载源码、编译
+cd /usr/src
+git clone https://github.com/bg6cq/aprs
+
+/usr/src/aprs
+vi aprs.fi.toudp.c
+把里面的china.aprs2.net改为127.0.0.1
+make
+
+8. 修改web文件
+cd /var/www/
+mv html html.old
+ln -s /usr/src/aprs/web html
+
+9. 启动数据库，创建表
+service mysqld start
+执行mysql 输入以下命令
+create database aprs;
+use aprs;
+CREATE TABLE `aprspacket` (
+  `tm` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `call` varchar(16) NOT NULL,
+  `datatype` char(1) NOT NULL,
+  `lat` char(8) NOT NULL,
+  `lon` char(9) NOT NULL,
+  `table` char(1) NOT NULL,
+  `symbol` char(1) NOT NULL,
+  `msg` varchar(200) NOT NULL,
+  `raw` varchar(250) NOT NULL,
+  KEY `tm` (`tm`),
+  KEY `tm_call` (`tm`,`call`),
+  KEY `call_tm` (`call`,`tm`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+CREATE TABLE `lastpacket` (
+  `call` varchar(16) NOT NULL,
+  `tm` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `datatype` char(1) NOT NULL,
+  `lat` char(8) NOT NULL,
+  `lon` char(9) NOT NULL,
+  `table` char(1) NOT NULL,
+  `symbol` char(1) NOT NULL,
+  `msg` varchar(200) NOT NULL,
+  PRIMARY KEY (`call`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+CREATE TABLE `packetstats` (
+  `day` date NOT NULL DEFAULT '0000-00-00',
+  `packets` int(10) DEFAULT NULL,
+  PRIMARY KEY (`day`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+
+10. 设置开机启动
+执行
+chkconfig mysqld on
+chkconfig httpd on
+chkconfig aprsc on
+vi /etc/rc.local 
+增加
+
+/usr/src/aprs/udptomysql
+/usr/src/aprs/aprs.fi.toudp
+
+reboot 重启
+
+启动后 
+http://x.x.x.x:14501/可以看到aprsc状态
+http://x.x.x.x/可以看到地图
+tcp 14580可以接收标准aprs客户端连接
+
+注：
+各程序功能：
+1. aprsc aprs服务端
+2. udptomysql 从UDP接收数据包，存到mysql数据库
+3. aprs.fi.toudp 连接到127.0.0.1:14580，获取呼号前缀B和VR2的数据，发给udptomysql
+
+</pre>
