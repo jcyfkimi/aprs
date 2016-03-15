@@ -1,5 +1,8 @@
 <?php
 
+$colors = array("411400FF","4114F000","4114F0FF","4178FF00","41FF78F0","410078F0");
+$colorindex=0;
+
 include "db.php";
 
 date_default_timezone_set( 'Asia/Shanghai');
@@ -56,6 +59,7 @@ if (isset($_REQUEST["BBOX"])) {
 
 // 显示路径
 $disppath=1;
+
 
 function urlmessage($call,$icon, $dtmstr, $msg, $ddt) {
 	global $baseurl;
@@ -294,8 +298,12 @@ while($stmt->fetch()) {
 	echo "img/".bin2hex($dts).".png</href>";
     	echo "</Icon><scale>1</scale></IconStyle>\n";
   	echo "<LineStyle>\n";
-    	echo "<color>ffffffff</color>\n";
-    	echo "<colorMode>random</colorMode>\n";
+    	echo "<color>";
+	echo $colors[$colorindex];
+	$colorindex++;
+	if($colorindex==count($colors)) $colorindex=0;
+	echo "</color>\n";
+    	echo "<colorMode>normal</colorMode>\n";
     	echo "<width>4</width>\n";
   	echo "</LineStyle>\n";
 //  	echo "<PolyStyle><color>7f00ff00</color></PolyStyle>\n";
