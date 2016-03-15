@@ -19,6 +19,10 @@ $opt = 0;
 if ( isset($_REQUEST["opt"])) 
 	$opt = 1;
 
+$inview = 0;
+if ( isset($_REQUEST["inview"])) 
+	$inview = 1;
+
 if (isset($_REQUEST["kml"])) {
 //	header("Content-Type:application/gpx+xml");
 	header("Content-Type:application/vnd.google-earth.kml+xml");
@@ -34,6 +38,7 @@ if (isset($_REQUEST["kml"])) {
 	echo "<Link>\n";
 	echo "<href>".$urlf."?span=".$span;
 	if ($opt==1) echo "&amp;opt=1";
+	if ($inview==1) echo "&amp;inview=1";
 	echo "</href>\n";
 	echo "<viewRefreshMode>onStop</viewRefreshMode>\n";
 	echo "<viewRefreshTime>1</viewRefreshTime>\n";
@@ -330,7 +335,7 @@ $stmt->store_result();
 while($stmt->fetch()) {
         $lat = strtolat($glat);
         $lon = strtolon($glon);
-	if($opt==1) {
+	if($inview==1) {
 		if($lat<$lat1) continue;
 		if($lat>$lat2) continue;
 		if($lon<$lon1) continue;

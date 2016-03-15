@@ -1085,7 +1085,7 @@ if ($cmd=="ge") {
 	$span = $_SESSION["span"];
 	echo "<form action=ge.php method=POST>";
 	echo "<input name=kml type=hidden>";
-	echo "显示轨迹历史天数:";
+	echo "显示历史天数：";
 	echo "<select name=span>";
 	for ( $i=1; $i<8; $i++) {
 		if ( $i==$span )
@@ -1094,10 +1094,14 @@ if ($cmd=="ge") {
 			echo "<option value=\"$i\">".$i."天</option>";
 	}
 	echo "</select><p>";
-	echo "仅显示视野内站点：<input name=opt type=checkbox> 站点多时减少不必要显示，提高速度\n";
+	echo "&nbsp;视线内显示：<input name=inview type=checkbox> 仅仅显示视线内站点，提高速度<p>\n";
+	echo "路径显示优化：<input name=opt type=checkbox> 放大后才显示路径，提高速度\n";
 	echo "<p><input type=submit value=\"启动Google Earth\">";
 	echo "<p>";
 	echo "注：选择2天，则显示从昨天00:00开始的台站数据和轨迹<p>";
+	echo "注：每个站点显示位置和路径占用2个对象，如果站点太多，显示的对象超过1000，<br>";
+	echo "&nbsp;&nbsp;Google Earth会不显示，这时可以选择视线内显示和路径显示优化<br>";
+	echo "&nbsp;&nbsp;将仅仅显示视野内的站点，并且放大到一定后才显示轨迹<p>";
 	echo "</form>";
 	exit(0);
 }
