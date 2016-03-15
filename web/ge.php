@@ -292,7 +292,7 @@ while($stmt->fetch()) {
 	echo "<Style id=\"st";
 	echo bin2hex($dts);
 	echo "\">\n";
-  	echo "<LabelStyle><color>ff00ffff</color><scale>1</scale></LabelStyle>\n";
+  	echo "<LabelStyle><color>5014F0FF</color><scale>1</scale></LabelStyle>\n";
 	echo "<IconStyle><Icon><href>";
 	echo $baseurl;
 	echo "img/".bin2hex($dts).".png</href>";
