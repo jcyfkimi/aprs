@@ -47,6 +47,8 @@ if (isset($_REQUEST["tm"])) {
 } else if (isset($_REQUEST["kml"])) {
 	$cmd="kml";
 	$call=$_REQUEST["kml"];
+} else if (isset($_REQUEST["ge"])) {
+	$cmd="ge";
 } else if (isset($_REQUEST["about"])) {
 	$cmd="about";
 } else if (isset($_REQUEST["setup"])) {
@@ -338,7 +340,7 @@ function top_menu() {
 	echo "<a href=".$_SERVER["PHP_SELF"]."?new".$blank.">最新</a> <a href=".$_SERVER["PHP_SELF"]."?today".$blank.
 	">今天</a> <a href=".$_SERVER["PHP_SELF"]."?stats".$blank.">统计</a> ";
 	echo "<a href=".$_SERVER["PHP_SELF"]."?map target=_blank>地图</a> ";
-	echo "<a href=\"ge.php?kml\">Google Earth</a> ";
+	echo "<a href=".$_SERVER["PHP_SELF"]."?ge>Google Earth</a> ";
 	echo "<a href=".$_SERVER["PHP_SELF"]."?setup>设置</a> ";
 	echo "<a href=".$_SERVER["PHP_SELF"]."?about>关于</a><p>";
 }
@@ -1078,6 +1080,27 @@ so.write("flashcontent4");
 	exit(0);
 }
 
+if ($cmd=="ge") {
+	echo "<h3>选择Google Earth参数</h3> ";
+	$span = $_SESSION["span"];
+	echo "<form action=ge.php method=POST>";
+	echo "<input name=kml type=hidden>";
+	echo "显示轨迹历史天数:";
+	echo "<select name=span>";
+	for ( $i=1; $i<8; $i++) {
+		if ( $i==$span )
+			echo "<option value=\"$i\" selected=\"selected\">".$i."天</option>";
+		else
+			echo "<option value=\"$i\">".$i."天</option>";
+	}
+	echo "</select><p>";
+	echo "仅显示视野内站点：<input name=opt type=checkbox> 站点多时减少不必要显示，提高速度\n";
+	echo "<p><input type=submit value=\"启动Google Earth\">";
+	echo "<p>";
+	echo "注：选择2天，则显示从昨天00:00开始的台站数据和轨迹<p>";
+	echo "</form>";
+	exit(0);
+}
 
 if ($cmd=="setup") {
 	echo "<h3>轨迹历史时间</h3> ";

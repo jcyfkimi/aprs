@@ -1,6 +1,6 @@
 <?php
 
-$colors = array("411400FF","4114F000","4114F0FF","4178FF00","41FF78F0","410078F0");
+$colors = array("FF1400FF","FF14F000","FF14F0FF","FF78FF00","FFFF78F0","FF0078F0");
 $colorindex=0;
 
 include "db.php";
@@ -11,6 +11,14 @@ $urlf = "http://".$_SERVER["HTTP_HOST"].$_SERVER["PHP_SELF"];
 $po = strripos($urlf,"/");
 $baseurl = substr($urlf,0,$po+1);
 
+$span = intval(@$_REQUEST["span"]);
+
+if ( ($span<=0) || ($span>10) ) $span = 2;  // default 2 days data
+
+$opt = 0;
+if ( isset($_REQUEST["opt"])) 
+	$opt = 1;
+
 if (isset($_REQUEST["kml"])) {
 //	header("Content-Type:application/gpx+xml");
 	header("Content-Type:application/vnd.google-earth.kml+xml");
@@ -20,11 +28,13 @@ if (isset($_REQUEST["kml"])) {
 	echo "<NetworkLink>\n";
 	echo "<visibility>1</visibility>\n";
 	echo "<name>APRS objects</name>\n";
-	echo "<description><![CDATA[\n";
-	echo "<p>APRS object of server ".$_SERVER["HTTP_HOST"]."</p>\n";
-	echo "]]></description>\n";
+//	echo "<description><![CDATA[\n";
+//	echo "<p>APRS object of server ".$_SERVER["HTTP_HOST"]."</p>\n";
+//	echo "]]></description>\n";
 	echo "<Link>\n";
-	echo "<href>".$urlf."</href>\n";
+	echo "<href>".$urlf."?span=".$span;
+	if ($opt==1) echo "&amp;opt=1";
+	echo "</href>\n";
 	echo "<viewRefreshMode>onStop</viewRefreshMode>\n";
 	echo "<viewRefreshTime>1</viewRefreshTime>\n";
 	echo "<refreshMode>onExpire</refreshMode>\n";
@@ -34,13 +44,13 @@ if (isset($_REQUEST["kml"])) {
 	exit(0);
 }
 
-$span = 2;  // 2 days data
 $span--;
 $startdate=date_create();
 date_sub($startdate,date_interval_create_from_date_string("$span days"));
 $startdatestr=date_format($startdate,"Y-m-d 00:00:00");
 
 $disppath=0;
+
 if (isset($_REQUEST["BBOX"])) {
 	$bbox=$_REQUEST["BBOX"];
 	$ll = split(",",$bbox);
@@ -48,8 +58,6 @@ if (isset($_REQUEST["BBOX"])) {
 	$lon2 = $ll[2];
 	$lat1 = $ll[1];
 	$lat2 = $ll[3];
-	if(abs($lon1-$lon2)<=10)
-		$disppath=1;
 } else {
 	$lon1=0;
 	$lon2=180;
@@ -57,13 +65,15 @@ if (isset($_REQUEST["BBOX"])) {
 	$lat2=90;
 }
 
-// 显示路径
-$disppath=1;
+if(abs($lon2-$lon1)<=15)
+	$disppath=1;
 
+if($opt==0) 
+	$disppath=1;
 
 function urlmessage($call,$icon, $dtmstr, $msg, $ddt) {
 	global $baseurl;
-	$m = "<font face=微软雅黑 size=2><img src=".$baseurl.$icon.">".$call."<a href=".$baseurl."index.php?call=".$call." target=_blank>数据包</a> ";
+	$m = "<img src=".$baseurl.$icon."><a href=".$baseurl."index.php?call=".$call." target=_blank>数据包</a> ";
 	$m =$m."轨迹";
 	$m = $m."<a href=".$baseurl."index.php?gpx=".$call." target=_blank>GPX</a> ";
 	$m = $m."<a href=".$baseurl."index.php?kml=".$call." target=_blank>KML</a> <hr color=green>".$dtmstr."<br>";
@@ -164,7 +174,7 @@ function urlmessage($call,$icon, $dtmstr, $msg, $ddt) {
 		
 	$msg=rtrim($msg);
 		
-	$m = $m."</font><font color=green face=微软雅黑 size=2>".addcslashes(htmlspecialchars($msg),"\\\r\n'\"")."</font>";
+	$m = $m."<font color=green>".addcslashes(htmlspecialchars($msg),"\\\r\n'\"")."</font>";
 	return $m;	
 }
 
@@ -292,7 +302,7 @@ while($stmt->fetch()) {
 	echo "<Style id=\"st";
 	echo bin2hex($dts);
 	echo "\">\n";
-  	echo "<LabelStyle><color>5014F0FF</color><scale>1</scale></LabelStyle>\n";
+  	echo "<LabelStyle><color>".$colors[$colorindex]."</color><scale>1</scale></LabelStyle>\n";
 	echo "<IconStyle><Icon><href>";
 	echo $baseurl;
 	echo "img/".bin2hex($dts).".png</href>";
@@ -319,11 +329,13 @@ $stmt->bind_result($call, $dtm, $glat, $glon, $msg, $ddt, $dts);
 $stmt->store_result();	
 while($stmt->fetch()) {
         $lat = strtolat($glat);
-	if($lat<$lat1-1) continue;
-	if($lat>$lat2+1) continue;
         $lon = strtolon($glon);
-	if($lon<$lon1-1) continue;
-	if($lon>$lon2+1) continue;
+	if($opt==1) {
+		if($lat<$lat1) continue;
+		if($lat>$lat2) continue;
+		if($lon<$lon1) continue;
+		if($lon>$lon2) continue;
+	}
 	echo "<Placemark>\n";
 	echo "  <name>".$call."</name>\n";
 	echo "  <description><![CDATA[\n";
