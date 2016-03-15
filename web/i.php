@@ -287,7 +287,7 @@ if ($cmd=="tm") {
 	if($call=="") exit(0);
 
 	if($span!=$lspan) { // 历史时间发生变化，删除所有路径, 重新更新
-		echo "	if(movepath.length>0) { map.removeOverlay(polyline); movepath.splice(0,movepath.length);} \n";
+		echo "	if(movepath.length>0) { map.removeOverlay(polyline); movepath.splice(0,movepath.length); updatepathlen();} \n";
 		$pathlen = 0;
 	} else {
 		$pathlen = @$_REQUEST["pathlen"];
@@ -338,6 +338,7 @@ function top_menu() {
 	echo "<a href=".$_SERVER["PHP_SELF"]."?new".$blank.">最新</a> <a href=".$_SERVER["PHP_SELF"]."?today".$blank.
 	">今天</a> <a href=".$_SERVER["PHP_SELF"]."?stats".$blank.">统计</a> ";
 	echo "<a href=".$_SERVER["PHP_SELF"]."?map target=_blank>地图</a> ";
+	echo "<a href=\"ge.php?kml\">Google Earth</a> ";
 	echo "<a href=".$_SERVER["PHP_SELF"]."?setup>设置</a> ";
 	echo "<a href=".$_SERVER["PHP_SELF"]."?about>关于</a><p>";
 }
