@@ -42,7 +42,8 @@ if (isset($_REQUEST["kml"])) {
 	echo "</href>\n";
 	echo "<viewRefreshMode>onStop</viewRefreshMode>\n";
 	echo "<viewRefreshTime>1</viewRefreshTime>\n";
-	echo "<refreshMode>onExpire</refreshMode>\n";
+	echo "<refreshMode>onInterval</refreshMode>\n";
+	echo "<refreshInterval>60</refreshInterval>";
 	echo "</Link>\n";
 	echo "</NetworkLink>\n";
 	echo "</kml>\n";
