@@ -31,16 +31,11 @@ MYSQL * connectdb(void)
 {
         MYSQL *mysql;
 
-        if ((mysql=mysql_init(NULL))==NULL) {
-                fprintf(stderr,"mysql_init error\n");
-                exit(1);
-        }
+        if ((mysql=mysql_init(NULL))==NULL) 
+                err_quit("mysql_init error\n");
         if( mysql_real_connect(mysql, DBHOST, DBUSER, DBPASSWD,
         DB, DBPORT, DBSOCKPATH, 0)== NULL)
-        {
-                fprintf(stderr,"mysql_init error\n");
-                exit(1);
-        }
+                err_quit("mysql_init error\n");
         return mysql;
 }
 
@@ -118,7 +113,7 @@ void ToMysql(char *buf, int len)
 	*p=0;
 	if(checkcall(call)==0) {
 #ifdef DEBUG
-		fprintf(stderr,"skipp call: %s\n",call);
+		err_msg("skipp call: %s\n",call);
 #endif	
 		return;
 	}
@@ -183,10 +178,10 @@ void ToMysql(char *buf, int len)
 		end = my_stpcpy(end,"')");
 		*end=0;
 #ifdef DEBUG
-		fprintf(stderr,"%s\n",sqlbuf);
+		err_msg("%s\n",sqlbuf);
 #endif
 		if (mysql_real_query(mysql,sqlbuf,(unsigned int) (end - sqlbuf))) {
-   			fprintf(stderr, "Failed to insert row, Error: %s\n",
+   			err_quit("Failed to insert row, Error: %s\n",
            		mysql_error(mysql));
 		}
 		
@@ -208,15 +203,15 @@ void ToMysql(char *buf, int len)
 		end = my_stpcpy(end,"')");
 		*end=0;
 #ifdef DEBUG
-		fprintf(stderr,"%s\n",sqlbuf);
+		err_msg("%s\n",sqlbuf);
 #endif
 		if (mysql_real_query(mysql,sqlbuf,(unsigned int) (end - sqlbuf))) {
-   			fprintf(stderr, "Failed to insert row, Error: %s\n",
+   			err_quit("Failed to insert row, Error: %s\n",
            		mysql_error(mysql));
 		}
 		end = my_stpcpy(sqlbuf,"INSERT INTO packetstats VALUES(curdate(),1) ON DUPLICATE KEY UPDATE packets=packets+1");
 		if (mysql_real_query(mysql,sqlbuf,(unsigned int) (end - sqlbuf))) {
-   			fprintf(stderr, "Failed to insert row, Error: %s\n",
+   			err_quit("Failed to insert row, Error: %s\n",
            		mysql_error(mysql));
 		}
 		return;
@@ -291,10 +286,10 @@ void ToMysql(char *buf, int len)
 		end = my_stpcpy(end,"')");
 		*end=0;
 #ifdef DEBUG
-		fprintf(stderr,"%s\n",sqlbuf);
+		err_msg("%s\n",sqlbuf);
 #endif
 		if (mysql_real_query(mysql,sqlbuf,(unsigned int) (end - sqlbuf))) {
-   			fprintf(stderr, "Failed to insert row, Error: %s\n",
+   			err_quit("Failed to insert row, Error: %s\n",
            		mysql_error(mysql));
 		} 
 		end = my_stpcpy(sqlbuf,"REPLACE INTO lastpacket(tm,`call`,datatype,lat,lon,`table`,symbol,msg) VALUES(now(),'");
@@ -314,15 +309,15 @@ void ToMysql(char *buf, int len)
 		end = my_stpcpy(end,"')");
 		*end=0;
 #ifdef DEBUG
-		fprintf(stderr,"%s\n",sqlbuf);
+		err_msg("%s\n",sqlbuf);
 #endif
 		if (mysql_real_query(mysql,sqlbuf,(unsigned int) (end - sqlbuf))) {
-   			fprintf(stderr, "Failed to insert row, Error: %s\n",
+   			err_quit("Failed to insert row, Error: %s\n",
            		mysql_error(mysql));
 		}
 		end = my_stpcpy(sqlbuf,"INSERT INTO packetstats VALUES(curdate(),1) ON DUPLICATE KEY UPDATE packets=packets+1");
 		if (mysql_real_query(mysql,sqlbuf,(unsigned int) (end - sqlbuf))) {
-   			fprintf(stderr, "Failed to insert row, Error: %s\n",
+   			err_quit("Failed to insert row, Error: %s\n",
            		mysql_error(mysql));
 		}
 		return;
@@ -336,15 +331,15 @@ unknow_msg:
 	*end=0;
 
 #ifdef DEBUG
-	fprintf(stderr,"%s\n",sqlbuf);
+	err_msg("%s\n",sqlbuf);
 #endif
 	if (mysql_real_query(mysql,sqlbuf,(unsigned int) (end - sqlbuf))) {
-   		fprintf(stderr, "Failed to insert row, Error: %s\n",
+   		err_quit("Failed to insert row, Error: %s\n",
            	mysql_error(mysql));
 	}
 	end = my_stpcpy(sqlbuf,"INSERT INTO packetstats VALUES(curdate(),1) ON DUPLICATE KEY UPDATE packets=packets+1");
 	if (mysql_real_query(mysql,sqlbuf,(unsigned int) (end - sqlbuf))) {
-   		fprintf(stderr, "Failed to insert row, Error: %s\n",
+   		err_quit("Failed to insert row, Error: %s\n",
        		mysql_error(mysql));
 	}
 }
@@ -362,7 +357,7 @@ void Process(int u_fd)
 		if(n==0) continue;
 		buff[n]=0;
 #ifdef DEBUG
-		fprintf(stderr,"C: %s",buff);
+		err_msg("C: %s",buff);
 #endif
 		ToMysql(buff, n);
 	}
@@ -375,10 +370,8 @@ int main(int argc, char *argv[])
 
 	signal(SIGCHLD,SIG_IGN);
 
-	if(argc!=1) {
-		fprintf(stderr,"usage:  udptomysql\n");
-		exit(0);
-	}
+	if(argc!=1) 
+		err_quit("usage:  udptomysql\n");
 
 #ifndef DEBUG
 	daemon_init("udptomysql",LOG_DAEMON);
@@ -398,7 +391,7 @@ int main(int argc, char *argv[])
 	u_fd = Udp_server("127.0.0.1","14583",(socklen_t *)&llen);
 
 #ifdef DEBUG
-	fprintf(stderr,"u_fd=%d\n",u_fd);
+	err_msg("u_fd=%d\n",u_fd);
 #endif
 	mysql=connectdb();	
 	Process(u_fd);

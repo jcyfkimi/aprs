@@ -82,13 +82,13 @@ void relayaprs(char *buf, int len)
 
 #include "passcode.c"
 
-void Process(char *call) 
+void Process(char*server,char *call) 
 {	
 	char buffer[MAXLEN];
 	int n;
 	int optval;
    	socklen_t optlen = sizeof(optval);
-	r_fd= Tcp_connect("china.aprs2.net","14580");
+	r_fd= Tcp_connect(server,"14580");
 	optval = 1;
 	Setsockopt(r_fd, SOL_SOCKET, SO_KEEPALIVE, &optval, optlen);
 	optval = 3;
@@ -122,8 +122,15 @@ void usage()
 int main(int argc, char *argv[])
 {
 	char *call="BG6CQ-5";
+	char *server="china.aprs2.net";
 	signal(SIGCHLD,SIG_IGN);
-	if(argc>1) call=argv[1];
+	if(argc==2) {
+		server=argv[1];
+		call=argv[2];
+	} if(argc!=0) {
+		printf("aprs.fi.toudp server call\n");
+		exit(0);
+	}
 
 #ifndef DEBUG
 	daemon_init("aprsrelay",LOG_DAEMON);
@@ -140,6 +147,6 @@ int main(int argc, char *argv[])
         }
 #endif
 
-	Process(call);
+	Process(server,call);
 	return(0);
 }
