@@ -845,41 +845,19 @@ if($cmd=="kml") {
 	echo "<kml xmlns=\"http://www.opengis.net/kml/2.2\" xmlns:gx=\"http://www.google.com/kml/ext/2.2\">\n";
 	echo "<Document>\n";
 	echo "<name>".$call." Track</name>\n";?>
-	<Style id="sn_ylw-pushpin">
+	<Style id="ylw">
 		<LabelStyle>
 			<color>ff1307ff</color>
 		</LabelStyle>
 		<LineStyle>
 			<color>ff00ffff</color>
-			<width>1.5</width>
+			<width>4</width>
 		</LineStyle>
 	</Style>
-	<Style id="sh_ylw-pushpin">
-		<IconStyle>
-			<scale>1.2</scale>
-		</IconStyle>
-		<LabelStyle>
-			<color>ff1307ff</color>
-		</LabelStyle>
-		<LineStyle>
-			<color>ff00ffff</color>
-			<width>1.5</width>
-		</LineStyle>
-	</Style>
-	<StyleMap id="msn_ylw-pushpin">
-		<Pair>
-			<key>normal</key>
-			<styleUrl>#sn_ylw-pushpin</styleUrl>
-		</Pair>
-		<Pair>
-			<key>highlight</key>
-			<styleUrl>#sh_ylw-pushpin</styleUrl>
-		</Pair>
-	</StyleMap>
 <?php
 	echo "<Folder><name>".$call."-".date("Y-m-d")."</name>\n";
 	echo "<Placemark>\n";
-	echo "<styleUrl>#msn_ylw-pushpin</styleUrl>\n";
+	echo "<styleUrl>#ylw</styleUrl>\n";
 	echo "<gx:Track id=\"1\">\n";
 	echo "<altitudeMode>absolute</altitudeMode>\n";
 	$q="select date_format(CONVERT_TZ(tm,@@session.time_zone, '+00:00'),\"%Y-%m-%dT%H:%i:%sZ\"),lat,lon,msg,datatype from aprspacket where tm>? and `call`=? and lat<>'' and not lat like '0000.00%' order by tm";
