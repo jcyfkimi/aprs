@@ -23,6 +23,15 @@ $inview = 0;
 if ( isset($_REQUEST["inview"])) 
 	$inview = 1;
 
+$altmode = 0;		// GPS 高度
+if ( isset($_REQUEST["alt"])) 
+	$altmode = 1;   // 地面位置
+
+$interval = 60;  // 默认60秒钟刷新
+if ( isset($_REQUEST["interval"])) 
+	$interval = intval($_REQUEST["interval"]);
+if ( $interval < 0 ) $interval = 60;
+
 if (isset($_REQUEST["kml"])) {
 //	header("Content-Type:application/gpx+xml");
 	header("Content-Type:application/vnd.google-earth.kml+xml");
@@ -39,11 +48,16 @@ if (isset($_REQUEST["kml"])) {
 	echo "<href>".$urlf."?span=".$span;
 	if ($opt==1) echo "&amp;opt=1";
 	if ($inview==1) echo "&amp;inview=1";
+	if ($altmode==1) echo "&amp;alt=1";
 	echo "</href>\n";
 	echo "<viewRefreshMode>onStop</viewRefreshMode>\n";
 	echo "<viewRefreshTime>1</viewRefreshTime>\n";
-	echo "<refreshMode>onInterval</refreshMode>\n";
-	echo "<refreshInterval>60</refreshInterval>";
+	 if ( $interval == 0 ) {
+		echo "<refreshMode>onExpire</refreshMode>\n";
+	} else {
+		echo "<refreshMode>onInterval</refreshMode>\n";
+		echo "<refreshInterval>".$interval."</refreshInterval>";
+	}
 	echo "</Link>\n";
 	echo "</NetworkLink>\n";
 	echo "</kml>\n";
@@ -337,10 +351,10 @@ while($stmt->fetch()) {
         $lat = strtolat($glat);
         $lon = strtolon($glon);
 	if($inview==1) {
-		if($lat<$lat1) continue;
-		if($lat>$lat2) continue;
-		if($lon<$lon1) continue;
-		if($lon>$lon2) continue;
+		if($lat<$lat1-0.5) continue;
+		if($lat>$lat2+0.5) continue;
+		if($lon<$lon1-0.5) continue;
+		if($lon>$lon2+0.5) continue;
 	}
 	echo "<Placemark>\n";
 	echo "  <name>".$call."</name>\n";
@@ -352,9 +366,14 @@ while($stmt->fetch()) {
 	echo "  <styleUrl>#st".bin2hex($dts)."</styleUrl>\n";
 	echo "  <MultiGeometry>\n";
 	echo "  <Point>\n";
-	echo "  <altitudeMode>absolute</altitudeMode>\n";
-	echo "    <coordinates>".$lon.",".$lat.",";
-	echo kml_alt($msg,$ddt);
+	if ( $altmode == 0 ) {  // GPS 高度
+		echo "  <altitudeMode>absolute</altitudeMode>\n";
+		echo "    <coordinates>".$lon.",".$lat.",";
+		echo kml_alt($msg,$ddt);
+	} else {
+		echo "  <altitudeMode>clampToGround</altitudeMode>\n";
+		echo "    <coordinates>".$lon.",".$lat.",0";
+	}
 	echo "</coordinates>\n";
   	echo "  </Point>\n";
 
@@ -369,13 +388,20 @@ if($disppath==1) {
 		echo "<LineString>\n";
     		echo "  <tessellate>1</tessellate>\n";
 		echo "  <extrude>1</extrude>\n";
-    		echo "  <altitudeMode>absolute</altitudeMode>\n";
+		if ( $altmode == 0 )   // GPS 高度
+    			echo "  <altitudeMode>absolute</altitudeMode>\n";
+		else 
+    			echo "  <altitudeMode>clampToGround</altitudeMode>\n";
+		
 		echo "  <coordinates>\n";
 		while($stmt2->fetch()) {
         		$lat = strtolat($glat);
         		$lon = strtolon($glon);
 			echo $lon.",".$lat.",";
-			echo kml_alt($msg,$ddt);
+			if ( $altmode == 0 )   // GPS 高度
+				echo kml_alt($msg,$ddt);
+			else 
+				echo "0";
 			echo " ";
 		}
 		echo "  </coordinates>\n";

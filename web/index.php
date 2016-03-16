@@ -1094,15 +1094,20 @@ if ($cmd=="ge") {
 		else
 			echo "<option value=\"$i\">".$i."天</option>";
 	}
-	echo "</select><p>";
-	echo "&nbsp;视线内显示：<input name=inview type=checkbox> 仅仅显示视线内站点，提高速度<p>\n";
+	echo "</select>";
+	echo " 选择2天，则显示从昨天00:00开始的台站数据和轨迹<p>";
+	echo "数据更新间隔：";
+	echo "<select name=interval>";
+	echo "<option value=\"0\">不自动刷新</option>";
+	echo "<option value=\"30\">30秒钟</option>";
+	echo "<option value=\"60\" selected=\"selected\">60秒钟</option>";
+	echo "<option value=\"120\">2分钟</option>";
+	echo "</select> 在Google Earth停留时数据更新间隔<p>";
+	echo "忽略高度数据：<input name=alt type=checkbox checked> 显示路径时忽略高度数据，贴地面<p>\n";
+	echo "仅显示视线内：<input name=inview type=checkbox> 显示视线经纬度±0.5°内站点，避免超过屏幕对象限制<p>\n";
 	echo "路径显示优化：<input name=opt type=checkbox> 放大后才显示路径，提高速度\n";
 	echo "<p><input type=submit value=\"启动Google Earth\">";
 	echo "<p>";
-	echo "注：选择2天，则显示从昨天00:00开始的台站数据和轨迹<p>";
-	echo "注：每个站点显示位置和路径占用2个对象，如果站点太多，显示的对象超过1000，<br>";
-	echo "&nbsp;&nbsp;Google Earth会不显示，这时可以选择视线内显示和路径显示优化<br>";
-	echo "&nbsp;&nbsp;将仅仅显示视野内的站点，并且放大到一定后才显示轨迹<p>";
 	echo "</form>";
 	exit(0);
 }
