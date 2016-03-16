@@ -198,6 +198,14 @@ function urlmessage($call,$icon, $dtmstr, $msg, $ddt) {
 	return $m;	
 }
 
+function checklatlon($glat, $glon) {
+	$s = substr($glat,7,1);
+	if( $s!='S' && $s!='N' ) return false;
+	$s = substr($glon,8,1);
+	if( $s!='W' && $s!='E' ) return false;
+	return true;
+}
+
 function strtolat($glat) {
 	$lat = 0;
 	$lat = substr($glat,0,2) + substr($glat,2,5)/60;
@@ -348,6 +356,8 @@ $stmt->execute();
 $stmt->bind_result($call, $dtm, $glat, $glon, $msg, $ddt, $dts);
 $stmt->store_result();	
 while($stmt->fetch()) {
+	
+	if(!checklatlon($glat, $glon)) continue; 
         $lat = strtolat($glat);
         $lon = strtolon($glon);
 	if($inview==1) {
@@ -395,6 +405,7 @@ if($disppath==1) {
 		
 		echo "  <coordinates>\n";
 		while($stmt2->fetch()) {
+			if(!checklatlon($glat, $glon)) continue; 
         		$lat = strtolat($glat);
         		$lon = strtolon($glon);
 			echo $lon.",".$lat.",";
