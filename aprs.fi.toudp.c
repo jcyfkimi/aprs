@@ -124,10 +124,10 @@ int main(int argc, char *argv[])
 	char *call="BG6CQ-5";
 	char *server="china.aprs2.net";
 	signal(SIGCHLD,SIG_IGN);
-	if(argc==2) {
+	if(argc==3) {
 		server=argv[1];
 		call=argv[2];
-	} if(argc!=0) {
+	} if(argc!=1) {
 		printf("aprs.fi.toudp server call\n");
 		exit(0);
 	}
