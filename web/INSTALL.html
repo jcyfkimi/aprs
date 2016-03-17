@@ -1,5 +1,4 @@
-安装记录:
-
+<h3>安装记录</h3>
 <pre>
 1. 下载CentOS-6.7-x86_64-netinstall.iso，默认安装，时区设置为Asia/Shanghai
 
@@ -44,9 +43,7 @@ MagicBadness   42.7
 cd /usr/src
 git clone https://github.com/bg6cq/aprs
 
-/usr/src/aprs
-vi aprs.fi.toudp.c
-把里面的china.aprs2.net改为127.0.0.1
+cd /usr/src/aprs
 make
 
 8. 修改web文件
@@ -98,11 +95,13 @@ CREATE TABLE `packetstats` (
 chkconfig mysqld on
 chkconfig httpd on
 chkconfig aprsc on
+
 vi /etc/rc.local 
 增加
-
 /usr/src/aprs/udptomysql
-/usr/src/aprs/aprs.fi.toudp
+/usr/src/aprs/aprs.fi.toudp 127.0.0.1 BG6CQ
+
+(上面的BG6CQ可以用自己的呼号，是登录127.0.0.1 14580取数据的)
 
 11. 设置服务器自动对时
 执行crontab -e
@@ -112,6 +111,10 @@ vi /etc/rc.local
 12. 重启
 reboot 重启
 
+</pre>
+
+<h3>使用</h3>
+<pre>
 启动后 
 http://x.x.x.x:14501/可以看到aprsc状态
 http://x.x.x.x/可以看到地图
@@ -122,5 +125,4 @@ tcp 14580可以接收标准aprs客户端连接
 1. aprsc aprs服务端
 2. udptomysql 从UDP接收数据包，存到mysql数据库
 3. aprs.fi.toudp 连接到127.0.0.1:14580，获取呼号前缀B和VR2的数据，发给udptomysql
-
 </pre>
