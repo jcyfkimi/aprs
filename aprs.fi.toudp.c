@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
 	if(argc==3) {
 		server=argv[1];
 		call=argv[2];
-	} if(argc!=1) {
+	} else if(argc!=1) {
 		printf("aprs.fi.toudp server call\n");
 		exit(0);
 	}
