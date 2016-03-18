@@ -1,7 +1,7 @@
-/* aprs.fi.toudp.c v1.0 by  james@ustc.edu.cn 2015.12.19
+/* local.toudp.c v1.0 by  james@ustc.edu.cn 2015.12.19
 
-   connect to china.aprs2.net. tcp 14580 port, login filter p/B
-   send all packets to udp host in file "/usr/src/arps/aprs.fi.udpdest
+   connect to 127.0.0.1 tcp 14580 port, login filter b/*
+   send all packets to udp host in file "/usr/src/arps/local.udpdest
 
 */
 
@@ -22,7 +22,7 @@
 
 #define MAXLEN 16384
 
-// #define DEBUG 1
+#define DEBUG 1
 
 #define PORT 14580
 
@@ -58,7 +58,7 @@ void sendudp(char*buf, int len, char *host, int port)
 void relayaprs(char *buf, int len)
 {
         FILE *fp;
-        fp = fopen("/usr/src/aprs/aprs.fi.udpdest","r");
+        fp = fopen("/usr/src/aprs/local.udpdest","r");
         if (fp==NULL) {
                 fprintf(stderr, "open host error\n");
                 return;
@@ -98,7 +98,7 @@ void Process(char*server,char *call)
 	optval = 2;
 	Setsockopt(r_fd, SOL_TCP, TCP_KEEPINTVL, &optval, optlen);
 
-	snprintf(buffer,MAXLEN,"user %s pass %d vers fwd 1.5 filter p/B p/VR2\r\n",call,passcode(call));
+	snprintf(buffer,MAXLEN,"user %s pass %d vers fwd 1.5 filter b/*\r\n",call,passcode(call));
 	Write(r_fd, buffer, strlen(buffer));
 
 	while (1) {
@@ -114,26 +114,26 @@ void Process(char*server,char *call)
 
 void usage()
 {
-	printf("\naprs.fi.udp v1.0 - aprs relay by james@ustc.edu.cn\n");
-	printf("\naprs.fi.udp x.x.x.x CALL\n\n");
+	printf("\nlocal.toudp v1.0 - aprs relay by james@ustc.edu.cn\n");
+	printf("\nlocal.toudp x.x.x.x CALL\n\n");
 	exit(0);
 }
 
 int main(int argc, char *argv[])
 {
 	char *call="BG6CQ-5";
-	char *server="china.aprs2.net";
+	char *server="127.0.0.1";
 	signal(SIGCHLD,SIG_IGN);
 	if(argc==3) {
 		server=argv[1];
 		call=argv[2];
 	} else if(argc!=1) {
-		printf("aprs.fi.toudp server call\n");
+		printf("local.toudp server call\n");
 		exit(0);
 	}
 
 #ifndef DEBUG
-	daemon_init("aprsrelay",LOG_DAEMON);
+	daemon_init("local.toudp",LOG_DAEMON);
 	while(1) {
                 int pid;
                 pid=fork();

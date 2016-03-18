@@ -99,7 +99,7 @@ chkconfig aprsc on
 vi /etc/rc.local 
 增加
 /usr/src/aprs/udptomysql
-/usr/src/aprs/aprs.fi.toudp 127.0.0.1 BG6CQ
+/usr/src/aprs/local.toudp 127.0.0.1 BG6CQ
 
 (上面的BG6CQ可以用自己的呼号，是登录127.0.0.1 14580取数据的)
 
@@ -124,5 +124,5 @@ tcp 14580可以接收标准aprs客户端连接
 各程序功能：
 1. aprsc aprs服务端
 2. udptomysql 从UDP接收数据包，存到mysql数据库
-3. aprs.fi.toudp 连接到127.0.0.1:14580，获取呼号前缀B和VR2的数据，发给udptomysql
+3. local.toudp 连接到127.0.0.1:14580，获取呼号数据发给udptomysql
 </pre>

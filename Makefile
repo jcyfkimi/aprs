@@ -1,7 +1,9 @@
-all: aprstcp aprsudp udptoaprs udptomysql udptolog aprs.fi.toudp
+all: aprstcp aprsudp udptoaprs udptomysql udptolog aprs.fi.toudp local.toudp
 
 aprs.fi.toudp: aprs.fi.toudp.c passcode.c
 	gcc -o aprs.fi.toudp aprs.fi.toudp.c -Wall
+local.toudp: local.toudp.c passcode.c
+	gcc -o local.toudp local.toudp.c -Wall
 aprstcp: aprstcp.c
 	gcc  -o aprstcp aprstcp.c	 -Wall
 aprsudp: aprsudp.c
