@@ -4,12 +4,13 @@ int passcode(char *callin)
 	strncpy(call,callin,30);
         unsigned int hash = 0x73e2;
         while(call[i]) {
+                if( call[i] == '-' ) break;
                 call[i]=toupper(call[i]);
-                call[i+1]=toupper(call[i+1]);
                 hash ^= call[i]<< 8;
-                hash ^= call[i+1];
                 if( call[i+1] == 0 ) break;
                 if( call[i+1] == '-' ) break;
+                call[i+1]=toupper(call[i+1]);
+                hash ^= call[i+1];
                 i+=2;
         }
         hash = hash & 0x7fff;
