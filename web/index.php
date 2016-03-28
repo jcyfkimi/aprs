@@ -364,7 +364,7 @@ if ($cmd=="map") {
 		#autocenter { display:inline;} 
 		#disp15min { display:inline;} 
 	</style>
-	<title>APRS地图</title>
+	<title>中国救援指挥平台</title>
 	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=7RuEGPr12yqyg11XVR9Uz7NI"></script>
 </head>
 <body>
@@ -887,7 +887,7 @@ if($cmd=="kml") {
 }
 ?>
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<title>APRS relay server</title>
+	<title>中国救援指挥平台</title>
 </head>
 <style type="text/css">
 <!--
