@@ -970,17 +970,20 @@ if ($cmd=="today") {
 }
 
 if ($cmd=="call") {
-	echo "今天收到的 $call APRS数据包 ";
-	echo "下载轨迹";
-       	echo "<a href=".$_SERVER["PHP_SELF"]."?gpx=$call>GPX</a> ";
-       	echo "<a href=".$_SERVER["PHP_SELF"]."?kml=$call>KML</a> ";
-	disp_map($call);
-	echo "<p>";
+	echo "今天收到的 $call ";
 	$q="select tm,`call`,datatype,lat,lon,`table`,symbol,msg,raw from aprspacket where tm>curdate() and `call`=? order by tm desc";
 	$stmt=$mysqli->prepare($q);
         $stmt->bind_param("s",$call);
         $stmt->execute();
+	$stmt->store_result();
 	$meta = $stmt->result_metadata();
+	echo $stmt->num_rows;
+
+	echo " APRS数据包 下载轨迹";
+       	echo "<a href=".$_SERVER["PHP_SELF"]."?gpx=$call>GPX</a> ";
+       	echo "<a href=".$_SERVER["PHP_SELF"]."?kml=$call>KML</a> ";
+	disp_map($call);
+	echo "<p>";
 
 	$i=0;
 	while ($field = $meta->fetch_field()) {
