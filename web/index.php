@@ -327,7 +327,7 @@ function disp_map($call) {
 	echo "<a href=\"http://aprs.fi/#!mt=roadmap&z=11&call=a%2F".$call."&timerange=43200&tail=43200\" target=_blank>aprs.fi</a> ";
 	echo "<a href=\"http://aprs.hamclub.net/mtracker/map/aprs/".$call."\" target=_blank>hamclub</a> ";
 	echo "<a href=\"http://aprs.hellocq.net/\" target=_blank>hellocq</a> ";
-	echo "<a href=\"".$_SERVER["PHP_SELF"]."?map&call=".$call."\" target=_blank>baidu</a> ";
+	echo "<a href=\"".$_SERVER["PHP_SELF"]."?map&call=".$call."\" target=_blank>本站</a> ";
 }
 
 function top_menu() {
@@ -339,7 +339,12 @@ function top_menu() {
 	echo "<a href=".$_SERVER["PHP_SELF"]."?map target=_blank>地图</a> ";
 	echo "<a href=".$_SERVER["PHP_SELF"]."?ge>地球</a> ";
 	echo "<a href=".$_SERVER["PHP_SELF"]."?setup>设置</a> ";
-	echo "<a href=".$_SERVER["PHP_SELF"]."?about>关于</a><p>";
+	echo "<a href=".$_SERVER["PHP_SELF"]."?about>关于</a> ";
+	echo "<form style=\"margin:0px;display: inline\" action=".$_SERVER["PHP_SELF"]." method=POST>";
+	echo "<input name=today type=hidden>";
+	echo "<input name=str size=6>";
+	echo "<input type=submit value=查找>";
+	echo "</form><p>";
 }
 
 if ($cmd=="map") {  
@@ -363,6 +368,7 @@ if ($cmd=="map") {
 		#pathlen { display:inline; color:green} 
 		#autocenter { display:inline;} 
 		#disp15min { display:inline;} 
+		#search { display:inline;} 
 	</style>
 	<title>APRS地图</title>
 	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=7RuEGPr12yqyg11XVR9Uz7NI"></script>
@@ -375,7 +381,14 @@ if ($cmd=="map") {
 	">地球</a> </div>";
 	echo "<a href=".$_SERVER["PHP_SELF"]."?setup target=_blank>设置</a> ";
 	echo" <div id=calls></div><div id=inview></div><div id=pkts></div> ";
-	echo "<div id=msg></div><div id=pathlen></div><div id=autocenter></div><div id=disp15min></div></div>";
+	echo "<div id=msg></div><div id=pathlen></div><div id=autocenter></div>";
+	echo "<div id=disp15min></div>";
+	echo " <div id=search><form style=\"margin:0px;display: inline\" action=".$_SERVER["PHP_SELF"]." method=POST>";
+	echo "<input name=today type=hidden>";
+	echo "<input name=str size=6>";
+	echo "<input type=submit value=查找>";
+	echo "</form></div>";
+	echo "</div>";
 ?>
 	<div id="allmap"></div>
 </div>
@@ -399,15 +412,17 @@ var llat2=0;
 var jiupian=1;
 var autocenter=true;
 var debug=true;
-var disp15min = true;
-var ldisp15min = true;
+var disp15min = false;
+var ldisp15min = false;
 var disp15min_refresh = 0;
 var lspan=1;
 
 (function(a,b){if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0,4)))ismobile=b})(navigator.userAgent||navigator.vendor||window.opera,1);
 
-if(ismobile)
+if(ismobile) {
 	document.getElementById("ge").innerHTML = "";
+	document.getElementById("disp15min").innerHTML = "";
+}
 
 function updateinview() {
 	if(ismobile)
@@ -474,6 +489,8 @@ function monitor_station(mycall) {
 }
 
 function disp15min_div(){
+	if(ismobile) 
+		return;
 	if(disp15min)
 		document.getElementById("disp15min").innerHTML = "<input type=checkbox checked id=disp15min onclick=\"disp15min_click(this);\">仅显示活动站点</input>";
 	else
@@ -887,7 +904,7 @@ if($cmd=="kml") {
 }
 ?>
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<title>APRS relay server</title>
+	<title>APRS地图</title>
 </head>
 <style type="text/css">
 <!--
@@ -922,7 +939,7 @@ if ($cmd=="new") {
 	echo "<h3>最新收到的无法解析经纬度的APRS数据包</h3>";
 	$q="select tm,`call`,raw from aprspacket where tm>=curdate() and lat='' order by tm desc limit 10";
 	$result = $mysqli->query($q);
-	echo "<table border=1 cellspacing=0><tr><th>时间</th><th>呼号</th><th>APRS Packet</th><th>地图</th></tr>\n";
+	echo "<table border=1 cellspacing=0><tr><th>时间</th><th>呼号</th><th>APRS Packet</th></tr>\n";
 	while($r=$result->fetch_array()) {
         	echo "<tr><td>";
         	echo $r[0];
@@ -930,8 +947,6 @@ if ($cmd=="new") {
         	echo "<a href=".$_SERVER["PHP_SELF"]."?call=$r[1]>$r[1]</a>";
         	echo "</td><td>";
 		echo $r[2];  //raw
-        	echo "</td><td>";
-		disp_map($r[1]);
         	echo "</td></tr>\n";
 	}
 	echo "</table>\n";
@@ -939,18 +954,29 @@ if ($cmd=="new") {
 }
 
 if ($cmd=="today") {
-	echo "<h3>今天收到的APRS数据包</h3>";
+	if(isset($_REQUEST["str"])) {
+		$str = $_REQUEST["str"];
+		echo "<h3>今天收到的 $str 有关APRS数据包</h3>";
+	} else {
+		echo "<h3>今天收到的APRS数据包</h3>";
+		$str = "";
+	}
 	if(isset($_REQUEST["c"]))
-		$q = "select `call`, count(*) c, count(distinct(concat(lon,lat))) from aprspacket where tm>curdate() group by `call` order by c desc";
+		$q = "select `call`, count(*) c, count(distinct(concat(lon,lat))) from aprspacket where tm>curdate() and `call` like ? group by `call` order by c desc";
 	else if(isset($_REQUEST["d"]))
-		$q = "select `call`, count(*), count(distinct(concat(lon,lat))) c from aprspacket where tm>curdate() group by `call` order by c desc";
+		$q = "select `call`, count(*), count(distinct(concat(lon,lat))) c from aprspacket where tm>curdate() and `call` like ? group by `call` order by c desc";
 	else
-		$q = "select `call`, count(*), count(distinct(concat(lon,lat))) from aprspacket where tm>curdate() group by substr(`call`,3)";
-	$result = $mysqli->query($q);
+		$q = "select `call`, count(*), count(distinct(concat(lon,lat))) from aprspacket where tm>curdate() and `call` like ? group by substr(`call`,3)";
+	$stmt=$mysqli->prepare($q);
+	$str = "%".$str."%";
+	$stmt->bind_param("s",$str);
+	$stmt->execute();
+	$stmt->bind_result($r[0],$r[1],$r[2]);
+	$stmt->store_result();	
 	echo "<table border=1 cellspacing=0><tr><th><a href=".$_SERVER["PHP_SELF"]."?today>呼号</a></th>";
 	echo "<th><a href=".$_SERVER["PHP_SELF"]."?today&c>数据包数量</a></th>";
 	echo "<th><a href=".$_SERVER["PHP_SELF"]."?today&d>位置点数量</a></th><th>下载轨迹</th><th>地图</th></tr>\n";
-	while($r=$result->fetch_array()) {
+	while($stmt->fetch()) {
         	echo "<tr><td>";
         	echo "<a href=".$_SERVER["PHP_SELF"]."?call=$r[0]>$r[0]</a>";
         	echo "</td><td align=right>";
