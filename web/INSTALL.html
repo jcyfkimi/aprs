@@ -52,7 +52,18 @@ mv html html.old
 ln -s /usr/src/aprs/web html
 
 9. 启动数据库，创建表
-service mysqld start
+vi /etc/my.cnf
+
+在[mysqld]下添加
+default-character-set=utf8
+
+增加
+[client]
+default-character-set=utf8
+
+保存
+
+运行service mysqld start
 执行mysql 输入以下命令
 create database aprs;
 use aprs;
