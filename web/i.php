@@ -364,7 +364,7 @@ if ($cmd=="map") {
 		#autocenter { display:inline;} 
 		#disp15min { display:inline;} 
 	</style>
-	<title>APRS地图</title>
+	<title>中国救援指挥平台</title>
 	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=7RuEGPr12yqyg11XVR9Uz7NI"></script>
 </head>
 <body>
@@ -372,7 +372,7 @@ if ($cmd=="map") {
 	<div id="top"><?php
 	$blank = " target=_blank";
 	echo "<a href=".$_SERVER["PHP_SELF"]."?new".$blank.">最新</a> <div id=ge><a href=".$_SERVER["PHP_SELF"]."?ge".$blank.
-	">地球</a> </div>";
+	">地球</a> <a href=all.php>跟踪</a> </div>";
 	echo "<a href=".$_SERVER["PHP_SELF"]."?setup target=_blank>设置</a> ";
 	echo" <div id=calls></div><div id=inview></div><div id=pkts></div> ";
 	echo "<div id=msg></div><div id=pathlen></div><div id=autocenter></div><div id=disp15min></div></div>";
@@ -887,7 +887,7 @@ if($cmd=="kml") {
 }
 ?>
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<title>APRS relay server</title>
+	<title>中国救援指挥平台</title>
 </head>
 <style type="text/css">
 <!--
