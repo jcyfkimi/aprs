@@ -123,7 +123,11 @@ function urlmessage($call,$icon, $dtmstr, $msg, $ddt) {
 		$m = $m."<b>".$speed." km/h ".$dir."°";
 		$msg = substr($msg,7);
 		if( substr($msg,0,3)=='/A=') {      // 178/061/A=000033
-			$alt=number_format(substr($msg,3,6)*0.3048,1);
+			if(strstr($msg, "51Track X2A")) {
+				$alt=number_format(substr($msg,3,6),1);
+			} else {
+				$alt=number_format(substr($msg,3,6)*0.3048,1);
+			}
 			$m=$m." 海拔".$alt."m</b><br>";
 			$msg = substr($msg,9);
 		}
@@ -358,7 +362,7 @@ if ($cmd=="map") {
 		body, html{width: 100%;height: 100%;margin:0;font-family:"微软雅黑";}
 		#full {height:100%; width: 100%;}
 		#top {height:25px; width: 100%;}
-		#allmap {height:100%; width: 100%;}
+		#allmap {position:absolute;top:25px;left:0; right:0px; bottom:0px; width: 100%;}
 		#control{width:100%;}
 		#ge { display:inline} 
 		#calls { display:inline} 
