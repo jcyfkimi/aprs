@@ -98,7 +98,11 @@ function urlmessage($call,$icon, $dtmstr, $msg, $ddt, $lon, $lat) {
 		$m = $m."<b>".$speed." km/h ".$dir."°";
 		$msg = substr($msg,7);
 		if( substr($msg,0,3)=='/A=') {      // 178/061/A=000033
-			$alt=number_format(substr($msg,3,6)*0.3048,1);
+			if(strstr($msg, "51Track X2A")) {
+				$alt=number_format(substr($msg,3,6),1);
+			} else {
+				$alt=number_format(substr($msg,3,6)*0.3048,1);
+			}
 			$m=$m." 海拔".$alt."m</b><br>";
 			$msg = substr($msg,9);
 		} else $m=$m."</b><br>";

@@ -1,9 +1,9 @@
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
-        <title>APRS Í¼±ê</title>
+        <title>APRS å›¾æ ‡</title>
 
-APRSÍ¼±êÓÉÁ½¸ö×Ö·û¿ØÖÆ£¬·Ö±ð½ÐtableºÍsymbol¡£<p>
-Ò»°ãÀ´Ëµ£¬tableÉèÖÃÎª/¼´¿É¡£<br>
-symbol¿ÉÒÔ°´ÕÕÏÂ±í×ó²à×Ö·ûÉèÖÃ:
+APRSå›¾æ ‡ç”±ä¸¤ä¸ªå­—ç¬¦æŽ§åˆ¶ï¼Œåˆ†åˆ«å«tableå’Œsymbolã€‚<p>
+ä¸€èˆ¬æ¥è¯´ï¼Œtableè®¾ç½®ä¸º/å³å¯ã€‚<br>
+symbolå¯ä»¥æŒ‰ç…§ä¸‹è¡¨å·¦ä¾§å­—ç¬¦è®¾ç½®:
 
 <?php
 
