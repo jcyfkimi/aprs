@@ -23,7 +23,7 @@
 
 #define MAXLEN 16384
 
-// #define DEBUG 1
+ #define DEBUG 1
 
 int c_fd;
 
@@ -105,7 +105,7 @@ void processaprs(unsigned char *buf, int len)
 	call=imei_call(buf+5);
 	if(call[0]==0) 
 		return;
-	int n=0;
+	int n=0,i;
 	n = sprintf(abuf,"%s>GT02,TCPIP*:=",call);
 	float l;
 	l = ((buf[22]*256+buf[23])*256+buf[24])*256+buf[25];
@@ -121,6 +121,9 @@ void processaprs(unsigned char *buf, int len)
 #endif
 	n+= sprintf(abuf+n,"%03d%05.2f%c>",(int)(l/60),l-60*((int)(l/60)), (buf[39]&4) == 0? 'W':'E');
 	n+= sprintf(abuf+n,"%03d/%03d",buf[31]*256+buf[32],buf[30]);
+	n+= sprintf(abuf+n,"IMEI:");
+	for(i=0;i<8;i++) 
+		n+= sprintf(abuf+n,"%02X",*(buf+5+i));
 #ifdef DEBUG
 fprintf(stderr,"%s\n",abuf);
 #endif
