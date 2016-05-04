@@ -654,7 +654,10 @@ function centertocurrent(){
 	geolocation.getCurrentPosition(function(r){
 		if(this.getStatus() == BMAP_STATUS_SUCCESS){
 			map.centerAndZoom(r.point,12);
-	}},{enableHighAccuracy: false});
+		}
+		UpdateStation();  
+		updateinview();
+},{enableHighAccuracy: false});
 }
 
 // 百度地图API功能
@@ -678,13 +681,14 @@ map.addEventListener('resize', map_resize);
         $call=@$_REQUEST["call"];
         if($call!="")  {
 		echo "monitor_station(\"$call\");\n";
+		echo "UpdateStation();\n";
 	} else 
 		echo "centertocurrent();\n";
 	echo "disp15min_div()\n";
 ?>
 
-createXmlHttpRequest();  
-UpdateStation();  
+//createXmlHttpRequest();  
+//UpdateStation();  
 </script>
 <?php
 	exit(0);
