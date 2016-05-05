@@ -8,17 +8,11 @@ if (!isset($_SESSION["jiupian"]))
 	$_SESSION["jiupian"]=1;
 
 if (!isset($_SESSION["span"]))
-	$_SESSION["span"]=2;
+	$_SESSION["span"]=1;
 $span = $_SESSION["span"];
 if ( ($span<=0) || ($span >10) ) $span=1;
-$span--;
 
-//$startdate=date_create();
-//$span="-15";
-//date_sub($startdate,date_interval_create_from_date_string("$span hour"));
-//$startdatestr=date_format($startdate,"Y-m-d H:i:s");
-
-$startdate=time() - 2 * 3600;
+$startdate=time() - $span * 3600 * 24;
 $startdatestr=date("Y-m-d H:i:s",$startdate);
 
 
