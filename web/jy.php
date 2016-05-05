@@ -246,7 +246,7 @@ var lasttm=0;
 var movepaths = {};
 var polylines = {};
 
-var colors = ["#1400FF","#14F0FF","#78FF00","#FF78F0","#0078F0"];
+var colors = ["#1400FF","#14F0FF","#78FF00","#FF78F0","#0078F0","#F0FF14","#FF78F0","#FF78F0","#FF78F0"];
 var colorindex = 0;
 
 function getcolor(){
