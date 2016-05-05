@@ -395,7 +395,7 @@ map.centerAndZoom(new BMap.Point(108.940178,34.5), 6);
 
 //centertocurrent();
 
-createXmlHttpRequest();  
+//createXmlHttpRequest();  
 UpdateStation();  
 </script>
 <?php
