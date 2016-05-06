@@ -568,7 +568,11 @@ function setstation(lon, lat, label, tm, iconurl, msg)
 		else {
     			markers[label].setAnimation(BMAP_ANIMATION_BOUNCE);
 			m = markers[label];
-			setTimeout((function(m){m.setAnimation(null);})(m), 500);
+			setTimeout( 
+				function(){
+					m.setAnimation(null);
+				}, 
+				500);
 		}
 		lasttms[label] = tm;
 		if(tm>lastupdatetm) lastupdatetm = tm;
@@ -593,7 +597,11 @@ function setstation(lon, lat, label, tm, iconurl, msg)
 	infowindows[label]=infowindow;
 	if(tm>lastupdatetm) lastupdatetm = tm;
     	marker.setAnimation(BMAP_ANIMATION_BOUNCE);
-	setTimeout((function(m){m.setAnimation(null);})(marker), 500);
+	setTimeout(
+		function(){
+			marker.setAnimation(null);
+		}, 
+		500);
 	totalmarkers++;
 	updateinview();
 }
