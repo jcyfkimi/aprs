@@ -556,6 +556,7 @@ function setstation(lon, lat, label, tm, iconurl, msg)
 {	
 	if(markers.hasOwnProperty(label)) { 
 		if(tm<lasttms[label]) return;
+		markers[label].setAnimation(null);
 		markers[label].setPosition( new BMap.Point(lon, lat) );
 		infowindows[label].setContent(msg);
 		if(iconurls[label]!=iconurl) {
@@ -566,8 +567,8 @@ function setstation(lon, lat, label, tm, iconurl, msg)
 		if(tm==lasttms[label]) tm++;  // 如果同一个站点同样的时间戳第二次出现，说明至少过去了2秒，
 					// 可以将最后时间戳+1, 这样一来，同一个站点的信息最多重复一次
 		else {
-    			markers[label].setAnimation(BMAP_ANIMATION_BOUNCE);
-			m = markers[label];
+			var m = markers[label];
+    			m.setAnimation(BMAP_ANIMATION_BOUNCE);
 			setTimeout( 
 				function(){
 					m.setAnimation(null);
