@@ -75,30 +75,24 @@ void sendudp(char*buf, int len, char *host, int port)
 	close(s);
 }
 
+void insertU(char *buf, int *len) {
+	char *p;
+	p=buf+*len;
+	*p='/';
+	*(p+1)='U';
+	*(p+2)='D';
+	*(p+3)='P';
+	*(p+4)=0;
+	(*len)+=4;
+}
+
 void relayaprs(char *buf, int len)
 {
-	FILE *fp;
-	sendudp(buf,len, "127.0.0.1",PORT+1);
-	fp = fopen("/usr/src/aprs/udpdest","r");
-	if (fp==NULL) {
-		fprintf(stderr, "open host error\n");
-		return;
-	}
-	char hbuf[MAXLEN];
-	while(fgets(hbuf,MAXLEN,fp)) {
-		char *p;
-		if(strlen(hbuf)<5) continue;
-		if(hbuf[strlen(hbuf)-1]=='\n') 
-			hbuf[strlen(hbuf)-1]=0;
-		p = strchr(hbuf,':');
-		if(p) {
-			*p=0;
-			p++;
-			sendudp(buf,len,hbuf,atoi(p));
-		} else 
-			sendudp(buf,len,hbuf,PORT);
-	}
-	fclose(fp);
+	sendudp(buf,len, "127.0.0.1",14581);   // forward to china.aprs2.net
+	sendudp(buf,len, "120.25.100.30",14580);   // forward to aprs.hellocq.net
+	insertU(buf,&len);
+	sendudp(buf,len, "127.0.0.1",14582);   // udptolog
+	sendudp(buf,len, "127.0.0.1",14583);   // udptomysql 
 }
 
 int main(void)

@@ -9,7 +9,7 @@ aprstcp: aprstcp.c
 gt02: gt02.c
 	gcc -g -o gt02 gt02.c	 -Wall -lm
 aprsudp: aprsudp.c
-	gcc  -o aprsudp aprsudp.c	 -Wall
+	gcc -g -o aprsudp aprsudp.c	 -Wall
 udptoaprs: udptoaprs.c passcode.c
 	gcc -o udptoaprs udptoaprs.c -Wall
 udptomysql: udptomysql.c
