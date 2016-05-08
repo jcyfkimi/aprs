@@ -397,7 +397,6 @@ if ($cmd=="map") {
 	<div id="allmap"></div>
 </div>
 </body>
-</html>
 <script type="text/javascript">
 var totalmarkers=0;
 var markers = {};
@@ -699,6 +698,7 @@ map.addEventListener('resize', map_resize);
 //createXmlHttpRequest();  
 //UpdateStation();  
 </script>
+</html>
 <?php
 	exit(0);
 }
