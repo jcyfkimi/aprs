@@ -77,6 +77,12 @@ void sendudp(char*buf, int len, char *host, int port)
 
 void insertU(char *buf, int *len) {
 	char *p;
+	if(buf[*len-1]=='\n')
+		(*len)--;
+	if(buf[*len-1]=='\r')
+		(*len)--;
+	buf[*len]=0;
+
 	p=buf+*len;
 	*p='/';
 	*(p+1)='U';
