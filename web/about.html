@@ -11,8 +11,11 @@
 <pre>
 功能：
 从 14580 UDP端口接收数据
-使用UDP转发给127.0.0.1 14581端口
-使用UDP转发给/usr/src/aprs/udpdest服务器(/usr/src/aprs/udpdest 可以有多行，每行是一个IP:port形式)
+使用UDP转发给以下端口
+127.0.0.1 14581
+127.0.0.1 14582
+127.0.0.1 14583
+120.25.100.30 14580 (aprs.helloce.net)
 </pre>
 
 <h3>2. aprstcp</h3>
@@ -20,7 +23,10 @@
 功能：
 从 14580 tcp端口接收数据
 使用TCP转发给china.aprs2.net
-使用UDP转发给/usr/src/aprs/udpdest服务器(/usr/src/aprs/udpdest 可以有多行，每行是一个IP:port形式)
+使用UDP转发给以下端口
+127.0.0.1 14582
+127.0.0.1 14583
+120.25.100.30 14580
 </pre>
 
 <h3>3. udptoaprs</h3>
