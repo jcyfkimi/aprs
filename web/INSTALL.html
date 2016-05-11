@@ -34,10 +34,10 @@ vi /etc/sysconfig/aprsc
 STARTAPRSC="yes"
 
 vi /opt/aprsc/etc/aprsc.conf
-需要时修改ServerID，管理员mail
-注释下面两行：
-Listen "UDP submit"
-MagicBadness   42.7
+修改ServerID，管理员mail
+下面两行前加#注释：
+#Listen "UDP submit"
+#MagicBadness   42.7
 
 7. 下载源码、编译
 cd /usr/src
