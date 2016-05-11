@@ -12,7 +12,7 @@ aprsudp: aprsudp.c
 	gcc -g -o aprsudp aprsudp.c	 -Wall
 udptoaprs: udptoaprs.c passcode.c
 	gcc -o udptoaprs udptoaprs.c -Wall
-udptomysql: udptomysql.c
+udptomysql: udptomysql.c db.h
 	gcc -g -o udptomysql udptomysql.c -Wall -lmysqlclient -L/usr/lib64/mysql/
 
 clean:
