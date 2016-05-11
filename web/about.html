@@ -62,6 +62,28 @@
 使用UDP转发给/usr/src/aprs/aprs.fi.udpdest服务器(/usr/src/aprs/aprs.fi.udpdest 可以有多行，每行是一个IP:port形式)
 </pre>
 
+<h3>7. gt02</h3>
+<pre>
+命令行：gt02
+功能：
+在TCP 8821端口接收GT02设备的数据包
+如果收到的IMEI在 /usr/src/aprs/imei_call.txt有对应呼呼，则转发给
+UDP 127.0.0.1 14580
+否则使用呼号GT2UN-9，使用UDP转发给
+127.0.0.1 14582
+127.0.0.1 14583
+</pre>
+
+<h3>8. local.toudp</h3>
+<pre>
+命令行：local.todup 127.0.0.1 呼号
+参数含义：呼号，用来连接127.0.0.1  14580服务器
+功能：
+登录127.0.0.1 14580 APRS-IS服务器，获取信息
+使用UDP转发给
+127.0.0.1 14583
+</pre>
+
 <h3>数据库信息</h3>
 <pre>
 数据库名字是 aprs 

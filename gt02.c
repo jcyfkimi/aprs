@@ -1,8 +1,9 @@
-/* gt02 v1.0 by  james@ustc.edu.cn 2015.12.19
-
+/* gt02 v1.0 by  james@ustc.edu.cn 2016.05.11
    accept GT02 connection on tcp port 8821
-	if IMEI was found in table imei_call, send to udp 127.0.0.1:14580, then go to aprs.fi
-	else use GT2-XXXX (XXXX is imei last 2 HEX) as call and send to 127.0.0.1:14582, 127.0.0.1:14583 for local display
+	if IMEI was found in file imei_call.txt, 
+		send to udp 127.0.0.1:14580, then go to aprs.fi
+	else 
+		use GT2UN-9 as call and send to 127.0.0.1:14582, 127.0.0.1:14583 for local display
 */
 
 #include <stdio.h>
@@ -23,9 +24,7 @@
 
 #define MAXLEN 16384
 
- #define DEBUG 1
-
-int c_fd;
+// #define DEBUG 1
 
 void dump_pkt(unsigned char *buf, int len)
 {
@@ -38,6 +37,7 @@ void dump_pkt(unsigned char *buf, int len)
 	}
 	fprintf(stderr,"\n");
 }
+
 void sendudp(char*buf, int len, char *host, int port)
 {
         struct sockaddr_in si_other;
@@ -102,6 +102,17 @@ void processaprs(unsigned char *buf, int len)
 {
         char abuf[MAXLEN];
 	char *call;
+	static time_t last_tm;
+	time_t now_tm;
+	now_tm = time(NULL);
+	if(now_tm-last_tm < 5) {
+#ifdef DEBUG
+		fprintf(stderr,"packet interval < 5, skip\n");
+#endif
+		return;
+	}
+	last_tm = now_tm;
+
 	call=imei_call(buf+5);
 	if(call[0]==0) 
 		return;
@@ -122,13 +133,18 @@ void processaprs(unsigned char *buf, int len)
 	n+= sprintf(abuf+n,"%03d%05.2f%c>",(int)(l/60),l-60*((int)(l/60)), (buf[39]&4) == 0? 'W':'E');
 	n+= sprintf(abuf+n,"%03d/%03d",buf[31]*256+buf[32],buf[30]);
 	n+= sprintf(abuf+n,"IMEI:");
-	for(i=0;i<8;i++) 
+	for(i=6;i<8;i++) 
 		n+= sprintf(abuf+n,"%02X",*(buf+5+i));
+	n+= sprintf(abuf+n,"\r\n");
 #ifdef DEBUG
-fprintf(stderr,"%s\n",abuf);
+	fprintf(stderr,"APRS: %s\n",abuf);
 #endif
-
-        sendudp(abuf,n,"127.0.0.1",14583);
+	if(strstr(abuf,"GT2UN-9")==0)  // imei_call
+        	sendudp(abuf,n,"127.0.0.1",14580);
+	else {
+        	sendudp(abuf,n,"127.0.0.1",14582);
+        	sendudp(abuf,n,"127.0.0.1",14583);
+	}
 }
 
 void Process(int c_fd) 
@@ -164,17 +180,24 @@ void Process(int c_fd)
 			buffer[4]=0x0a;	
         		Write(c_fd, buffer, 5);
 #ifdef DEBUG
+			fprintf(stderr,"heart beat packet\n");
 			fprintf(stderr,"send back heart beat\n");
 #endif
 			continue;
 		}
 		if( (n==42) && (buffer[0]==0x68) && (buffer[1]==0x68) && 
 			(buffer[2]==0x25) && 
-			(buffer[3]==0x0) && (buffer[4]==0x0) && 
+//			(buffer[3]==0x0) && (buffer[4]==0x0) && 
 			(buffer[15]==0x10) ) { // gps status 
-		
+#ifdef DEBUG
+			fprintf(stderr,"GPS status packet\n");
+#endif
                 	processaprs(buffer,n);
+			continue;
 		}
+#ifdef DEBUG
+		fprintf(stderr,"unknow packer\n");
+#endif
         }
 }
 
@@ -188,6 +211,7 @@ void usage()
 int main(int argc, char *argv[])
 {
 	int listen_fd;
+	int c_fd;
 	int llen;
 
 	signal(SIGCHLD,SIG_IGN);
@@ -203,6 +227,7 @@ int main(int argc, char *argv[])
 		slen = sizeof(sa);
 		c_fd = Accept(listen_fd, &sa, (socklen_t *)&slen);
 #ifdef DEBUG
+		fprintf(stderr,"get connection:\n");
 		Process(c_fd);
 #else
 		if( Fork()==0 ) {
