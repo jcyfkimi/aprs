@@ -78,12 +78,12 @@ int main(int argc, char *argv[])
 	signal(SIGCHLD,SIG_IGN);
 
 	if(argc!=2) {
-		fprintf(stderr,"usage:  aprstcp your_call_sign\n");
+		fprintf(stderr,"usage:  udptoaprs your_call_sign\n");
 		exit(0);
 	}
 
 #ifndef DEBUG
-	daemon_init("aprstcp",LOG_DAEMON);
+	daemon_init("udptoaprs",LOG_DAEMON);
 	while(1) {
    		int pid;
    		pid=fork();
@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
 	u_fd = Udp_server("127.0.0.1","14581",(socklen_t *)&llen);
 
 	r_fd = Tcp_connect("china.aprs2.net","14580");
-	snprintf(buf,MAXLEN,"user %s pass %d vers aprsrelay 1.0 filter r/31.83/117.29/1\r\n",
+	snprintf(buf,MAXLEN,"user %s pass %d vers udptoaprs 1.0 filter r/31.83/117.29/1\r\n",
 		argv[1], passcode(argv[1]));
 	Write(r_fd, buf, strlen(buf));
 #ifdef DEBUG

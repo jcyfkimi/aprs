@@ -1,8 +1,10 @@
 /* aprstcp v1.0 by  james@ustc.edu.cn 2015.12.19
 
    replay 14580 tcp aprs packet to "china.aprs2.net"
-   send all packets to udp host in file "/usr/src/arps/udpdest" 
-
+   send all packets to udp
+	127.0.0.1 14582
+	127.0.0.1 14583
+	120.25.100.30 14580
 */
 
 #include <stdio.h>

@@ -1,7 +1,8 @@
 /* local.toudp.c v1.0 by  james@ustc.edu.cn 2015.12.19
 
    connect to 127.0.0.1 tcp 14580 port, login filter t/poimqstunw
-   send all packets to udp host in file "/usr/src/arps/local.udpdest
+   send all packets to udp
+	127.0.0.1 14583
 
 */
 
