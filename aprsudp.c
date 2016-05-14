@@ -81,6 +81,8 @@ void insertU(char *buf, int *len) {
 		(*len)--;
 	if(buf[*len-1]=='\r')
 		(*len)--;
+	if(buf[*len-1]=='\n')
+		(*len)--;
 	buf[*len]=0;
 
 	p=buf+*len;
@@ -121,7 +123,7 @@ int main(void)
 	while(1) {
 		char buf[MAXLEN];
 		int len;
-		len = recvfrom(s, buf, MAXLEN, 0, (struct sockaddr * )&si_other, (socklen_t *)&slen);
+		len = recvfrom(s, buf, MAXLEN-10, 0, (struct sockaddr * )&si_other, (socklen_t *)&slen);
 		if (len<10 ) continue;
 		buf[len]=0;
 		if (strncmp(buf,"user",4)==0) {
