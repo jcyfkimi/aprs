@@ -1,8 +1,7 @@
 /* aprs.tomysql.c v1.0 by  james@ustc.edu.cn 2015.12.19
 
    connect to china.aprs2.net. tcp 14580 port, login filter p/B p/VR2
-   send all packets to mysql database china
-   this program is for aprs.co
+   store all packets to mysql database
 
 */
 
@@ -98,7 +97,7 @@ int main(int argc, char *argv[])
 #endif
 	mysql=connectdb();
 
-	mysql_query(mysql,"use china");
+//	mysql_query(mysql,"use china");
 	Process(server, call);
 	return(0);
 }
