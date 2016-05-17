@@ -1,0 +1,104 @@
+/* aprs.tomysql.c v1.0 by  james@ustc.edu.cn 2015.12.19
+
+   connect to china.aprs2.net. tcp 14580 port, login filter p/B p/VR2
+   send all packets to mysql database china
+   this program is for aprs.co
+
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <time.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netinet/ip.h>
+#include <netinet/tcp.h>
+#include <linux/if.h>
+#include <linux/if_ether.h>
+#include <linux/if_packet.h>
+#include "sock.h"
+#include <ctype.h>
+
+// #define DEBUG 1
+
+#define MAXLEN 16384
+
+#include "db.h"
+
+#include "tomysql.c"
+
+#include "passcode.c"
+
+void Process(char *server, char *call) 
+{	
+	char buffer[MAXLEN];
+	int r_fd;
+	int n;
+	int optval;
+   	socklen_t optlen = sizeof(optval);
+	r_fd= Tcp_connect(server,"14580");
+	optval = 1;
+	Setsockopt(r_fd, SOL_SOCKET, SO_KEEPALIVE, &optval, optlen);
+	optval = 3;
+	Setsockopt(r_fd, SOL_TCP, TCP_KEEPCNT, &optval, optlen);
+	optval = 2;
+	Setsockopt(r_fd, SOL_TCP, TCP_KEEPIDLE, &optval, optlen);
+	optval = 2;
+	Setsockopt(r_fd, SOL_TCP, TCP_KEEPINTVL, &optval, optlen);
+
+	snprintf(buffer,MAXLEN,"user %s pass %d vers aprs.fi.toudp 1.5 filter p/B p/VR2\r\n",call,passcode(call));
+	Write(r_fd, buffer, strlen(buffer));
+
+	while (1) {
+		n = Readline(r_fd, buffer, MAXLEN);
+		if(n<=0)   {
+			exit(0);
+		}
+		if(buffer[0]=='#') continue;
+		buffer[n]=0;
+		ToMysql(buffer,n);
+	}
+}
+
+void usage()
+{
+	printf("\naprstomysql v1.0 - aprs relay by james@ustc.edu.cn\n");
+	printf("\naprstomysql [ x.x.x.x CALL ]\n\n");
+	exit(0);
+}
+
+int main(int argc, char *argv[])
+{
+	char *call="BG6CQ-4";
+	char *server="china.aprs2.net";
+	signal(SIGCHLD,SIG_IGN);
+	if(argc==3) {
+		server=argv[1];
+		call=argv[2];
+	} else if(argc!=1) {
+		usage();
+		exit(0);
+	}
+
+#ifndef DEBUG
+	daemon_init("aprstomysql",LOG_DAEMON);
+	while(1) {
+                int pid;
+                pid=fork();
+                if(pid==0) // i am child, will do the job
+                        break;
+                else if(pid==-1) // error
+                        exit(0);
+                else
+                        wait(NULL); // i am parent, wait for child
+                sleep(2);  // if child exit, wait 2 second, and rerun
+        }
+#endif
+	mysql=connectdb();
+
+	mysql_query(mysql,"use china");
+	Process(server, call);
+	return(0);
+}
