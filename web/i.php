@@ -989,11 +989,25 @@ if ($cmd=="new") {
 if ($cmd=="today") {
 	if(isset($_REQUEST["str"])) {
 		$str = $_REQUEST["str"];
-		echo "<h3>今天收到的 $str 有关APRS数据包</h3>";
+		echo "<h3>今天收到的 $str 有关APRS数据包 ";
 	} else {
-		echo "<h3>今天收到的APRS数据包</h3>";
+		echo "<h3>今天收到的APRS数据包 ";
 		$str = "";
 	}
+	$str = "%".$str."%";
+	$q = "select count(distinct(`call`)), count(*) from aprspacket where tm>curdate() and `call` like ? ";
+	$stmt=$mysqli->prepare($q);
+	$stmt->bind_param("s",$str);
+	$stmt->execute();
+	$stmt->bind_result($r[0],$r[1]);
+	$stmt->store_result();	
+	$stmt->fetch();
+	echo "<font color=blue>";
+	echo $r[0]."呼号/".$r[1]."数据包";
+	echo "</font>";
+	echo "</h3>";
+	$stmt->close();
+
 	if(isset($_REQUEST["c"]))
 		$q = "select `call`, count(*) c, count(distinct(concat(lon,lat))) from aprspacket where tm>curdate() and `call` like ? group by `call` order by c desc";
 	else if(isset($_REQUEST["d"]))
@@ -1001,7 +1015,6 @@ if ($cmd=="today") {
 	else
 		$q = "select `call`, count(*), count(distinct(concat(lon,lat))) from aprspacket where tm>curdate() and `call` like ? group by substr(`call`,3)";
 	$stmt=$mysqli->prepare($q);
-	$str = "%".$str."%";
 	$stmt->bind_param("s",$str);
 	$stmt->execute();
 	$stmt->bind_result($r[0],$r[1],$r[2]);
