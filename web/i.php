@@ -967,6 +967,22 @@ if ($cmd=="new") {
         	echo "</td></tr>\n";
 	}
 	echo "</table>\n";
+
+
+	echo "<h3>最新收到的气象站APRS数据包</h3>";
+	$q="select tm,`call`,raw from aprspacket where tm>=curdate() and `call` like '%-13' order by tm desc limit 10";
+	$result = $mysqli->query($q);
+	echo "<table border=1 cellspacing=0><tr><th>时间</th><th>呼号</th><th>APRS Packet</th></tr>\n";
+	while($r=$result->fetch_array()) {
+        	echo "<tr><td>";
+        	echo $r[0];
+        	echo "</td><td>";
+        	echo "<a href=".$_SERVER["PHP_SELF"]."?call=$r[1]>$r[1]</a>";
+        	echo "</td><td>";
+		echo $r[2];  //raw
+        	echo "</td></tr>\n";
+	}
+	echo "</table>\n";
 	exit(0);
 }
 
