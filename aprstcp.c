@@ -94,6 +94,9 @@ void relayaprs(char *buf, int len)
         sendudp(buf,len, "120.25.100.30",14580);   // forward to aprs.hellocq.net
         sendudp(buf,len, "127.0.0.1",14582);   // udptolog
         sendudp(buf,len, "127.0.0.1",14583);   // udptomysql
+     	if(strstr(buf,"-13>"))
+                sendudp(buf,len,"114.55.54.60",14580);   // forward -13 to lewei50.com
+
 }
 
 void Process(int c_fd) 
