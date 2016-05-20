@@ -101,8 +101,6 @@ void relayaprs(char *buf, int len)
 	insertU(buf,&len);
 	sendudp(buf,len, "127.0.0.1",14582);   // udptolog
 	sendudp(buf,len, "127.0.0.1",14583);   // udptomysql 
-	if(strstr(buf,"-13>"))
-		sendudp(buf,len, "114.55.54.60",14580);   // forward -13 to lewei50.com
 }
 
 int main(void)

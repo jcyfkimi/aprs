@@ -58,6 +58,10 @@ void sendudp(char *buf, int len, char *host, int port)
 void relayaprs(char *buf, int len)
 {
         FILE *fp;
+
+	if(strstr(buf,"-13>"))
+		sendudp(buf,len, "114.55.54.60",14580);   // forward -13 to lewei50.com
+
         fp = fopen("/usr/src/aprs/aprs.fi.udpdest","r");
         if (fp==NULL) {
                 fprintf(stderr, "open host error\n");
@@ -78,6 +82,7 @@ void relayaprs(char *buf, int len)
                         sendudp(buf,len,hbuf,PORT);
         }
         fclose(fp);
+
 }
 
 #include "passcode.c"
