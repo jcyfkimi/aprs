@@ -30,9 +30,37 @@
 
 #include "passcode.c"
 
+void sendudp(char *buf, int len, char *host, int port)
+{
+        struct sockaddr_in si_other;
+        int s, slen=sizeof(si_other);
+        int l;
+#ifdef DEBUG
+        fprintf(stderr,"send to %s,",host);
+#endif
+        if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1) {
+                fprintf(stderr,"socket error");
+                return;
+        }
+        memset((char *) &si_other, 0, sizeof(si_other));
+        si_other.sin_family = AF_INET;
+        si_other.sin_port = htons(port);
+        if (inet_aton(host, &si_other.sin_addr)==0) {
+                fprintf(stderr, "inet_aton() failed\n");
+                close(s);
+                return;
+        }
+        l = sendto(s, buf, len, 0, (const struct sockaddr *)&si_other, slen);
+#ifdef DEBUG
+        fprintf(stderr,"%d\n",l);
+#endif
+        close(s);
+}
+
+
 void Process(char *server, char *call) 
 {	
-	char buffer[MAXLEN];
+	char buf[MAXLEN];
 	int r_fd;
 	int n;
 	int optval;
@@ -47,17 +75,19 @@ void Process(char *server, char *call)
 	optval = 2;
 	Setsockopt(r_fd, SOL_TCP, TCP_KEEPINTVL, &optval, optlen);
 
-	snprintf(buffer,MAXLEN,"user %s pass %d vers aprs.fi.toudp 1.5 filter p/B p/VR2\r\n",call,passcode(call));
-	Write(r_fd, buffer, strlen(buffer));
+	snprintf(buf,MAXLEN,"user %s pass %d vers aprs.fi.toudp 1.5 filter p/B p/VR2\r\n",call,passcode(call));
+	Write(r_fd, buf, strlen(buf));
 
 	while (1) {
-		n = Readline(r_fd, buffer, MAXLEN);
+		n = Readline(r_fd, buf, MAXLEN);
 		if(n<=0)   {
 			exit(0);
 		}
-		if(buffer[0]=='#') continue;
-		buffer[n]=0;
-		ToMysql(buffer,n);
+		if(buf[0]=='#') continue;
+		buf[n]=0;
+		ToMysql(buf,n);
+		if(strstr(buf,"-13>"))
+                	sendudp(buf, n , "114.55.54.60",14580);   // forward -13 to lewei50.comI
 	}
 }
 
