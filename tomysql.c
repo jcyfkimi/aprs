@@ -1,3 +1,5 @@
+#include <math.h>
+
 char *my_stpcpy(char *dst, const char *src){
 	char *q = dst;
 	const char *p = src;
@@ -57,12 +59,14 @@ int checklon(char *s) {
 	if(*(s+8)=='W') return 1;
 	return 0;
 }
+
 void ToMysql(char *buf, int len)
 {	char bufcopy[MAXLEN],sqlbuf[MAXLEN],*end;
 	if(len<=10) return;
 	if(len>1000)len=1000;
 	if(buf[len-1]=='\n') len--;
 	if(buf[len-1]=='\r') len--;
+	if(buf[len-1]=='\n') len--;
 	buf[len]=0;
 	strcpy(bufcopy,buf);
 
@@ -106,19 +110,47 @@ void ToMysql(char *buf, int len)
 		p+=7;
 	}
 	if( (datatype == '=') || (datatype=='!') ) {
-		if( strlen(p)<17 ) 
-			goto unknow_msg;
-		lat = p;
-		if(checklat(lat)==0) lat="";
-		table=*(p+8);
-		*(p+8)=0;
-		p+=9;
-		lon= p;
-		if(checklon(lon)==0) lon="";
-		symbol = *(p+9);
-		*(p+9)=0;
-		p+=10;
-		msg=p;
+		if( (*p=='/') && (strlen(p)>=12)) {			//compressed data  !/BmQnk)&Y[ A
+			char S,W;
+			float flat,flon;
+			table = *p;
+			symbol = *(p+9);
+			p++;
+			flat= 90.0 - ((*p-33.0)*91*91*91 + (*(p+1)-33)*91*91 + (*(p+2)-33)* 91 + *(p+3)-33) / 380926;
+			p+=4;
+			flon= -180.0 + ((*p-33.0)*91*91*91 + (*(p+1)-33)*91*91 + (*(p+2)-33)* 91 + *(p+3)-33) / 190463;
+			if(flat<0) {
+				flat = -flat;
+				S='S';
+			} else
+				S='N';
+			if(flon<0) {
+				flon = -flon;
+				W='W';
+			} else
+				W='E';
+
+			p-=4;  // will rewrite buff 
+			lat = p;
+			sprintf(lat,"%02.0f%05.2f%c", flat,(flat-floor(flat))*60,S);
+			lon = p+10;
+			sprintf(lon,"%02.0f%05.2f%c",flon,(flon-floor(flon))*60,W);
+			msg = "";
+		} else {
+			if( strlen(p)<17 ) 
+				goto unknow_msg;
+			lat = p;
+			if(checklat(lat)==0) lat="";
+			table=*(p+8);
+			*(p+8)=0;
+			p+=9;
+			lon= p;
+			if(checklon(lon)==0) lon="";
+			symbol = *(p+9);
+			*(p+9)=0;
+			p+=10;
+			msg=p;
+		}
 		end = my_stpcpy(sqlbuf,"INSERT INTO aprspacket (tm,`call`,datatype,lat,lon,`table`,symbol,msg,raw) VALUES(now(),'");
 		end += mysql_real_escape_string(mysql,end,call,strlen(call));
 		end = my_stpcpy(end,"','");
@@ -303,3 +335,4 @@ unknow_msg:
        		mysql_error(mysql));
 	}
 }
+
