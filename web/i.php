@@ -344,7 +344,7 @@ function top_menu() {
 	echo "<a href=".$_SERVER["PHP_SELF"]."?ge>地球</a> ";
 	echo "<a href=".$_SERVER["PHP_SELF"]."?setup>设置</a> ";
 	echo "<a href=".$_SERVER["PHP_SELF"]."?about>关于</a> ";
-	echo "<form style=\"margin:0px;display: inline\" action=".$_SERVER["PHP_SELF"]." method=POST>";
+	echo "<form style=\"margin:0px;display: inline\" action=".$_SERVER["PHP_SELF"]." method=GET>";
 	echo "<input name=today type=hidden>";
 	echo "<input name=str size=6>";
 	echo "<input type=submit value=查找>";
@@ -387,7 +387,7 @@ if ($cmd=="map") {
 	echo" <div id=calls></div><div id=inview></div><div id=pkts></div> ";
 	echo "<div id=msg></div><div id=pathlen></div><div id=autocenter></div>";
 	echo "<div id=disp15min></div>";
-	echo " <div id=search><form style=\"margin:0px;display: inline\" action=".$_SERVER["PHP_SELF"]." method=POST>";
+	echo " <div id=search><form style=\"margin:0px;display: inline\" action=".$_SERVER["PHP_SELF"]." method=GET>";
 	echo "<input name=today type=hidden>";
 	echo "<input name=str size=6>";
 	echo "<input type=submit value=查找>";
