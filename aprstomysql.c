@@ -85,9 +85,9 @@ void Process(char *server, char *call)
 		}
 		if(buf[0]=='#') continue;
 		buf[n]=0;
-		ToMysql(buf,n);
 		if(strstr(buf,"-13>"))
                 	sendudp(buf, n , "114.55.54.60",14580);   // forward -13 to lewei50.comI
+		ToMysql(buf,n);
 	}
 }
 
