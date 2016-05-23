@@ -100,7 +100,7 @@ void usage()
 
 int main(int argc, char *argv[])
 {
-	char *call="BG6CQ-4";
+	char *call="BG6DA-4";
 	char *server="china.aprs2.net";
 	signal(SIGCHLD,SIG_IGN);
 	if(argc==3) {
