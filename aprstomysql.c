@@ -75,7 +75,7 @@ void Process(char *server, char *call)
 	optval = 2;
 	Setsockopt(r_fd, SOL_TCP, TCP_KEEPINTVL, &optval, optlen);
 
-	snprintf(buf,MAXLEN,"user %s pass %d vers aprs.fi.toudp 1.5 filter p/B p/V p/9\r\n",call,passcode(call));
+	snprintf(buf,MAXLEN,"user %s pass %d vers aprs.fi.toudp 1.5 filter p/B p/VR2 p/9\r\n",call,passcode(call));
 	Write(r_fd, buf, strlen(buf));
 
 	while (1) {
