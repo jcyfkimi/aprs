@@ -1013,7 +1013,7 @@ if ($cmd=="today") {
 	else if(isset($_REQUEST["d"]))
 		$q = "select `call`, count(*), count(distinct(concat(lon,lat))) c from aprspacket where tm>curdate() and `call` like ? group by `call` order by c desc";
 	else
-		$q = "select `call`, count(*), count(distinct(concat(lon,lat))) from aprspacket where tm>curdate() and `call` like ? group by substr(`call`,3)";
+		$q = "select `call`, count(*), count(distinct(concat(lon,lat))) from aprspacket where tm>curdate() and `call` like ? group by `call`";
 	$stmt=$mysqli->prepare($q);
 	$stmt->bind_param("s",$str);
 	$stmt->execute();
