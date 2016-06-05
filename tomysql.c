@@ -20,6 +20,7 @@ int checkcall(char*call) {
 	char *p;
 	if(strlen(call)<5) return 0;
 	p=call;
+	if(!isdigit(*(p+2))) return 0;
 /*
 	if(!isupper(*(p+0))) return 0;
 	if(!isupper(*(p+1))) return 0;
