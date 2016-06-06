@@ -2,6 +2,8 @@
 
 include "db.php";
 
+$ak = "7RuEGPr12yqyg11XVR9Uz7NI";
+
 date_default_timezone_set( 'Asia/Shanghai');
 
 if (!isset($_SESSION["jiupian"]))
@@ -68,6 +70,39 @@ if($jiupian>0) {
 	require "wgtochina_baidu.php";
 	$mp=new Converter();
 }
+
+function GetIP(){  
+	$realip = '';  
+	$unknown = 'unknown';  
+	if (isset($_SERVER)){  
+		if(isset($_SERVER['HTTP_X_FORWARDED_FOR']) && !empty($_SERVER['HTTP_X_FORWARDED_FOR']) && strcasecmp($_SERVER['HTTP_X_FORWARDED_FOR'], $unknown)){  
+			$arr = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);  
+			foreach($arr as $ip){  
+				$ip = trim($ip);  
+				if ($ip != 'unknown'){  
+					$realip = $ip;  
+					break;  
+				}  
+			}  
+		}else if(isset($_SERVER['HTTP_CLIENT_IP']) && !empty($_SERVER['HTTP_CLIENT_IP']) && strcasecmp($_SERVER['HTTP_CLIENT_IP'], $unknown))
+			$realip = $_SERVER['HTTP_CLIENT_IP'];  
+		else if(isset($_SERVER['REMOTE_ADDR']) && !empty($_SERVER['REMOTE_ADDR']) && strcasecmp($_SERVER['REMOTE_ADDR'], $unknown))
+			$realip = $_SERVER['REMOTE_ADDR'];  
+		else
+			$realip = $unknown;  
+	}else{  
+		if(getenv('HTTP_X_FORWARDED_FOR') && strcasecmp(getenv('HTTP_X_FORWARDED_FOR'), $unknown))
+				$realip = getenv("HTTP_X_FORWARDED_FOR");  
+		else if(getenv('HTTP_CLIENT_IP') && strcasecmp(getenv('HTTP_CLIENT_IP'), $unknown))
+			$realip = getenv("HTTP_CLIENT_IP");  
+		else if(getenv('REMOTE_ADDR') && strcasecmp(getenv('REMOTE_ADDR'), $unknown))
+			$realip = getenv("REMOTE_ADDR");  
+		else
+			$realip = $unknown;  
+	}  
+	$realip = preg_match("/[\d\.]{7,15}/", $realip, $matches) ? $matches[0] : $unknown;  
+	return $realip;  
+}  
 
 function urlmessage($call,$icon, $dtmstr, $msg, $ddt) {
 	$m = "<font face=微软雅黑 size=2><img src=".$icon."> ".$call." <a href=".$_SERVER["PHP_SELF"]."?call=".$call." target=_blank>数据包</a> <a id=\\\"m\\\" href=\\\"#\\\" onclick=\\\"javascript:monitor_station('".$call."');return false;\\\">";
@@ -375,7 +410,7 @@ if ($cmd=="map") {
 		#search { display:inline;} 
 	</style>
 	<title>APRS地图</title>
-	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=7RuEGPr12yqyg11XVR9Uz7NI"></script>
+	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=<?php echo $ak;?>"></script>
 </head>
 <body>
 <div id="full">
@@ -657,15 +692,15 @@ function UpdateStationDisplay(){
         }     
 }    
 
-function centertocurrent(){
+function centertounknow(){
 	var geolocation = new BMap.Geolocation();
 	geolocation.getCurrentPosition(function(r){
 		if(this.getStatus() == BMAP_STATUS_SUCCESS){
 			map.centerAndZoom(r.point,12);
 		}
-		UpdateStation();  
-		updateinview();
-},{enableHighAccuracy: false});
+	},{enableHighAccuracy: false});
+	UpdateStation();  
+	updateinview();
 }
 
 // 百度地图API功能
@@ -690,13 +725,23 @@ map.addEventListener('resize', map_resize);
         if($call!="")  {
 		echo "monitor_station(\"$call\");\n";
 		echo "UpdateStation();\n";
-	} else 
-		echo "centertocurrent();\n";
+	} else  {			// try IP location
+		$IP = GetIP();
+  		$content = file_get_contents("http://api.map.baidu.com/location/ip?ak=".$ak."&ip=".$IP."&coor=bd09ll");
+  		$json = json_decode($content);
+		if(isset($json->{'status'}) && ($json->{'status'}==0)) {
+			echo "map.centerAndZoom(new BMap.Point(";
+			echo $json->{'content'}->{'point'}->{'x'};
+			echo ",";
+			echo $json->{'content'}->{'point'}->{'y'};
+			echo "),12); ";
+			echo "UpdateStation();  updateinview();";
+		}  else 
+			echo "centertounknow();\n";
+	}
 	echo "disp15min_div()\n";
 ?>
 
-//createXmlHttpRequest();  
-//UpdateStation();  
 </script>
 </html>
 <?php
