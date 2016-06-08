@@ -129,7 +129,7 @@ function urlmessage($call,$icon, $dtmstr, $msg, $ddt) {
 		$msg = substr($msg,9);
 		$m = $m."<b>温度".$t."°C 湿度".$h."% 气压".$b."mpar<br>";
 		$m = $m."风".$c."°".$s."m/s(大风".$g."m/s)<br>";
-	 	$m = $m."雨".$r."mm/1h ".$p."mm/24h<b><br>";
+	 	$m = $m."雨".$r."mm/1h ".$p."mm/24h</b><br>";
 	}
 	if (  (strlen($msg)>=27) &&
 		(substr($msg,3,1)=='/') &&
@@ -148,7 +148,7 @@ function urlmessage($call,$icon, $dtmstr, $msg, $ddt) {
 		$msg = substr($msg,9);
 		$m = $m."<b>温度".$t."°C 湿度".$h."% 气压".$b."mpar<br>";
 		$m = $m."风".$c."°".$s."m/s(大风".$g."m/s)<br>";
-	 	$m = $m."雨".$r."mm/自午夜起<b><br>";
+	 	$m = $m."雨".$r."mm/自午夜起</b><br>";
 	}
 	if( (strlen($msg)>=7) &&
 		(substr($msg,3,1)=='/'))  // 178/061/A=000033
@@ -163,9 +163,10 @@ function urlmessage($call,$icon, $dtmstr, $msg, $ddt) {
 			} else {
 				$alt=number_format(substr($msg,3,6)*0.3048,1);
 			}
-			$m=$m." 海拔".$alt."m</b><br>";
+			$m=$m." 海拔".$alt."m";
 			$msg = substr($msg,9);
 		}
+		$m = $m."</b><br>";
 	} else if( (strlen($msg)>=9) &&
 		(substr($msg,0,3)=='/A=') )      // /A=000033
 	{

@@ -129,7 +129,7 @@ function urlmessage($call,$icon, $dtmstr, $msg, $ddt) {
 		$msg = substr($msg,9);
 		$m = $m."<b>温度".$t."°C 湿度".$h."% 气压".$b."mpar<br>";
 		$m = $m."风".$c."°".$s."m/s(大风".$g."m/s)<br>";
-	 	$m = $m."雨".$r."mm/1h ".$p."mm/24h<b><br>";
+	 	$m = $m."雨".$r."mm/1h ".$p."mm/24h</b><br>";
 	}
 	if (  (strlen($msg)>=27) &&
 		(substr($msg,3,1)=='/') &&
@@ -148,7 +148,7 @@ function urlmessage($call,$icon, $dtmstr, $msg, $ddt) {
 		$msg = substr($msg,9);
 		$m = $m."<b>温度".$t."°C 湿度".$h."% 气压".$b."mpar<br>";
 		$m = $m."风".$c."°".$s."m/s(大风".$g."m/s)<br>";
-	 	$m = $m."雨".$r."mm/自午夜起<b><br>";
+	 	$m = $m."雨".$r."mm/自午夜起</b><br>";
 	}
 	if( (strlen($msg)>=7) &&
 		(substr($msg,3,1)=='/'))  // 178/061/A=000033
@@ -163,9 +163,10 @@ function urlmessage($call,$icon, $dtmstr, $msg, $ddt) {
 			} else {
 				$alt=number_format(substr($msg,3,6)*0.3048,1);
 			}
-			$m=$m." 海拔".$alt."m</b><br>";
+			$m=$m." 海拔".$alt."m";
 			$msg = substr($msg,9);
 		}
+		$m = $m."</b><br>";
 	} else if( (strlen($msg)>=9) &&
 		(substr($msg,0,3)=='/A=') )      // /A=000033
 	{
@@ -1260,6 +1261,49 @@ if ($cmd=="setup") {
 	echo "<br><input type=submit value=\"设置显示纠偏方式\">";
 	echo "</form>";
 	echo "修改本项设置，需手动刷新地图才生效";
+	echo "<p>\n";
+	echo "<h3>坐标转换工具</h3>";
+	if(isset($_REQUEST["lat"])) {
+		$lati=$_REQUEST["lat"];
+		$loni=$_REQUEST["lon"];
+		echo "输入地球纬度/经度：$lati/$loni<br>";
+	require "wgtochina_baidu.php";
+	$mp=new Converter();
+		
+		$lat = explode(".",$lati);
+		if(count($lat)<=2) 
+			$latui = $lati;
+		else if(strlen($lat[2])==3)
+			$latui = $lat[0] + ($lat[1]+$lat[2]/100)/100;
+		else
+			$latui = $lat[0] + $lat[1]/60+$lat[2]/3600;
+
+		$lon = explode(".",$loni);
+		if(count($lon)<=2) 
+			$lonui = $loni;
+		else if(strlen($lon[2])==3)
+			$lonui = $lon[0] + ($lon[1]+$lon[2]/100)/100;
+		else
+			$lonui = $lon[0] + $lon[1]/60 +$lon[2]/3600;
+
+		echo "归一化后纬度/经度：$latui/$lonui<br>";
+		
+			$p=$mp->WGStoBaiDuPoint($lonui,$latui);
+			$lon = $p->getX();
+			$lat = $p->getY();
+		echo "百度地图纬度/经度：$lat/$lon<p>";
+	}
+	echo "<form action=".$_SERVER["PHP_SELF"]." method=POST>";
+	echo "<input name=setup type=hidden>";
+	echo "请按照如下3种格式之一输入（判断依据是最后小数点后数字位数）<br>\n";
+	echo "ddd.ddddd，度.度的十进制小数部分（5位）例如：31.12035º<br>";
+	echo "ddd.mm.mmm，度.分.分的十进制小数部分（3位）例如 31º10.335'<br>";
+	echo "ddd.mm.ss, 度.分.秒 例如 31º12'42<p>";
+
+	echo "GPS纬度: <input name=lat>(正数是北纬)<br>";
+	echo "GPS经度: <input name=lon>(正数是东经)<br>";
+	echo "<input type=submit value=转换>\n";
+	echo "</form>";	
 	exit(0);
 }
 if ($cmd=="about") {
