@@ -1274,7 +1274,7 @@ if ($cmd=="setup") {
 		if(count($lat)<=2) 
 			$latui = $lati;
 		else if(strlen($lat[2])==3)
-			$latui = $lat[0] + ($lat[1]+$lat[2]/100)/100;
+			$latui = $lat[0] + ($lat[1]+$lat[2]/1000.0)/60.0;
 		else
 			$latui = $lat[0] + $lat[1]/60+$lat[2]/3600;
 
@@ -1282,7 +1282,7 @@ if ($cmd=="setup") {
 		if(count($lon)<=2) 
 			$lonui = $loni;
 		else if(strlen($lon[2])==3)
-			$lonui = $lon[0] + ($lon[1]+$lon[2]/100)/100;
+			$lonui = $lon[0] + ($lon[1]+$lon[2]/1000)/60;
 		else
 			$lonui = $lon[0] + $lon[1]/60 +$lon[2]/3600;
 
@@ -1300,8 +1300,8 @@ if ($cmd=="setup") {
 	echo "ddd.mm.mmm，度.分.分的十进制小数部分（3位）例如 31º10.335'<br>";
 	echo "ddd.mm.ss, 度.分.秒 例如 31º12'42<p>";
 
-	echo "GPS纬度: <input name=lat>(正数是北纬)<br>";
-	echo "GPS经度: <input name=lon>(正数是东经)<br>";
+	echo "GPS纬度: <input name=lat value=\"".$lati."\">(正数是北纬)<br>";
+	echo "GPS经度: <input name=lon value=\"".$loni."\">(正数是东经)<br>";
 	echo "<input type=submit value=转换>\n";
 	echo "</form>";	
 	exit(0);
