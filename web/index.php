@@ -111,6 +111,13 @@ function urlmessage($call, $icon, $dtmstr, $msg, $ddt) {
 	$m =$m."轨迹";
 	$m = $m."<a href=".$_SERVER["PHP_SELF"]."?gpx=".$call." target=_blank>GPX</a> ";
 	$m = $m."<a href=".$_SERVER["PHP_SELF"]."?kml=".$call." target=_blank>KML</a> <hr color=green>".$dtmstr."<br>";
+
+	$msg = rtrim($msg);
+	if(strlen($msg)>=4) 
+		if(substr($msg, strlen($msg)-4,4)=="/UDP")   // strip /UDP
+			$msg = substr($msg,0, strlen($msg)-4);
+	$msg = rtrim($msg);
+
 	if (  (strlen($msg)>=32) &&
 		(substr($msg,3,1)=='/') &&
 		(substr($msg,7,1)=='g') &&
@@ -197,6 +204,9 @@ function urlmessage($call, $icon, $dtmstr, $msg, $ddt) {
 			$msg = substr($msg,4);
 		}
 		$m = $m."<b>".$speed." km/h ".$dir."° 海拔".$alt."m</b><br>";
+		if(strlen($msg)>=2) 
+			if((substr($msg,strlen($msg)-2,2)=='_(') || (substr($msg,strlen($msg)-2,2)=='_)') )
+				$msg=substr($msg,0,strlen($msg)-2);
 	}  
 	if( (strlen($msg)>=7) &&
                 (substr($msg,0,3)=='PHG') )  // PHG
@@ -211,8 +221,7 @@ function urlmessage($call, $icon, $dtmstr, $msg, $ddt) {
                 $msg = substr($msg,7);
 	}
 		
-	$msg = rtrim($msg);
-		
+	if(strlen($msg)>0)
 	$m = $m."</font><font color=green face=微软雅黑 size=2>".addcslashes(htmlspecialchars($msg),"\\\r\n'\"")."</font><br>";
 
  	$q = "select raw from aprspacket where `call` = ? and lat ='' order by tm desc limit 1";
@@ -228,8 +237,13 @@ function urlmessage($call, $icon, $dtmstr, $msg, $ddt) {
 	$stmt->fetch();
 	if($rawmsg!="") {
 		$rawmsg = strstr($rawmsg,":>");
-		if($rawmsg) 
-			$m = $m."<font color=red face=微软雅黑 size=2>".addcslashes(htmlspecialchars(substr($rawmsg,2)),"\\\r\n'\"")."</font>";
+		if($rawmsg) {
+			$rawmsg = substr($rawmsg,2);
+			$t = strpos($rawmsg, "/UDP");
+			if($t !== false )
+				$rawmsg = substr($rawmsg, 0, $t);
+			$m = $m."<font color=red face=微软雅黑 size=2>".addcslashes(htmlspecialchars($rawmsg),"\\\r\n'\"")."</font>";
+		}
 	}	
 	$stmt->close();
 	return $m;	
