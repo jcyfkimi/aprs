@@ -205,7 +205,10 @@ function urlmessage($call, $icon, $dtmstr, $msg, $ddt) {
 		}
 		$m = $m."<b>".$speed." km/h ".$dir."° 海拔".$alt."m</b><br>";
 		if(strlen($msg)>=2) 
-			if((substr($msg,strlen($msg)-2,2)=='_(') || (substr($msg,strlen($msg)-2,2)=='_)') )
+			if((substr($msg,strlen($msg)-2,2)=='_(') 
+			|| (substr($msg,strlen($msg)-2,2)=='_)')
+			|| (substr($msg,strlen($msg)-2,2)=='_"')
+			 )
 				$msg=substr($msg,0,strlen($msg)-2);
 	}  
 	if( (strlen($msg)>=7) &&
