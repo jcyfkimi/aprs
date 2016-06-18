@@ -104,7 +104,8 @@ function GetIP(){
 	return $realip;  
 }  
 
-function urlmessage($call,$icon, $dtmstr, $msg, $ddt) {
+function urlmessage($call, $icon, $dtmstr, $msg, $ddt) {
+	global $mysqli;
 	$m = "<font face=微软雅黑 size=2><img src=".$icon."> ".$call." <a href=".$_SERVER["PHP_SELF"]."?call=".$call." target=_blank>数据包</a> <a id=\\\"m\\\" href=\\\"#\\\" onclick=\\\"javascript:monitor_station('".$call."');return false;\\\">";
 	$m = $m."切换跟踪</a> ";
 	$m =$m."轨迹";
@@ -210,9 +211,27 @@ function urlmessage($call,$icon, $dtmstr, $msg, $ddt) {
                 $msg = substr($msg,7);
 	}
 		
-	$msg=rtrim($msg);
+	$msg = rtrim($msg);
 		
-	$m = $m."</font><font color=green face=微软雅黑 size=2>".addcslashes(htmlspecialchars($msg),"\\\r\n'\"")."</font>";
+	$m = $m."</font><font color=green face=微软雅黑 size=2>".addcslashes(htmlspecialchars($msg),"\\\r\n'\"")."</font><br>";
+
+ 	$q = "select raw from aprspacket where `call` = ? and lat ='' order by tm desc limit 1";
+	$stmt = $mysqli->prepare($q);
+	if(!$stmt) {
+		echo "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
+		exit;
+	}
+        $stmt->bind_param("s",$call);
+        $stmt->execute();
+	$rawmsg = "";
+       	$stmt->bind_result($rawmsg);
+	$stmt->fetch();
+	if($rawmsg!="") {
+		$rawmsg = strstr($rawmsg,":>");
+		if($rawmsg) 
+			$m = $m."<font color=red face=微软雅黑 size=2>".addcslashes(htmlspecialchars(substr($rawmsg,2)),"\\\r\n'\"")."</font>";
+	}	
+	$stmt->close();
 	return $m;	
 }
 
@@ -283,7 +302,7 @@ if ($cmd=="tm") {
 	}
         $stmt->execute();
        	$stmt->bind_result($glat,$glon,$dcall,$dtm,$dtmstr,$dts,$dmsg,$ddt);
-
+	$stmt->store_result();
 	while($stmt->fetch()) {
                 $lat = strtolat($glat);
                 $lon = strtolon($glon);
@@ -1274,7 +1293,7 @@ if ($cmd=="setup") {
 		if(count($lat)<=2) 
 			$latui = $lati;
 		else if(strlen($lat[2])==3)
-			$latui = $lat[0] + ($lat[1]+$lat[2]/1000.0)/60.0;
+			$latui = $lat[0] + ($lat[1]+$lat[2]/100)/100;
 		else
 			$latui = $lat[0] + $lat[1]/60+$lat[2]/3600;
 
@@ -1282,7 +1301,7 @@ if ($cmd=="setup") {
 		if(count($lon)<=2) 
 			$lonui = $loni;
 		else if(strlen($lon[2])==3)
-			$lonui = $lon[0] + ($lon[1]+$lon[2]/1000)/60;
+			$lonui = $lon[0] + ($lon[1]+$lon[2]/100)/100;
 		else
 			$lonui = $lon[0] + $lon[1]/60 +$lon[2]/3600;
 
