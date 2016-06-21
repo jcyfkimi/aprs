@@ -106,6 +106,7 @@ function GetIP(){
 
 function urlmessage($call, $icon, $dtmstr, $msg, $ddt) {
 	global $mysqli;
+	global $startdatestr;
 	$m = "<font face=微软雅黑 size=2><img src=".$icon."> ".$call." <a href=".$_SERVER["PHP_SELF"]."?call=".$call." target=_blank>数据包</a> <a id=\\\"m\\\" href=\\\"#\\\" onclick=\\\"javascript:monitor_station('".$call."');return false;\\\">";
 	$m = $m."切换跟踪</a> ";
 	$m =$m."轨迹";
@@ -227,13 +228,13 @@ function urlmessage($call, $icon, $dtmstr, $msg, $ddt) {
 	if(strlen($msg)>0)
 	$m = $m."</font><font color=green face=微软雅黑 size=2>".addcslashes(htmlspecialchars($msg),"\\\r\n'\"")."</font><br>";
 
- 	$q = "select raw from aprspacket where `call` = ? and lat ='' order by tm desc limit 1";
+ 	$q = "select raw from aprspacket where tm>=? and `call` = ? and lat ='' order by tm desc limit 1";
 	$stmt = $mysqli->prepare($q);
 	if(!$stmt) {
 		echo "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
 		exit;
 	}
-        $stmt->bind_param("s",$call);
+        $stmt->bind_param("ss",$startdatestr,$call);
         $stmt->execute();
 	$rawmsg = "";
        	$stmt->bind_result($rawmsg);
