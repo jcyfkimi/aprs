@@ -18,6 +18,10 @@ $startdate=date_create();
 date_sub($startdate,date_interval_create_from_date_string("$span days"));
 $startdatestr=date_format($startdate,"Y-m-d 00:00:00");
 
+$title = file_get_contents( "title.txt" );
+if( $title === FALSE )
+	$title = "APRS地图";
+
 if (isset($_REQUEST["tm"])) {
 	$cmd="tm";
 	$tm=$_REQUEST["tm"];
@@ -443,7 +447,7 @@ if ($cmd=="map") {
 		#disp15min { display:inline;} 
 		#search { display:inline;} 
 	</style>
-	<title>APRS地图</title>
+	<title><?php echo $title; ?></title>
 	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=<?php echo $ak;?>"></script>
 </head>
 <body>
@@ -834,32 +838,15 @@ function gpx_wpt($tm, $msg, $ddt) {
 
 if($cmd=="track") {
 	if($call=="") exit(0); 
-	if(!isset($_REQUEST["startdate"])) {
-
-		top_menu();
-		
-		$startdate=date_create();
-		$startdatestr=date_format($startdate,"Y-m-d");
-
-		echo "下载 ".$call." 轨迹:<p>";
-		echo "<form action=".$_SERVER["PHP_SELF"]." method=GET>";
-		echo "<input type=hidden name=track value=\"".$call."\">";
-		echo "请选择开始时间： ";
-		echo "<input name=startdate type=date value=".$startdatestr."><p>";
-		echo "请选择结束时间： ";
-		echo "<input name=enddate type=date value=".$startdatestr."><p>";
-		echo "下载类型: GPX格式<input type=radio name=type value=gpx>  KML格式<input type=radio checked name=type value=kml><p>";
-		echo "<input type=submit value=\"下载\">";
+	if(isset($_REQUEST["startdate"])) {
+		$startdatestr = $_REQUEST["startdate"]." 00:00:00";
+		$enddatestr = $_REQUEST["enddate"]." 23:59:59";
+		if($_REQUEST["type"]=="gpx")
+			download_gpx($call, $startdatestr, $enddatestr);
+		else
+			download_kml($call, $startdatestr, $enddatestr);
 		exit(0);
 	}
-	
-
-	$startdatestr = $_REQUEST["startdate"]." 00:00:00";
-	$enddatestr = $_REQUEST["enddate"]." 23:59:59";
-	if($_REQUEST["type"]=="gpx")
-		download_gpx($call, $startdatestr, $enddatestr);
-	else
-		download_kml($call, $startdatestr, $enddatestr);
 }
 
 
@@ -1029,7 +1016,7 @@ function download_kml($call, $startdatestr, $enddatestr) {
 }
 ?>
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<title>APRS地图</title>
+	<title><?php echo $title; ?></title>
 </head>
 <style type="text/css">
 <!--
@@ -1042,6 +1029,22 @@ div{ display:inline}
 <?php
 
 top_menu();
+
+if($cmd=="track") {
+	$startdate=date_create();
+	$startdatestr=date_format($startdate,"Y-m-d");
+
+	echo "<h3>下载 ".$call." 轨迹</h3>";
+	echo "<form action=".$_SERVER["PHP_SELF"]." method=GET>";
+	echo "<input type=hidden name=track value=\"".$call."\">";
+	echo "请选择开始时间： ";
+	echo "<input name=startdate type=date value=".$startdatestr."><p>";
+	echo "请选择结束时间： ";
+	echo "<input name=enddate type=date value=".$startdatestr."><p>";
+	echo "请选择轨迹类型： GPX格式<input type=radio name=type value=gpx>  KML格式<input type=radio checked name=type value=kml><p>";
+	echo "<input type=submit value=\"下载\">";
+	exit(0);
+}
 
 if ($cmd=="new") {
 	echo "<h3>最新收到的APRS数据包</h3>";
@@ -1097,7 +1100,7 @@ if ($cmd=="new") {
 if ($cmd=="today") {
 	if(isset($_REQUEST["str"])) {
 		$str = $_REQUEST["str"];
-		echo "<h3>今天收到的 $str 有关APRS数据包 ";
+		echo "<h3>今天收到的 <a href=".$_SERVER["PHP_SELF"]."?track=".$str.">$str</a> 有关APRS数据包 ";
 	} else {
 		echo "<h3>今天收到的APRS数据包 ";
 		$str = "";
