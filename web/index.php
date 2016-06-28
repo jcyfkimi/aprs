@@ -36,12 +36,9 @@ if (isset($_REQUEST["tm"])) {
 } else if (isset($_REQUEST["stats"])) {
 	$cmd="stats";
 	header("refresh: 60;");
-} else if (isset($_REQUEST["gpx"])) {
-	$cmd="gpx";
-	$call=$_REQUEST["gpx"];
-} else if (isset($_REQUEST["kml"])) {
-	$cmd="kml";
-	$call=$_REQUEST["kml"];
+} else if (isset($_REQUEST["track"])) {
+	$cmd="track";
+	$call=$_REQUEST["track"];
 } else if (isset($_REQUEST["ge"])) {
 	$cmd="ge";
 } else if (isset($_REQUEST["about"])) {
@@ -109,9 +106,8 @@ function urlmessage($call, $icon, $dtmstr, $msg, $ddt) {
 	global $startdatestr;
 	$m = "<font face=微软雅黑 size=2><img src=".$icon."> ".$call." <a href=".$_SERVER["PHP_SELF"]."?call=".$call." target=_blank>数据包</a> <a id=\\\"m\\\" href=\\\"#\\\" onclick=\\\"javascript:monitor_station('".$call."');return false;\\\">";
 	$m = $m."切换跟踪</a> ";
-	$m =$m."轨迹";
-	$m = $m."<a href=".$_SERVER["PHP_SELF"]."?gpx=".$call." target=_blank>GPX</a> ";
-	$m = $m."<a href=".$_SERVER["PHP_SELF"]."?kml=".$call." target=_blank>KML</a> <hr color=green>".$dtmstr."<br>";
+	$m = $m."<a href=".$_SERVER["PHP_SELF"]."?track=".$call." target=_blank>轨迹下载</a> ";
+	$m = $m."<hr color=green>".$dtmstr."<br>";
 
 	$msg = rtrim($msg);
 	if(strlen($msg)>=4) 
@@ -836,9 +832,39 @@ function gpx_wpt($tm, $msg, $ddt) {
 	return $m;
 }
 
-if($cmd=="gpx") {
+if($cmd=="track") {
 	if($call=="") exit(0); 
+	if(!isset($_REQUEST["startdate"])) {
+
+		top_menu();
+		
+		$startdate=date_create();
+		$startdatestr=date_format($startdate,"Y-m-d");
+
+		echo "下载 ".$call." 轨迹:<p>";
+		echo "<form action=".$_SERVER["PHP_SELF"]." method=GET>";
+		echo "<input type=hidden name=track value=\"".$call."\">";
+		echo "请选择开始时间： ";
+		echo "<input name=startdate type=date value=".$startdatestr."><p>";
+		echo "请选择结束时间： ";
+		echo "<input name=enddate type=date value=".$startdatestr."><p>";
+		echo "下载类型: GPX格式<input type=radio name=type value=gpx>  KML格式<input type=radio checked name=type value=kml><p>";
+		echo "<input type=submit value=\"下载\">";
+		exit(0);
+	}
 	
+
+	$startdatestr = $_REQUEST["startdate"]." 00:00:00";
+	$enddatestr = $_REQUEST["enddate"]." 23:59:59";
+	if($_REQUEST["type"]=="gpx")
+		download_gpx($call, $startdatestr, $enddatestr);
+	else
+		download_kml($call, $startdatestr, $enddatestr);
+}
+
+
+function download_gpx($call, $startdatestr, $enddatestr) {
+	global $mysqli;
 /*Content-Disposition:attachment; filename="2110153.gpx"
 Content-Language:en-US
 Content-Length:7890
@@ -847,14 +873,14 @@ Content-Type:application/gpx+xml
 */
 	date_default_timezone_set("Asia/Shanghai");
 	header("Content-Type:application/gpx+xml");
-	header("Content-Disposition:attachment; filename=\"".$call."-".date("Y-m-d")."Track.gpx\"");
+	header("Content-Disposition:attachment; filename=\"".$call."-".$startdatestr."Track.gpx\"");
 	echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 	echo "<gpx version=\"1.0\">\n";
 	echo "<name>APRS GPX</name>\n";
-	echo "<trk><name>".$call." ".date("Y-m-d")." Track</name><number>1</number><trkseg>\n";
-	$q="select date_format(CONVERT_TZ(tm,@@session.time_zone, '+00:00'),\"%Y-%m-%dT%H:%i:%sZ\"),lat,lon,msg,datatype from aprspacket where tm>? and `call`=? and lat<>'' and not lat like '0000.00%' order by tm";
+	echo "<trk><name>".$call." ".$startdatestr." Track</name><number>1</number><trkseg>\n";
+	$q="select date_format(CONVERT_TZ(tm,@@session.time_zone, '+00:00'),\"%Y-%m-%dT%H:%i:%sZ\"),lat,lon,msg,datatype from aprspacket where tm>=? and tm<=? and `call`=? and lat<>'' and not lat like '0000.00%' order by tm";
         $stmt=$mysqli->prepare($q);
-        $stmt->bind_param("ss",$startdatestr,$call);
+        $stmt->bind_param("sss",$startdatestr,$enddatestr,$call);
         $stmt->execute();
         $stmt->bind_result($dtm, $glat, $glon, $msg, $ddt);
 //<trkpt lat="46.57608333" lon="8.89241667"><ele>2376</ele><time>2007-10-14T10:09:57Z</time></trkpt>
@@ -952,12 +978,11 @@ function kml_wpt($tm, $msg, $ddt) {
 	return $m;
 }
 
-if($cmd=="kml") {
-	if($call=="") exit(0); 
-	
+function download_kml($call, $startdatestr, $enddatestr) {
+	global $mysqli;
 	date_default_timezone_set("Asia/Shanghai");
 	header("Content-Type:application/gpx+xml");
-	header("Content-Disposition:attachment; filename=\"".$call."-".date("Y-m-d")."Track.kml\"");
+	header("Content-Disposition:attachment; filename=\"".$call."-".$startdatestr."Track.kml\"");
 	echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 	echo "<kml xmlns=\"http://www.opengis.net/kml/2.2\" xmlns:gx=\"http://www.google.com/kml/ext/2.2\">\n";
 	echo "<Document>\n";
@@ -972,14 +997,14 @@ if($cmd=="kml") {
 		</LineStyle>
 	</Style>
 <?php
-	echo "<Folder><name>".$call."-".date("Y-m-d")."</name>\n";
+	echo "<Folder><name>".$call."-".$startdatestr."</name>\n";
 	echo "<Placemark>\n";
 	echo "<styleUrl>#ylw</styleUrl>\n";
 	echo "<gx:Track id=\"1\">\n";
 	echo "<altitudeMode>absolute</altitudeMode>\n";
-	$q="select date_format(CONVERT_TZ(tm,@@session.time_zone, '+00:00'),\"%Y-%m-%dT%H:%i:%sZ\"),lat,lon,msg,datatype from aprspacket where tm>? and `call`=? and lat<>'' and not lat like '0000.00%' order by tm";
+	$q="select date_format(CONVERT_TZ(tm,@@session.time_zone, '+00:00'),\"%Y-%m-%dT%H:%i:%sZ\"),lat,lon,msg,datatype from aprspacket where tm>=? and tm<=? and `call`=? and lat<>'' and not lat like '0000.00%' order by tm";
         $stmt=$mysqli->prepare($q);
-        $stmt->bind_param("ss",$startdatestr,$call);
+        $stmt->bind_param("sss",$startdatestr,$enddatestr,$call);
         $stmt->execute();
         $stmt->bind_result($dtm, $glat, $glon, $msg, $ddt);
 	$stmt->store_result();	
@@ -1113,9 +1138,7 @@ if ($cmd=="today") {
         	echo "</td><td align=right>";
         	echo $r[2];
         	echo "</td><td>";
-		echo "下载轨迹";
-        	echo "<a href=".$_SERVER["PHP_SELF"]."?gpx=$r[0]>GPX</a>";
-        	echo " <a href=".$_SERVER["PHP_SELF"]."?kml=$r[0]>KML</a>";
+        	echo "<a href=".$_SERVER["PHP_SELF"]."?track=$r[0]>下载轨迹</a>";
         	echo "</td><td>";
 		disp_map($r[0]);
         	echo "</td></tr>\n";
@@ -1134,9 +1157,8 @@ if ($cmd=="call") {
 	$meta = $stmt->result_metadata();
 	echo $stmt->num_rows;
 
-	echo " APRS数据包 下载轨迹";
-       	echo "<a href=".$_SERVER["PHP_SELF"]."?gpx=$call>GPX</a> ";
-       	echo "<a href=".$_SERVER["PHP_SELF"]."?kml=$call>KML</a> ";
+	echo " APRS数据包 ";
+       	echo "<a href=".$_SERVER["PHP_SELF"]."?track=$call>下载轨迹</a> ";
 	disp_map($call);
 	echo "<p>";
 
