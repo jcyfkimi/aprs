@@ -1,6 +1,6 @@
 <?php
 
-include "db.php";
+include "../db.php";
 
 date_default_timezone_set( 'Asia/Shanghai');
 
@@ -37,7 +37,7 @@ if ( ($cmd=="map") || ($cmd=="tm")) {
 }
 
 if($jiupian>0) {
-	require "wgtochina_baidu.php";
+	require "../wgtochina_baidu.php";
 	$mp=new Converter();
 }
 
