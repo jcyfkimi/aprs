@@ -192,7 +192,7 @@ if ($cmd=="tm") {
 			$lon = $p->getX();
 			$lat = $p->getY();
 		} 
-		$icon = "img/".bin2hex($dts).".png";
+		$icon = "/img/".bin2hex($dts).".png";
 		$dmsg = urlmessage($dcall, $icon, $dtmstr, $dmsg, $ddt, $glon, $glat);
 		echo "setstation(".$lon.",".$lat.",\"".$dcall."\",".$dtm.",\"".$icon."\",\n\"".$dmsg."\");\n";
 	}
