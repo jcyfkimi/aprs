@@ -23,7 +23,7 @@
 
 #define MAXLEN 16384
 
-#define DEBUG 1
+// #define DEBUG 1
 
 #define PORT 14580
 
