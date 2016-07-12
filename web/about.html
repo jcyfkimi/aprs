@@ -86,7 +86,17 @@ UDP 127.0.0.1 14580
 127.0.0.1 14583
 </pre>
 
-<h3>9. aprstomysql</h3>
+<h3>9. local.toaprs</h3>
+<pre>
+命令行：local.toaprs 127.0.0.1 呼号
+参数含义：呼号，用来连接127.0.0.1  14580服务器
+功能：
+登录127.0.0.1 14580 APRS-IS服务器，获取BA BD BG BH BR开头信息
+使用TCP转发给
+china.aprs2.net 14580
+</pre>
+
+<h3>10. aprstomysql</h3>
 <pre>
 命令行： aprstomyql 呼号
 参数含义：呼号，用来连接china.aprs2.net服务器
