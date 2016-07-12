@@ -23,7 +23,7 @@
 
 #define MAXLEN 16384
 
-// #define DEBUG 1
+#define DEBUG 1
 
 #define PORT 14580
 
@@ -73,6 +73,9 @@ void Process(char*server,char *call)
 		}
 		if(buffer[0]=='#') continue;
 		buffer[n]=0;
+#ifdef	DEBUG
+	fprintf(stderr,"r %s", buffer);
+#endif
 		Write(aprs_fd, buffer, n);
 	}
 }
