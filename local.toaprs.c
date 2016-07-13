@@ -89,7 +89,7 @@ void usage()
 
 int main(int argc, char *argv[])
 {
-	char *call="BG5DNS-11";
+	char *call="BG5DNS-13";
 	char *server="127.0.0.1";
 	signal(SIGCHLD,SIG_IGN);
 	if(argc==3) {
