@@ -23,20 +23,29 @@ int checkcall(char*call) {
         p=call;
 	// 第3位必须是数字
         if(!isdigit(*(p+2))) return 0;
-	// BA BD BG BH BR BI BY
+	// BA BD BG BH BI BL BM BR BV BX BY
 	if(*p=='B') {
 		if(*(p+1)=='A' ||
 		  *(p+1)=='D' ||
 		  *(p+1)=='G' ||
 		  *(p+1)=='H' ||
-		  *(p+1)=='R' ||
 		  *(p+1)=='I' ||
+		  *(p+1)=='L' ||
+		  *(p+1)=='M' ||
+		  *(p+1)=='R' ||
+		  *(p+1)=='V' ||
+		  *(p+1)=='X' ||
 		  *(p+1)=='Y')
 			return 1;
 	}
-	// VR
+	// VR2
 	if(*p=='V') {
-		if(*(p+1)=='R')
+		if(*(p+1)=='R' && *(p+2)=='2')
+			return 1;
+	}
+	// XX9
+	if(*p=='X') {
+		if(*(p+1)=='X' && *(p+2)=='9')
 			return 1;
 	}
 
