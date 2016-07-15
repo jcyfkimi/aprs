@@ -13,9 +13,36 @@
 #include <ctype.h>
 #include "sock.h"
 
-//#define DEBUG 1
+// #define DEBUG 1
 
 #define MAXLEN 16384
+
+int checkcall(char*call) {
+        char *p;
+        if(strlen(call)<5) return 0;
+        p=call;
+	// 第3位必须是数字
+        if(!isdigit(*(p+2))) return 0;
+	// BA BD BG BH BR BI BY
+	if(*p=='B') {
+		if(*(p+1)=='A' ||
+		  *(p+1)=='D' ||
+		  *(p+1)=='G' ||
+		  *(p+1)=='H' ||
+		  *(p+1)=='R' ||
+		  *(p+1)=='I' ||
+		  *(p+1)=='Y')
+			return 1;
+	}
+	// VR
+	if(*p=='V') {
+		if(*(p+1)=='R')
+			return 1;
+	}
+
+        return 0;
+}
+
 
 void Process(int u_fd, int r_fd) 
 {	
@@ -24,6 +51,7 @@ void Process(int u_fd, int r_fd)
 	struct timeval tv;
 	int m,n;
 	int max_fd;
+	char call[MAXLEN];
 
 	while (1) {
 		FD_ZERO(&rset);
@@ -58,8 +86,21 @@ void Process(int u_fd, int r_fd)
 			}
 			if(n==0) continue;
 			buff[n]=0;
+
 #ifdef DEBUG
 			fprintf(stderr,"C: %s",buff);
+#endif
+			strcpy(call,buff);
+			char *p;
+			p = strchr(call,'>');
+			if(p) *p = 0;
+#ifdef DEBUG
+			if(checkcall(call) == 0) {
+				fprintf(stderr,"!!  %s is not a china call!!!\n",call);
+				continue;
+			}
+#else
+			if(checkcall(call) == 0) continue;
 #endif
 			Write(r_fd, buff, n);
 		}
