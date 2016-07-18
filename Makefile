@@ -1,4 +1,4 @@
-all: aprstcp aprsudp udptoaprs udptomysql udptolog aprs.fi.toudp local.toudp local.toaprs gt02 aprstomysql
+all: aprstcp aprsudp udptoaprs udptomysql udptolog udptolocal aprs.fi.toudp local.toudp local.toaprs gt02 aprstomysql
 
 aprs.fi.toudp: aprs.fi.toudp.c passcode.c
 	gcc -o aprs.fi.toudp aprs.fi.toudp.c -Wall
@@ -14,6 +14,8 @@ aprsudp: aprsudp.c
 	gcc -g -o aprsudp aprsudp.c	 -Wall
 udptoaprs: udptoaprs.c passcode.c
 	gcc -o udptoaprs udptoaprs.c -Wall
+udptolocal: udptolocal.c passcode.c
+	gcc -o udptolocal udptolocal.c -Wall
 udptomysql: udptomysql.c db.h tomysql.c
 	gcc -g -o udptomysql udptomysql.c -Wall -lmysqlclient -L/usr/lib64/mysql/
 aprstomysql: aprstomysql.c db.h tomysql.c
