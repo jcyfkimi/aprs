@@ -13,7 +13,7 @@
 #include <ctype.h>
 #include "sock.h"
 
- #define DEBUG 1
+// #define DEBUG 1
 
 #define MAXLEN 16384
 
@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
    	}
 #endif
 	err_msg("starting\n");
-	u_fd = Udp_server("0.0.0.0","14590",(socklen_t *)&llen);
+	u_fd = Udp_server("0.0.0.0","14580",(socklen_t *)&llen);
 
 	r_fd = Tcp_connect("127.0.0.1","14580");
 	snprintf(buf,MAXLEN,"user %s pass %d vers udptolocal 1.0 filter r/31.83/117.29/1\r\n",
