@@ -48,7 +48,7 @@ void Process(char*server,char *call)
 	optval = 2;
 	Setsockopt(r_fd, SOL_TCP, TCP_KEEPINTVL, &optval, optlen);
 
-	snprintf(buffer,MAXLEN,"user %s pass %d vers aprsfwd 1.5 filter t/poimqstunw\r\n",call,passcode(call));
+	snprintf(buffer,MAXLEN,"user %s pass %d vers aprsfwd 1.5 filter p/BA p/BD p/BR p/BH\r\n",call,passcode(call));
 	Write(r_fd, buffer, strlen(buffer));
 
 	aprs_fd= Tcp_connect("china.aprs2.net","14580");
@@ -60,9 +60,6 @@ void Process(char*server,char *call)
 	Setsockopt(aprs_fd, SOL_TCP, TCP_KEEPIDLE, &optval, optlen);
 	optval = 200;
 	Setsockopt(aprs_fd, SOL_TCP, TCP_KEEPINTVL, &optval, optlen);
-
-	snprintf(buffer,MAXLEN,"user %s pass %d vers aprsfwd 1.5 filter p/BA p/BD p/BR p/BH\r\n",call,passcode(call));
-	Write(r_fd, buffer, strlen(buffer));
 
 	snprintf(buffer,MAXLEN,"user %s pass %d vers aprsfwd 1.5 \r\n",call,passcode(call));
 	Write(aprs_fd, buffer, strlen(buffer));
