@@ -13,6 +13,9 @@ $span = $_SESSION["span"];
 if ( ($span<=0) || ($span >10) ) $span=1;
 
 $startdate=time() - $span * 3600 * 24;
+
+// 1 hour history
+$startdate=time() - 3600;
 $startdatestr=date("Y-m-d H:i:s",$startdate);
 
 $title = file_get_contents( "title.txt" );
