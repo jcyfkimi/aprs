@@ -139,6 +139,39 @@ function urlmessage($call, $icon, $dtmstr, $msg, $ddt) {
 		$m = $m."<b>温度".$t."°C 湿度".$h."% 气压".$b."mpar<br>";
 		$m = $m."风".$c."°".$s."m/s(大风".$g."m/s)<br>";
 	 	$m = $m."雨".$r."mm/1h ".$p."mm/24h</b><br>";
+		if(substr($msg,0,1)==',') {  // ,053,069,071,035,047,058,28.928 PM1.0 PM2.5 PM10 
+			$msg = substr($msg,1);
+			$uspm1 = 0 + $msg;
+			$msg = strstr($msg,",");
+			$msg = substr($msg,1);
+			$uspm25 = 0 + $msg;
+			$msg = strstr($msg,",");
+			$msg = substr($msg,1);
+			$uspm10 = 0 + $msg;
+			$msg = strstr($msg,",");
+			$msg = substr($msg,1);
+			$cnpm1 = 0 + $msg;
+			$msg = strstr($msg,",");
+			$msg = substr($msg,1);
+			$cnpm25 = 0 + $msg;
+			$msg = strstr($msg,",");
+			$msg = substr($msg,1);
+			$cnpm10 = 0 + $msg;
+			$msg = strstr($msg,",");
+			$msg = substr($msg,1);
+			$jiaquan = 0 + $msg;
+			$m = $m."<b>美标PM1.0/2.5/10</b>: ".$uspm1."/".$uspm25."/".$uspm10." ug/m3<br>";	
+			$m = $m."<b>国标PM1.0/2.5/10</b>: ".$cnpm1."/".$cnpm25."/".$cnpm10." ug/m3<br>";	
+			$m = $m."<b>甲醛</b>: ".$jiaquan." ug/m3<br>";
+			while(1) {
+				$c=substr($msg,0,1);
+				if( is_numeric($c) || ($c=='.')) {
+					$msg = substr($msg,1);
+					continue;
+				}
+				break;
+			}
+		}
 	}
 	if (  (strlen($msg)>=27) &&
 		(substr($msg,3,1)=='/') &&
@@ -1106,9 +1139,9 @@ if ($cmd=="today") {
 		$str = "";
 	}
 	$str = "%".$str."%";
-	$q = "select count(distinct(`call`)), count(*) from aprspacket where tm>curdate() and `call` like ? ";
+	$q = "select count(distinct(`call`)), count(*) from aprspacket where tm>curdate() and ( `call` like ? or raw like ?) ";
 	$stmt=$mysqli->prepare($q);
-	$stmt->bind_param("s",$str);
+	$stmt->bind_param("ss",$str,$str);
 	$stmt->execute();
 	$stmt->bind_result($r[0],$r[1]);
 	$stmt->store_result();	
@@ -1120,13 +1153,13 @@ if ($cmd=="today") {
 	$stmt->close();
 
 	if(isset($_REQUEST["c"]))
-		$q = "select `call`, count(*) c, count(distinct(concat(lon,lat))) from aprspacket where tm>curdate() and `call` like ? group by `call` order by c desc";
+		$q = "select `call`, count(*) c, count(distinct(concat(lon,lat))) from aprspacket where tm>curdate() and (`call` like ? or raw like ?) group by `call` order by c desc";
 	else if(isset($_REQUEST["d"]))
-		$q = "select `call`, count(*), count(distinct(concat(lon,lat))) c from aprspacket where tm>curdate() and `call` like ? group by `call` order by c desc";
+		$q = "select `call`, count(*), count(distinct(concat(lon,lat))) c from aprspacket where tm>curdate() and (`call` like ? or raw like ?) group by `call` order by c desc";
 	else
-		$q = "select `call`, count(*), count(distinct(concat(lon,lat))) from aprspacket where tm>curdate() and `call` like ? group by `call`";
+		$q = "select `call`, count(*), count(distinct(concat(lon,lat))) from aprspacket where tm>curdate() and (`call` like ? or raw like ?) group by `call`";
 	$stmt=$mysqli->prepare($q);
-	$stmt->bind_param("s",$str);
+	$stmt->bind_param("ss",$str,$str);
 	$stmt->execute();
 	$stmt->bind_result($r[0],$r[1],$r[2]);
 	$stmt->store_result();	
