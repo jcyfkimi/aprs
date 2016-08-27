@@ -82,14 +82,16 @@ echo "<tr><td>经度：</td><td><input id=lon name=lon value=\"".$lon."\"></td><
 echo "<tr><td>纬度：</td><td><input id=lat name=lat value=\"".$lat."\"></td></tr>\n";
 echo "<tr><td>类型：</td><td><input name=ts value=\"".$ts."\"></td></tr>\n";
 echo "<tr><td>消息：</td><td><input name=desc value=\"".$desc."\"></td></tr>\n";
-echo "<tr><td colspan=2 align=center><button type=button onClick=\"get_location();\">当前位置</button>&nbsp;&nbsp;&nbsp;";
+echo "<tr><td colspan=2 align=center><br><button type=button onClick=\"get_location();\">当前位置</button>&nbsp;&nbsp;&nbsp;";
 echo "<input type=submit value=\"发送信息\"></input></td></tr>\n";
 echo "</table>";
 echo "</from><p>";
-echo "支持如下格式（依据小数点数或数字位数）<br>\n";
-echo "ddd.ddddd，度.度的十进制 如31.12035º<br>";
-echo "ddd.mm.ss, 度.分.秒 如31º12'42\"<p>";
-echo "ddd.mm.mmm，度.分.分小数（3位）如31º10.335'<br>";
+echo "经纬度格式（依据小数点数或数字位数）<br>\n";
+echo "<table>";
+echo "<tr><td>ddd.ddddd</td><td>度.度</td><td>31.12035º</td></tr>";
+echo "<tr><td>ddd.mm.ss</td><td>度.分.秒</td><td>31º12'42\"</td></tr>";
+echo "<tr><td>ddd.mm.mmm</td><td>度.分.分（3位）</td><td>31º10.335'</td></tr>";
+echo "</table>";
 ?>
 
 <div id=out></div>
