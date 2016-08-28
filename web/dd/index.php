@@ -1,8 +1,13 @@
 <?php
+
+$aprs_server = "127.0.0.1";
+$msg="";
+
 function sendaprs($call, $lat, $lon, $desc, $ts)
-{	
+{	global $aprs_server;
+	global $msg;
 	$s = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
-	socket_connect($s, "202.141.176.2", 14580 );
+	socket_connect($s, $aprs_server, 14580 );
 	$N = 'N';
 	if($lat < 0) {
 		$lat = - $lat;
@@ -17,9 +22,10 @@ function sendaprs($call, $lat, $lon, $desc, $ts)
 	$msg = $msg.sprintf("%02d%05.2f%s%s", floor($lat), ($lat-floor($lat))*60, $N, substr($ts,0,1));
 	$msg = $msg.sprintf("%03d%05.2f%s%s", floor($lon), ($lon-floor($lon))*60, $E, substr($ts,1,1));
 	$msg = $msg.sprintf("%s%s", $desc, "\r\n");
-	echo $msg;
-	echo "<p>";
+//	echo $msg;
+//	echo "<p>";
 	socket_send ($s, $msg, strlen($msg), 0);
+	$msg = date("Y-m-d H:i:s ").$msg;
 }
 
 $call =@$_REQUEST["call"];
@@ -66,7 +72,7 @@ if($call=="") {
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+	<meta name="viewport" content="initial-scale=1.0" />
 </head>
 <body>
 <?php
@@ -74,6 +80,7 @@ if($call=="") {
 if(@$_REQUEST["send"]==1) 
 	sendaprs($call,$latui,$lonui,$desc,$ts);
 
+echo "<h3>发送APRS位置信息</h3>\n";
 echo "<form name=aprs action=index.php method=post>";
 echo "<input type=hidden name=send value=1>";
 echo "<table>";
@@ -88,13 +95,13 @@ echo "</table>";
 echo "</from><p>";
 echo "经纬度格式（依据小数点数或数字位数）<br>\n";
 echo "<table>";
-echo "<tr><td>ddd.ddddd</td><td>度.度</td><td>31.12035º</td></tr>";
+echo "<tr><td>ddd.dddddd</td><td>度.度</td><td>31.12035º</td></tr>";
 echo "<tr><td>ddd.mm.ss</td><td>度.分.秒</td><td>31º12'42\"</td></tr>";
 echo "<tr><td>ddd.mm.mmm</td><td>度.分.分（3位）</td><td>31º10.335'</td></tr>";
 echo "</table>";
 ?>
 
-<div id=out></div>
+<div id=out><?php if($msg!="") echo "<font color=green>".$msg."</font>"; ?></div>
 
 <script type="text/javascript">
 function get_location(){
