@@ -5,6 +5,7 @@
 	127.0.0.1 14582
 	127.0.0.1 14583
 	120.25.100.30 14580
+   send packets with "-13" to 114.55.54.60 14580
 */
 
 #include <stdio.h>
@@ -135,6 +136,8 @@ void relayaprs(char *buf, int len)
 {	char mybuf[MAXLEN];
 	strncpy(mybuf,buf,len);
         sendudp(mybuf,len, "120.25.100.30",14580);   // forward to aprs.hellocq.net
+      	if(strstr(mybuf,"-13>"))
+                  sendudp(mybuf, len , "114.55.54.60",14580);   // forward -13 to lewei50.comI
 	insertIG(mybuf, &len) ;
         sendudp(mybuf,len, "127.0.0.1",14582);   // udptolog
         sendudp(mybuf,len, "127.0.0.1",14583);   // udptomysql
