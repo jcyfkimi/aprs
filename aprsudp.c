@@ -128,6 +128,14 @@ int main(void)
 		len = recvfrom(s, buf, MAXLEN-10, 0, (struct sockaddr * )&si_other, (socklen_t *)&slen);
 		if (len<10 ) continue;
 		buf[len]=0;
+		if( (buf[len-1]=='\n') || (buf[len-1]=='\r') )
+			len--;
+		if( (buf[len-1]=='\n') || (buf[len-1]=='\r') )
+			len--;
+		buf[len]=0x0d;
+		buf[len+1]=0x0a;
+		buf[len+2]=0;
+		len += 2;
 		if (strncmp(buf,"user",4)==0) {
 			char *p=strstr(buf," pass ");
 			if (p) {
