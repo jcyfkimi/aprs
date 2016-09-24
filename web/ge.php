@@ -1,6 +1,7 @@
 <?php
 
-$colors = array("FF1400FF","FF14F000","FF14F0FF","FF78FF00","FFFF78F0","FF0078F0","FFF0FF14","FFFF78F0","FFFF78F0","FFFF78F0");
+$colors = array("FF1400FF","FF14F000","FF14F0FF","FF78FF00","FFFF78F0","FF0078F0");
+$colorindex=0;
 
 include "db.php";
 
@@ -318,27 +319,27 @@ $stmt->fetch();
 echo "<name>".$cnt." stations</name>\n";
 $stmt->close();
 
-echo "<Snippet>tracks during past ".$span." days</Snippet>\n";
-$q="select `call`,concat(`table`,symbol) from lastpacket where tm>?";
+echo "<Snippet>tracks during past 2 days</Snippet>\n";
+$q="select distinct(concat(`table`,symbol)) from lastpacket where tm>?";
 $stmt=$mysqli->prepare($q);
 $stmt->bind_param("s",$startdatestr);
 $stmt->execute();
-$stmt->bind_result($call,$dts);
+$stmt->bind_result($dts);
 $stmt->store_result();	
 while($stmt->fetch()) {
 	echo "<Style id=\"st";
-	echo md5($call);
+	echo bin2hex($dts);
 	echo "\">\n";
-  	echo "<LabelStyle><color>";
-	echo $colors[ord(md5($call))%count($colors)];
-	echo "</color><scale>1</scale></LabelStyle>\n";
+  	echo "<LabelStyle><color>".$colors[$colorindex]."</color><scale>1</scale></LabelStyle>\n";
 	echo "<IconStyle><Icon><href>";
 	echo $baseurl;
 	echo "img/".bin2hex($dts).".png</href>";
     	echo "</Icon><scale>1</scale></IconStyle>\n";
   	echo "<LineStyle>\n";
     	echo "<color>";
-	echo $colors[ord(md5($call))%count($colors)];
+	echo $colors[$colorindex];
+	$colorindex++;
+	if($colorindex==count($colors)) $colorindex=0;
 	echo "</color>\n";
     	echo "<colorMode>normal</colorMode>\n";
     	echo "<width>4</width>\n";
@@ -372,7 +373,7 @@ while($stmt->fetch()) {
 	echo "\n";
 	echo "]]></description>\n";
 	echo "  <Snippet maxLines='0'></Snippet>\n";
-	echo "  <styleUrl>#st".md5($call)."</styleUrl>\n";
+	echo "  <styleUrl>#st".bin2hex($dts)."</styleUrl>\n";
 	echo "  <MultiGeometry>\n";
 	echo "  <Point>\n";
 	if ( $altmode == 0 ) {  // GPS 高度
