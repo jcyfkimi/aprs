@@ -1369,7 +1369,7 @@ if ($cmd=="setup") {
 		if(count($lat)<=2) 
 			$latui = $lati;
 		else if(strlen($lat[2])==3)
-			$latui = $lat[0] + ($lat[1]+$lat[2]/100)/100;
+			$latui = $lat[0] + ($lat[1]+$lat[2]/1000)/60;
 		else
 			$latui = $lat[0] + $lat[1]/60+$lat[2]/3600;
 
@@ -1377,7 +1377,7 @@ if ($cmd=="setup") {
 		if(count($lon)<=2) 
 			$lonui = $loni;
 		else if(strlen($lon[2])==3)
-			$lonui = $lon[0] + ($lon[1]+$lon[2]/100)/100;
+			$lonui = $lon[0] + ($lon[1]+$lon[2]/1000)/60;
 		else
 			$lonui = $lon[0] + $lon[1]/60 +$lon[2]/3600;
 

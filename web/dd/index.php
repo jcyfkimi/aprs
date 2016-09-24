@@ -56,14 +56,15 @@ if($call=="") {
 	if(count($lati)<=2) 
 		$latui = $lat;
 	else if(strlen($lati[2])==3)
-		$latui = $lati[0] + ($lati[1]+$lati[2]/100)/100;
+		$latui = $lati[0] + ($lati[1]+$lati[2]/1000)/60;
 	else
 		$latui = $lati[0] + $lati[1]/60+$lati[2]/3600;
+
 	$loni = explode(".",$lon);
 	if(count($loni)<=2) 
 		$lonui = $lon;
 	else if(strlen($loni[2])==3)
-		$lonui = $loni[0] + ($loni[1]+$loni[2]/100)/100;
+		$lonui = $loni[0] + ($loni[1]+$loni[2]/1000)/60;
 	else
 		$lonui = $loni[0] + $loni[1]/60 +$loni[2]/3600;
 }
